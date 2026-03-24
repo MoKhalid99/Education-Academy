@@ -1,0 +1,53 @@
+﻿@page "/login"
+@using Education_Academy.Components.Layout
+@layout EmptyLayout
+
+<div class="auth-wrapper">
+    <div class="auth-card shadow-lg">
+        <h3 class="auth-title">LOG IN</h3>
+
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+            <div class="input-group-custom">
+                <input type="text" placeholder="الاسم" @bind="loginModel.Username" />
+                <input type="email" placeholder="الايميل" @bind="loginModel.Email" />
+                <input type="tel" placeholder="رقم الهاتف" @bind="loginModel.Phone" />
+                <input type="password" placeholder="كلمة المرور" @bind="loginModel.Password" />
+            </div>
+
+            <button type="submit" class="btn-submit">تسجيل</button>
+        </EditForm>
+
+        <div class="social-login">
+            <p>ليس لديك حساب؟ سجل الآن</p>
+            <div class="social-icons">
+                <i class="fab fa-google"></i>
+                <i class="fab fa-facebook"></i>
+                <i class="fab fa-linkedin"></i>
+            </div>
+        </div>
+
+        <button class="btn-forgot" @onclick="ForgotPassword">نسيت كلمة المرور؟</button>
+    </div>
+</div>
+@code {
+    private LoginViewModel loginModel = new LoginViewModel();
+    private async Task HandleLogin()
+    {
+        // هنا نضع منطق التأكد من المستخدم لاحقاً
+        Console.WriteLine($"تسجيل دخول لـ: {loginModel.Email}");
+        await Task.Delay(500); // محاكاة لعملية التحقق
+    }
+    private void ForgotPassword()
+    {
+        Console.WriteLine("تم طلب استعادة كلمة المرور");
+    }
+
+    // تعريف الكلاس الداخلي للبيانات
+    public class LoginViewModel
+    {
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+}

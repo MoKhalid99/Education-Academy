@@ -1,0 +1,32 @@
+﻿@inject HttpClient Http
+
+<div class="loading-container">
+    <div class="loader-box">
+        <div class="spinner"></div>
+        <img src="images/cloud-upload.png" alt="Loading" class="cloud-icon" />
+        <p class="loading-text">Loading...</p>
+
+        @if (!string.IsNullOrEmpty(currentTip))
+        {
+            <div class="tip-box">
+                <span class="tip-title">نصيحة برمجية:</span>
+                <p class="tip-content">@currentTip</p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string currentTip = "";
+    private List<string>? tips;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // جلب النصائح من ملف JSON
+        tips = await Http.GetFromJsonAsync<List<string>>("data/tips.json");
+        if (tips != null && tips.Count > 0)
+        {
+            currentTip = tips[new Random().Next(tips.Count)];
+        }
+    }
+}

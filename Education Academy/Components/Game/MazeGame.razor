@@ -1,0 +1,52 @@
+﻿@page "/games/maze"
+@inject IJSRuntime JSRuntime
+
+<div class="game-container">
+    <div class="row">
+        <div class="col-md-4 code-panel">
+            <h3>منطقة البرمجة</h3>
+            <div class="command-buttons">
+                <button class="btn btn-outline-primary" @onclick='() => AddCommand("Forward")'>Move Forward</button>
+                <button class="btn btn-outline-primary" @onclick='() => AddCommand("Left")'>Turn Left</button>
+                <button class="btn btn-outline-primary" @onclick='() => AddCommand("Right")'>Turn Right</button>
+            </div>
+
+            <div class="code-editor">
+                <pre>@string.Join("\n", commands)</pre>
+            </div>
+
+            <button class="btn btn-success w-100" @onclick="RunGame">تشغيل الكود (Run)</button>
+            <button class="btn btn-danger w-100 mt-2" @onclick="ResetGame">إعادة ضبط</button>
+        </div>
+
+        <div class="col-md-8 canvas-panel">
+            <canvas id="mazeCanvas" width="600" height="400" style="border:5px solid #4db6ac; border-radius: 15px;"></canvas>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<string> commands = new();
+
+    private void AddCommand(string cmd) => commands.Add(cmd);
+
+    private void ResetGame()
+    {
+        commands.Clear();
+        JSRuntime.InvokeVoidAsync("mazeGame.reset");
+    }
+
+    private async Task RunGame()
+    {
+        // نرسل الأوامر لـ JavaScript لتحريك الشخصية خطوة بخطوة
+        await JSRuntime.InvokeVoidAsync("mazeGame.run", commands);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("mazeGame.init", "mazeCanvas");
+        }
+    }
+}

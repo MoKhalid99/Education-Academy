@@ -1,0 +1,44 @@
+﻿@page "/admin/upload"
+
+<MudPaper Class="pa-8 mt-4 shadow-lg" Style="max-width: 600px; margin: auto;">
+    <MudText Typo="Typo.h5" Class="mb-4">رفع مادة تعليمية جديدة (تشفير تلقائي)</MudText>
+    
+    <MudSelect T="int" Label="اختر المستوى" Variant="Variant.Outlined" @bind-Value="targetLevel">
+        <MudSelectItem Value="0">المستوى صفر</MudSelectItem>
+        <MudSelectItem Value="1">المستوى الأول</MudSelectItem>
+        <MudSelectItem Value="2">المستوى الثاني</MudSelectItem>
+        <MudSelectItem Value="3">المستوى الثالث</MudSelectItem>
+    </MudSelect>
+
+<MudFileUpload T="IBrowserFile" 
+               OnFilesChanged="UploadAndEncrypt" 
+               id="unique_upload_id">
+    <ButtonTemplate>
+        <MudButton HtmlTag="label" 
+                   Variant="Variant.Filled" 
+                   Color="Color.Primary" 
+                   for="unique_upload_id">
+            اختر الملف التعليمي
+        </MudButton>
+    </ButtonTemplate>
+</MudFileUpload>
+@if (isUploading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+    }
+</MudPaper>
+
+@code {
+    private int targetLevel;
+    private bool isUploading = false;
+
+    private async Task UploadAndEncrypt(InputFileChangeEventArgs e)
+    {
+        isUploading = true;
+        // هنا نقوم باستدعاء خدمة التشفير 
+        // نأخذ الملف -> نشفره AES -> نحفظه في مجلد SecureData
+        await Task.Delay(2000); // محاكاة الرفع
+        isUploading = false;
+        // Snackbar.Add("تم رفع وتشفير الملف بنجاح!", Severity.Success);
+    }
+}

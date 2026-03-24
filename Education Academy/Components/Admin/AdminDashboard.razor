@@ -1,0 +1,80 @@
+﻿@page "/admin/dashboard"
+@attribute [Authorize(Roles = "Admin")]
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
+    <MudText Typo="Typo.h3" GutterBottom="true" Color="Color.Primary">لوحة التحكم - التعليم البرمجي</MudText>
+
+    <MudGrid>
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
+                <MudIcon Icon="@Icons.Material.Filled.People" Color="Color.Primary" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
+                <div>
+                    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary">إجمالي الطلاب</MudText>
+                    <MudText Typo="Typo.h4">@totalStudents</MudText>
+                </div>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" sm="6" md="3">
+            <MudPaper Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
+                <MudIcon Icon="@Icons.Material.Filled.Layers" Color="Color.Secondary" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
+                <div>
+                    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary">المواد الدراسية</MudText>
+                    <MudText Typo="Typo.h4">24</MudText>
+                </div>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+
+    <MudTable Items="@students" Filter="new Func<ApplicationUser,bool>(FilterFunc)" Class="mt-8 shadow-lg">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">قائمة الطلاب والتقدم</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString" Placeholder="بحث عن طالب..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>الاسم</MudTh>
+            <MudTh>الإيميل</MudTh>
+            <MudTh>الليفل</MudTh>
+            <MudTh>النقاط (XP)</MudTh>
+            <MudTh>إجراءات</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="FullName">@context.FullName</MudTd>
+            <MudTd DataLabel="Email">@context.Email</MudTd>
+            <MudTd DataLabel="Level">
+                <MudChip T="string" Color="Color.Info" Variant="Variant.Text">Level @context.Level</MudChip>
+            </MudTd>
+            <MudTd DataLabel="XP">@context.ExperiencePoints</MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small" OnClick="@(() => EditUser(context))">تعديل</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Error" Size="Size.Small" Class="ms-2">حظر</MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudContainer>
+
+@code {
+    private List<ApplicationUser> students = new();
+    private int totalStudents = 0;
+    private string searchString = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        students = await context.Users.Where(u => !u.IsAdmin).ToListAsync();
+        totalStudents = students.Count;
+    }
+
+    private bool FilterFunc(ApplicationUser element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if (element.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        return false;
+    }
+
+    private void EditUser(ApplicationUser user) {
+        // فتح نافذة تعديل بيانات الطالب
+    }
+}

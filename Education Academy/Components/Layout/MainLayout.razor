@@ -1,0 +1,29 @@
+﻿@inherits LayoutComponentBase
+
+@Body
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+
+<div class="fab-container">
+    @if (isChatOpen)
+    {
+        <div class="chat-window">
+            <div class="chat-header">Education AI</div>
+            <div class="chat-content">
+            </div>
+            <input type="text" placeholder="اسأل AI..." class="chat-input" />
+        </div>
+    }
+    <button class="fab-btn" @onclick="() => isChatOpen = !isChatOpen">
+        Ask AI
+    </button>
+</div>
+
+@code {
+    private bool isChatOpen = false;
+}

@@ -1,0 +1,13 @@
+﻿@inherits LayoutComponentBase
+
+<div class="empty-layout-container">
+    @Body
+</div>
+
+<style>
+    /* هذا التنسيق يضمن أن الصفحة تأخذ كامل الشاشة بدون هوامش افتراضية */
+    .empty-layout-container {
+        min-height: 100vh;
+        width: 100%;
+    }
+</style>

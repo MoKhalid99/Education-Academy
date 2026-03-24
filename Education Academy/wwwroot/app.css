@@ -1,0 +1,126 @@
+﻿/* التدرج اللوني والخلفية العائمة */
+.auth-wrapper {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.auth-card {
+    background: linear-gradient(to bottom, #7da3a1, #b2d4d2); /* نفس درجات الصور */
+    padding: 40px;
+    border-radius: 30px; /* حواف مستديرة جداً */
+    width: 400px;
+    text-align: center;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.input-group-custom input {
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: 20px;
+    border: none;
+    background: white;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-submit {
+    background: #ffffff;
+    color: #4a6d6b;
+    border: none;
+    padding: 10px 40px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+    .btn-submit:hover {
+        background: #e0e0e0;
+    }
+:root {
+    --primary-teal: #7FB5C1;
+    --dark-text: #1A1A1A;
+    --accent-orange: #FF8A56;
+}
+
+.main-container {
+    font-family: 'Cairo', sans-serif; /* يفضل استخدام خط Cairo لجعل التصميم مثل الصورة */
+    direction: rtl;
+    padding: 0 40px;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.nav-right { display: flex; align-items: center; gap: 30px; }
+.logo { font-weight: bold; display: flex; align-items: center; gap: 10px; }
+
+.nav-links { display: flex; list-style: none; gap: 20px; }
+.nav-links a { text-decoration: none; color: #666; font-size: 14px; }
+.nav-links a.active { color: var(--accent-orange); font-weight: bold; }
+
+.search-box {
+    background: #F3F4F6;
+    padding: 5px 15px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+}
+.search-box input { border: none; background: none; outline: none; text-align: right; }
+
+.btn-login, .btn-register {
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+    background: #4A7B87;
+    color: white;
+}
+
+/* Hero Section */
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 60px 0;
+}
+
+.hero-content { max-width: 500px; text-align: right; }
+.hero-content h1 { font-size: 48px; font-weight: 900; margin-bottom: 20px; }
+.hero-content p { font-size: 18px; color: #333; line-height: 1.6; }
+
+.btn-cta {
+    background: #5F8B95;
+    color: white;
+    padding: 12px 40px;
+    border-radius: 10px;
+    border: none;
+    font-size: 18px;
+    margin-top: 25px;
+    cursor: pointer;
+}
+
+/* Stats Bar */
+.stats-bar {
+    background-color: var(--primary-teal);
+    display: flex;
+    justify-content: space-around;
+    padding: 30px;
+    border-radius: 15px;
+    color: #2D4F56;
+    margin-top: 50px;
+}
+
+.stat-item { display: flex; align-items: center; gap: 15px; }
+.stat-item i { font-size: 30px; }
+.stat-item h3 { margin: 0; font-size: 20px; }
+.stat-item p { margin: 0; font-size: 14px; opacity: 0.8; }

@@ -1,0 +1,9 @@
+﻿{
+  "Questions": [
+    {
+      "Text": "ما هي الكلمة المفتاحية لتعريف متغير نصي؟",
+      "Options": [ "int", "string", "bool" ],
+      "Answer": "string"
+    }
+  ]
+}
