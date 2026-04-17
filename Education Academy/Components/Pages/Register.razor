@@ -1,33 +1,52 @@
-﻿@page "/login"
+﻿@page "/register"
 @using Education_Academy.Components.Layout
 @layout EmptyLayout
 
-<PageTitle>سجل الان - Education Academy</PageTitle>
+<PageTitle>تسجيل - Education Academy</PageTitle>
 
 <div class="auth-wrapper">
     <div class="auth-card">
-        <h2 class="auth-title">سجل الان</h2>
+        <h2 class="auth-title">LOG IN</h2>
 
-        <EditForm Model="loginModel" OnValidSubmit="HandleLogin" FormName="LoginForm">
+        <EditForm Model="registerModel" OnValidSubmit="HandleRegister" FormName="RegisterForm">
             <DataAnnotationsValidator />
 
             <div class="form-group">
-                <InputText @bind-Value="loginModel.Username"
+                <InputText @bind-Value="registerModel.FullName"
                            class="form-input"
                            placeholder="الاسم" />
-                <ValidationMessage For="() => loginModel.Username" />
+                <ValidationMessage For="() => registerModel.FullName" />
             </div>
 
             <div class="form-group">
-                <InputText @bind-Value="loginModel.Password"
+                <InputText @bind-Value="registerModel.Email"
+                           class="form-input"
+                           placeholder="الايميل" />
+                <ValidationMessage For="() => registerModel.Email" />
+            </div>
+
+            <div class="form-group">
+                <InputText @bind-Value="registerModel.Phone"
+                           class="form-input"
+                           placeholder="رقم الهاتف" />
+                <ValidationMessage For="() => registerModel.Phone" />
+            </div>
+
+            <div class="form-group">
+                <InputText @bind-Value="registerModel.Password"
                            type="password"
                            class="form-input"
                            placeholder="الباسورد" />
-                <ValidationMessage For="() => loginModel.Password" />
+                <ValidationMessage For="() => registerModel.Password" />
             </div>
 
-            <button type="submit" class="btn-primary">دخول</button>
+            <button type="submit" class="btn-primary">تسجيل</button>
         </EditForm>
+
+        <p class="login-redirect">
+            ليس لديك حساب؟
+            <a href="/login" class="redirect-link">سجل الان</a>
+        </p>
 
         <p class="divider-text">او</p>
 
@@ -56,11 +75,35 @@
                 </svg>
             </a>
         </div>
-
-        <a href="/register" class="forgot-link">نسيان المرور</a>
     </div>
 </div>
 
+@code {
+    private RegisterModel registerModel = new();
+
+    private async Task HandleRegister()
+    {
+        // TODO: implement registration logic
+        await Task.CompletedTask;
+    }
+
+    public class RegisterModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "الاسم مطلوب")]
+        public string FullName { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "الايميل مطلوب")]
+        [System.ComponentModel.DataAnnotations.EmailAddress(ErrorMessage = "صيغة الايميل غير صحيحة")]
+        public string Email { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "رقم الهاتف مطلوب")]
+        public string Phone { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "الباسورد مطلوب")]
+        [System.ComponentModel.DataAnnotations.MinLength(6, ErrorMessage = "الباسورد يجب أن يكون 6 أحرف على الأقل")]
+        public string Password { get; set; } = string.Empty;
+    }
+}
 
 <style>
     /* ── Layout ── */
@@ -90,11 +133,12 @@
     /* ── Title ── */
     .auth-title {
         color: #fff;
-        font-size: 1.35rem;
-        font-weight: 600;
+        font-size: 1.25rem;
+        font-weight: 700;
         margin: 0 0 0.5rem;
         text-align: center;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
     }
 
     /* ── Form ── */
@@ -145,6 +189,25 @@
             transform: translateY(-1px);
         }
 
+    /* ── Redirect link ── */
+    .login-redirect {
+        color: rgba(255,255,255,0.8);
+        font-size: 0.82rem;
+        margin: 0;
+        text-align: center;
+    }
+
+    .redirect-link {
+        color: #fff;
+        font-weight: 600;
+        text-decoration: underline;
+        transition: opacity 0.2s;
+    }
+
+        .redirect-link:hover {
+            opacity: 0.8;
+        }
+
     /* ── Divider ── */
     .divider-text {
         color: rgba(255,255,255,0.75);
@@ -176,20 +239,6 @@
             transform: translateY(-2px);
         }
 
-    /* ── Forgot Link ── */
-    .forgot-link {
-        color: rgba(255,255,255,0.85);
-        font-size: 0.85rem;
-        text-decoration: underline;
-        cursor: pointer;
-        margin-top: 0.25rem;
-        transition: color 0.2s;
-    }
-
-        .forgot-link:hover {
-            color: #fff;
-        }
-
     /* ── Validation messages ── */
     .validation-message {
         color: #ffe08a;
@@ -198,26 +247,3 @@
         text-align: right;
     }
 </style>
-
-@code {
-    private LoginViewModel loginModel = new LoginViewModel();
-    private async Task HandleLogin()
-    {
-        // هنا نضع منطق التأكد من المستخدم لاحقاً
-        Console.WriteLine($"تسجيل دخول لـ: {loginModel.Email}");
-        await Task.Delay(500); // محاكاة لعملية التحقق
-    }
-    private void ForgotPassword()
-    {
-        Console.WriteLine("تم طلب استعادة كلمة المرور");
-    }
-
-    // تعريف الكلاس الداخلي للبيانات
-    public class LoginViewModel
-    {
-        public string Username { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Phone { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
-}

@@ -1,7 +1,62 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<div class="middle_section_container">
+    <div class="notes_pic_container">
+        <img src="gp images/notes.png" alt="" class="notes_pic" />
+    </div>
+    <div>
+        <div class="info_container">
+            <p class="first_paragraph">علوم الحاسب بين يديك</p>
+            <p class="second_paragraph">
+                كل المعلومات التي تحتاجها في رحلتك البرمجية بشكل سلس في مكان واحد
+            </p>
+        </div>
+        <div class="info_container_button">
+            <button class="sign_in_button"><p>سجل دخولك الان</p></button>
+            <img src="gp images/people.png" alt="" class="people_pic" />
+        </div>
+    </div>
+</div>
+<div class="lower_section">
+    <img src="gp images/Frame 1.png" alt="" class="lower_section_image" />
+</div>
+<style>
+    .middle_section_container {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 80px 10%;
+    }
 
-<h1>Hello, world!</h1>
+    .first_paragraph {
+        font-size: 45px;
+        font-weight: 900;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
 
-Welcome to your new app.
+    .sign_in_button {
+        background-color: #4b7983;
+        color: white;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 10px;
+        font-size: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .sign_in_button:hover {
+            background-color: #335961;
+        }
+
+    .lower_section {
+        text-align: center;
+        padding: 40px;
+    }
+
+    .lower_section_image {
+        box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+        border-radius: 15px;
+    }
+
+</style>

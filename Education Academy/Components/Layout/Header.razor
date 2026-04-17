@@ -1,0 +1,127 @@
+﻿<div class="head_section_container">
+    <div class="top_head_section">
+        <div class="container_for_notes_title">
+            <img class="open_book_pic" src="gp images/Book open.png" />
+            <p class="education_academy">Education Academy</p>
+        </div>
+        <div class="container_for_notes_title">
+            <div class="search_div">
+                <button class="search_menu">
+                    <img src="gp images/search menu.png" alt="" class="search_menu_photo" />
+                </button>
+                <input id="search" type="text" placeholder="ابحث هنا" class="search_here" />
+                <button class="search_menu">
+                    <img src="gp images/search lens.png" alt="" class="search_lens" />
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="low_head_section">
+        <NavLink href="/">
+            <button class="low_section_buttons">
+                <p class="low_section_buttons_text">الرئيسية</p>
+            </button>
+        </NavLink>
+        <NavLink href="/courses">
+            <button class="low_section_buttons">
+                <p class="low_section_buttons_text">كورسات جامعية</p>
+            </button>
+        </NavLink>
+        <button class="low_section_buttons">
+            <p class="low_section_buttons_text">أسأل AI</p>
+        </button>
+        <button class="low_section_buttons">
+            <p class="low_section_buttons_text">تواصل معانا</p>
+        </button>
+        <button class="low_section_buttons">
+            <p class="low_section_buttons_text">عننا</p>
+        </button>
+        <NavLink href="/leveltest">
+            <button class="low_section_buttons">
+                <p class="low_section_buttons_text">العاب</p>
+            </button>
+        </NavLink>
+        <button class="low_section_buttons_special">سجل معانا</button>
+        <button class="low_section_buttons_special2">سجل</button>
+    </div>
+</div>
+
+
+ <style>
+  .head_section_container {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.top_head_section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 45px;
+}
+
+.container_for_notes_title {
+  display: flex;
+  align-items: center;
+}
+
+.education_academy {
+  font-family: 'roboto', sans-serif;
+  font-weight: bold;
+  font-size: 20px;
+  margin-left: 20px;
+}
+
+.open_book_pic {
+  height: 50px;
+}
+
+.search_div {
+  background-color: rgb(212, 212, 212);
+  display: flex;
+  align-items: center;
+  border-radius: 20px;
+}
+
+.search_here {
+  border-radius: 20px;
+  height: 35px;
+  padding: 0 15px;
+  font-size: 16px;
+  border: none;
+  background-color: lightgray;
+}
+
+.low_head_section {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 15px 0;
+  border-top: 1px solid #eee;
+}
+
+.low_section_buttons {
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+.low_section_buttons:hover { color: orange; }
+
+.low_section_buttons_special {
+  background-color: #4b7983;
+  color: white;
+  padding: 5px 20px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+}
+</style>

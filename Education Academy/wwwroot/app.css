@@ -1,4 +1,8 @@
-﻿/* التدرج اللوني والخلفية العائمة */
+﻿@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* التدرج اللوني والخلفية العائمة */
 .auth-wrapper {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     height: 100vh;
@@ -124,3 +128,26 @@
 .stat-item i { font-size: 30px; }
 .stat-item h3 { margin: 0; font-size: 20px; }
 .stat-item p { margin: 0; font-size: 14px; opacity: 0.8; }
+
+@font-face {
+    font-family: 'roboto';
+    src: url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+main {
+    flex: 1; /* يضمن دفع الفوتر للأسفل */
+    padding-bottom: 50px;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}

@@ -1,0 +1,30 @@
+.main_container{
+    display: flex;
+    flex-direction: column;
+    row-gap: 100px;
+    align-items: center;
+}
+
+.content_container{
+    flex: 1;
+}
+
+.start_button{
+    font-size: 30px;
+    color: #f1efef;
+    border: 1px lightgray solid;
+    background-color: #8DCAD6;
+    padding-left: 100px;
+    padding-right: 100px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-radius: 20px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.35);
+
+    transition: 0.2s;
+}
+
+
+.start_button:hover{
+    transform: scale(1.2);
+}

@@ -1,0 +1,108 @@
+﻿@page "/courses"
+
+<div class="courses_div">كورسات</div>
+<div class="courses_container">
+    <div class="courses_lines">
+        <div class="anchor_container">
+            <a class="courses_buttons_anchor">
+                <button class="courses_buttons">
+                    <img src="gp images/level0.png" class="courses_icons" />
+                    <p class="courses_titles">LEVEL 0</p>
+                </button>
+            </a>
+        </div>
+        <div class="anchor_container">
+            <a class="courses_buttons_anchor">
+                <button class="courses_buttons">
+                    <img src="gp images/level1.png" alt="" class="courses_icons" />
+                    <p class="courses_titles">LEVEL 1</p>
+                </button>
+            </a>
+        </div>
+        <div class="anchor_container">
+            <a class="courses_buttons_anchor">
+                <button class="courses_buttons">
+                    <img src="gp images/level2.png" alt="" class="courses_icons" />
+                    <p class="courses_titles">LEVEL 2</p>
+                </button>
+            </a>
+        </div>
+    </div>
+    <div class="courses_lines">
+        <div class="anchor_container">
+            <a class="courses_buttons_anchor">
+                <button class="courses_buttons">
+                    <img src="gp images/level3.png" alt="" class="courses_icons" />
+                    <p class="courses_titles">LEVEL 3</p>
+                </button>
+            </a>
+        </div>
+        <div class="anchor_container">
+            <a class="courses_buttons_anchor">
+                <button class="courses_buttons">
+                    <img src="gp images/level4.png" alt="" class="courses_icons" />
+                    <p class="courses_titles">LEVEL 4</p>
+                </button>
+            </a>
+        </div>
+        <div class="anchor_container">
+            <a class="courses_buttons_anchor">
+                <button class="courses_buttons">
+                    <img src="gp images/gamepad logo.png"
+                         alt=""
+                         class="courses_icons" />
+                    <p class="courses_titles">GAMES</p>
+                </button>
+            </a>
+        </div>
+    </div>
+</div>
+<style>
+    .courses_div {
+        text-align: right;
+        padding: 40px 10%;
+        font-size: 35px;
+        font-weight: bold;
+    }
+
+    .courses_container {
+        display: flex;
+        flex-direction: column;
+        gap: 50px;
+        padding: 0 10% 100px 10%;
+    }
+
+    .courses_lines {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .courses_buttons {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: transform 0.3s;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+        .courses_buttons:hover {
+            transform: translateY(-10px) scale(1.05);
+        }
+
+    .courses_icons {
+        width: 280px;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .courses_titles {
+        font-size: 24px;
+        font-weight: bold;
+        padding: 15px 0;
+        margin: 0;
+        border-top: 1px solid #eee;
+    }
+</style>

@@ -1,5 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
+<div class="page-wrapper">
+    <Header />
+
 @Body
 
 <div id="blazor-error-ui" data-nosnippet>
@@ -22,6 +25,9 @@
     <button class="fab-btn" @onclick="() => isChatOpen = !isChatOpen">
         Ask AI
     </button>
+</div>
+
+    <Footer />
 </div>
 
 @code {

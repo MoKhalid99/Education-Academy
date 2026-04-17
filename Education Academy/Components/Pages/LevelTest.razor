@@ -1,0 +1,33 @@
+﻿@page "/leveltest"
+
+<div class="upper_container">
+    <div></div>
+    <div class="game-container">
+        <canvas id="game-canvas"></canvas>
+    </div>
+    <div></div>
+</div>
+<style>
+    .upper_container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 50px 0;
+    }
+
+    .game-container {
+        width: 800px;
+        height: 600px;
+        background-color: #000;
+        border: 5px solid #4b7983;
+        border-radius: 15px;
+        padding: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    #game-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+</style>
