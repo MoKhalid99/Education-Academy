@@ -1,44 +1,80 @@
 ﻿@page "/admin/upload"
-
+@using EducationAcademy.Models
+@using EducationAcademy.Services
+@attribute [Authorize(Roles = "Admin")]
+@inject EncryptionService Encryptor
+@inject AcademyDbContext DbContext
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<AcademyDbContext> DbFactory
+@*صفحة جانبية مش مهمة لرفع الداتا*@
 <MudPaper Class="pa-8 mt-4 shadow-lg" Style="max-width: 600px; margin: auto;">
-    <MudText Typo="Typo.h5" Class="mb-4">رفع مادة تعليمية جديدة (تشفير تلقائي)</MudText>
+    <MudText Typo="Typo.h5">رفع وتشفير مادة تعليمية</MudText>
     
-    <MudSelect T="int" Label="اختر المستوى" Variant="Variant.Outlined" @bind-Value="targetLevel">
-        <MudSelectItem Value="0">المستوى صفر</MudSelectItem>
+    <MudSelect T="int" Label="المستوى المستهدف" @bind-Value="targetLevel">
         <MudSelectItem Value="1">المستوى الأول</MudSelectItem>
         <MudSelectItem Value="2">المستوى الثاني</MudSelectItem>
         <MudSelectItem Value="3">المستوى الثالث</MudSelectItem>
+        <MudSelectItem Value="4">المستوى الرابع</MudSelectItem>
     </MudSelect>
 
-<MudFileUpload T="IBrowserFile" 
-               OnFilesChanged="UploadAndEncrypt" 
-               id="unique_upload_id">
-    <ButtonTemplate>
-        <MudButton HtmlTag="label" 
-                   Variant="Variant.Filled" 
-                   Color="Color.Primary" 
-                   for="unique_upload_id">
-            اختر الملف التعليمي
-        </MudButton>
-    </ButtonTemplate>
-</MudFileUpload>
-@if (isUploading)
-    {
-        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
-    }
+
+    @if (isUploading) { <MudProgressLinear Indeterminate="true" /> }
 </MudPaper>
 
 @code {
-    private int targetLevel;
+    private int targetLevel = 1;
     private bool isUploading = false;
 
-    private async Task UploadAndEncrypt(InputFileChangeEventArgs e)
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
     {
         isUploading = true;
-        // هنا نقوم باستدعاء خدمة التشفير 
-        // نأخذ الملف -> نشفره AES -> نحفظه في مجلد SecureData
-        await Task.Delay(2000); // محاكاة الرفع
+        var file = e.File;
+        
+        using var stream = file.OpenReadStream(maxAllowedSize: 15 * 1024 * 1024);
+        var encryptedBytes = await Encryptor.EncryptFile(stream);
+
+        var fileName = $"{Guid.NewGuid()}.enc";
+        var path = Path.Combine("wwwroot", "materials", fileName);
+        
+        await File.WriteAllBytesAsync(path, encryptedBytes);
+
+        var material = new Material {
+            Title = file.Name,
+            EncryptedFilePath = fileName,
+            LevelId = targetLevel
+        };
+
+        DbContext.Materials.Add(material);
+        await DbContext.SaveChangesAsync();
+        
         isUploading = false;
-        // Snackbar.Add("تم رفع وتشفير الملف بنجاح!", Severity.Success);
     }
+    // تعريف القائمة التي سيستخدمها الجدول
+    private List<ApplicationUser> students = new List<ApplicationUser>();
+    
+    private int totalStudents = 0;
+    private string searchString = "";
+
+    // جلب البيانات من قاعدة البيانات عند تحميل الصفحة
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        
+        // جلب المستخدمين الذين ليسوا أدمن
+        students = await context.Users
+                                .Where(u => !u.IsAdmin)
+                                .ToListAsync();
+                                
+        totalStudents = students.Count;
+    }
+
+    // دالة الفلترة 
+    private bool FilterFunc(ApplicationUser element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if (element.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (element.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        return false;
+    }
+
 }

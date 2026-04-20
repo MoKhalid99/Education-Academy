@@ -1,0 +1,157 @@
+﻿{
+  "title": "اختبار المستوى 0 - الجزء الثالث",
+  "xpValue": 40,
+  "timeLimitMinutes": 20,
+  "questions": [
+    {
+      "id": 1,
+      "text": "أي عنصر HTML يُستخدم لعرض فيديو داخل الصفحة؟",
+      "options": [ "<media>", "<video>", "<movie>", "<embed>" ],
+      "correctAnswer": "<video>"
+    },
+    {
+      "id": 2,
+      "text": "ما هي خاصية CSS التي تجعل العناصر مرنة (Responsive)؟",
+      "options": [ "flex", "position", "float", "display: block" ],
+      "correctAnswer": "flex"
+    },
+    {
+      "id": 3,
+      "text": "ما هو اختصار البروتوكول الآمن لنقل البيانات؟",
+      "options": [ "HTTP", "HTTPS", "SSL", "SSH" ],
+      "correctAnswer": "HTTPS"
+    },
+    {
+      "id": 4,
+      "text": "أي سمة (Attribute) تُستخدم لتحديد نص بديل للصورة؟",
+      "options": [ "title", "src", "alt", "description" ],
+      "correctAnswer": "alt"
+    },
+    {
+      "id": 5,
+      "text": "ما هي الوظيفة الأساسية للـ JavaScript في المتصفح؟",
+      "options": [ "تنسيق الألوان", "هيكلة البيانات", "إضافة التفاعلية", "تخزين الملفات" ],
+      "correctAnswer": "إضافة التفاعلية"
+    },
+    {
+      "id": 6,
+      "text": "أي عنصر يُستخدم لجمع مدخلات المستخدم؟",
+      "options": [ "<input>", "<form>", "<section>", "<div>" ],
+      "correctAnswer": "<form>"
+    },
+    {
+      "id": 7,
+      "text": "ما هي قيمة 'position' التي تجعل العنصر ثابتاً عند التمرير؟",
+      "options": [ "relative", "absolute", "fixed", "static" ],
+      "correctAnswer": "fixed"
+    },
+    {
+      "id": 8,
+      "text": "أي امتداد يخص ملفات الصور ذات الخلفية الشفافة؟",
+      "options": [ ".jpg", ".png", ".bmp", ".gif" ],
+      "correctAnswer": ".png"
+    },
+    {
+      "id": 9,
+      "text": "ماذا يفعل الوسم <br>؟",
+      "options": [ "خط أفقي", "سطر جديد", "تغيير الخط", "رابط" ],
+      "correctAnswer": "سطر جديد"
+    },
+    {
+      "id": 10,
+      "text": "أي كائن في JavaScript يُستخدم للتعامل مع الوقت والتاريخ؟",
+      "options": [ "Time", "Clock", "Date", "Calendar" ],
+      "correctAnswer": "Date"
+    },
+    {
+      "id": 11,
+      "text": "ما هي الخاصية المستخدمة لتغيير نوع الخط في CSS؟",
+      "options": [ "font-style", "font-type", "font-family", "text-font" ],
+      "correctAnswer": "font-family"
+    },
+    {
+      "id": 12,
+      "text": "ما هو العنوان الرقمي الفريد لكل جهاز على الشبكة؟",
+      "options": [ "URL", "DNS", "IP Address", "MAC Address" ],
+      "correctAnswer": "IP Address"
+    },
+    {
+      "id": 13,
+      "text": "أي عنصر يُستخدم لتعريف خلية في جدول HTML؟",
+      "options": [ "<tr>", "<table>", "<td>", "<th>" ],
+      "correctAnswer": "<td>"
+    },
+    {
+      "id": 14,
+      "text": "ما هي الطريقة الصحيحة لكتابة مصفوفة في JavaScript؟",
+      "options": [ "var x = (1,2)", "var x = {1,2}", "var x = [1,2]", "var x = <1,2>" ],
+      "correctAnswer": "var x = [1,2]"
+    },
+    {
+      "id": 15,
+      "text": "ماذا تعني كلمة Cascading في CSS؟",
+      "options": [ "تكرار", "تسلسل", "تنظيم", "تلوين" ],
+      "correctAnswer": "تسلسل"
+    },
+    {
+      "id": 16,
+      "text": "أي من الخيارات التالية يُستخدم لربط ملف CSS خارجي؟",
+      "options": [ "<style>", "<a>", "<link>", "<script>" ],
+      "correctAnswer": "<link>"
+    },
+    {
+      "id": 17,
+      "text": "ما هي خاصية CSS التي تُستخدم لإخفاء عنصر تماماً؟",
+      "options": [ "visibility: hidden", "display: none", "opacity: 0", "z-index: -1" ],
+      "correctAnswer": "display: none"
+    },
+    {
+      "id": 18,
+      "text": "ما هو النظام الذي يترجم أسماء النطاقات إلى IP؟",
+      "options": [ "HTTP", "FTP", "DNS", "DHCP" ],
+      "correctAnswer": "DNS"
+    },
+    {
+      "id": 19,
+      "text": "أي عنصر HTML يُستخدم لعرض ملف صوتي؟",
+      "options": [ "<sound>", "<audio>", "<music>", "<voice>" ],
+      "correctAnswer": "<audio>"
+    },
+    {
+      "id": 20,
+      "text": "ما هي العلامة التي تُستخدم لإنهاء جملة برمجية في JS؟",
+      "options": [ ":", ".", ";", "!" ],
+      "correctAnswer": ";"
+    },
+    {
+      "id": 21,
+      "text": "أي نوع من وحدات CSS يعتمد على حجم نافذة المتصفح؟",
+      "options": [ "px", "cm", "vh/vw", "pt" ],
+      "correctAnswer": "vh/vw"
+    },
+    {
+      "id": 22,
+      "text": "ما هو الوسم الصحيح للنصوص المكتوبة بخط عريض؟",
+      "options": [ "<bold>", "<strong>", "<italic>", "<big>" ],
+      "correctAnswer": "<strong>"
+    },
+    {
+      "id": 23,
+      "text": "ما هي لغة الاستعلام عن قواعد البيانات المرتبطة بالويب؟",
+      "options": [ "SQL", "PHP", "ASP", "JSON" ],
+      "correctAnswer": "SQL"
+    },
+    {
+      "id": 24,
+      "text": "ما هو الـ Framework الشهير لتنسيق المواقع بسرعة؟",
+      "options": [ "jQuery", "Bootstrap", "Node.js", "React" ],
+      "correctAnswer": "Bootstrap"
+    },
+    {
+      "id": 25,
+      "text": "ما هي الخاصية المستخدمة لترتيب العناصر فوق بعضها في CSS؟",
+      "options": [ "order", "float", "z-index", "stack" ],
+      "correctAnswer": "z-index"
+    }
+  ]
+}

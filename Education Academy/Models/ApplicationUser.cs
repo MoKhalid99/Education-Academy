@@ -1,9 +1,15 @@
 ﻿using Microsoft.AspNetCore.Identity;
-
-public class ApplicationUser : IdentityUser
+using System.ComponentModel.DataAnnotations;
+namespace EducationAcademy.Models
 {
-	public string FullName { get; set; } = string.Empty;
-	public int Level { get; set; } = 0; 
-	public int ExperiencePoints { get; set; } = 0; // الـ XP
-	public bool IsAdmin { get; set; } = false;
+	// نموذج المستخدم الخاص بتطبيق الأكاديمية التعليمية، يرث من IdentityUser لإدارة المستخدمين والأدوار
+	public class ApplicationUser : IdentityUser
+	{
+		[Required]
+		[MaxLength(100)]
+		public string FullName { get; set; } = string.Empty;
+		public int XP { get; set; } = 0;
+		public int CurrentLevel { get; set; } = 1; public bool IsAdmin { get; set; } = false;
+		public int MaxLevelReached { get; set; } = 1;
+	}
 }

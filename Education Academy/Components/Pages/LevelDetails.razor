@@ -1,0 +1,120 @@
+﻿@page "/level-details/{LevelId:int}"
+@inject NavigationManager Nav
+
+<div class="level-container">
+    <div class="header-section">
+        <h1>المستوى @LevelId</h1>
+        <p>هنا تجد المادة العلمية والاختبارات الخاصة بهذا المستوى</p>
+    </div>
+
+    <div class="content-grid">
+        <div class="material-card">
+            <div class="card-icon">📚</div>
+            <h3>المادة العلمية</h3>
+            <p>شرح تفصيلي لدروس المستوى @LevelId</p>
+            @* يمكنك تغيير الرابط ليكون ملف PDF أو صفحة شرح *@
+            <button class="btn-view" @onclick="OpenMaterial">عرض المادة</button>
+        </div>
+
+        <div class="quizzes-section">
+            <h3>الاختبارات المتاحة</h3>
+            <div class="quizzes-grid">
+                @for (int i = 1; i <= 3; i++)
+                {
+                    var quizNum = i;
+                    <div class="quiz-card">
+                        <span>الاختبار @quizNum</span>
+        
+                        <button class="btn-start" @onclick="() => StartQuiz(quizNum)">ابدأ الآن</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .level-container {
+        padding: 40px;
+        direction: rtl;
+        text-align: center;
+    }
+
+    .header-section {
+        margin-bottom: 40px;
+    }
+
+    .content-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        align-items: center;
+    }
+
+    .material-card {
+        background: #f8f9fa;
+        border: 2px solid #4b7983;
+        border-radius: 15px;
+        padding: 20px;
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .quizzes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 12fr));
+        gap: 20px;
+        width: 100%;
+        max-width: 800px;
+        margin-top: 20px;
+    }
+
+    .quiz-card {
+        background: white;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-view {
+        background-color: #4b7983;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-start {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+        .btn-start:hover {
+            background-color: #218838;
+        }
+</style>
+
+@code {
+    [Parameter] public int LevelId { get; set; }
+
+    private void StartQuiz(int quizNum)
+    {
+        // التوجيه لصفحة الاختبار مع تمرير المستوى ورقم الاختبار
+        Nav.NavigateTo($"/leveltest/{LevelId}/{quizNum}");
+    }
+
+    private void OpenMaterial()
+    {
+        // هنا يمكنك التوجيه لصفحة شرح أو فتح ملف PDF
+        // Nav.NavigateTo($"/materials/level{LevelId}.pdf");
+    }
+}

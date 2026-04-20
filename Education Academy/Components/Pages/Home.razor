@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager NavigationManager
 
 <div class="middle_section_container">
     <div class="notes_pic_container">
@@ -6,19 +8,29 @@
     </div>
     <div>
         <div class="info_container">
-            <p class="first_paragraph">علوم الحاسب بين يديك</p>
+            <p class="first_paragraph">علوم الحاسب بين يديك</p> 
             <p class="second_paragraph">
                 كل المعلومات التي تحتاجها في رحلتك البرمجية بشكل سلس في مكان واحد
             </p>
         </div>
         <div class="info_container_button">
-            <button class="sign_in_button"><p>سجل دخولك الان</p></button>
+            <AuthorizeView>
+                <Authorized>
+                    @* إذا كان مسجل دخول يذهب للوحة التحكم *@
+                    <button class="sign_in_button" @onclick='() => NavigationManager.NavigateTo("/courses")'>
+                        <p>ابدأ التعلم الآن</p>
+                    </button>
+                </Authorized>
+                <NotAuthorized>
+                    @* إذا لم يكن مسجل دخول يذهب لصفحة الدخول *@
+                    <button class="sign_in_button" @onclick='() => NavigationManager.NavigateTo("/login")'>
+                        <p>سجل دخولك الان</p>
+                    </button> 
+                </NotAuthorized>
+            </AuthorizeView>
             <img src="gp images/people.png" alt="" class="people_pic" />
         </div>
     </div>
-</div>
-<div class="lower_section">
-    <img src="gp images/Frame 1.png" alt="" class="lower_section_image" />
 </div>
 <style>
     .middle_section_container {

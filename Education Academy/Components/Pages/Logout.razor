@@ -1,0 +1,10 @@
+﻿@page "/logout"
+@inject NavigationManager Nav
+
+@code {
+    //تأكيد تسجيل الخروج
+    protected override void OnInitialized()
+    {
+        Nav.NavigateTo("account/logout", forceLoad: true);
+    }
+}

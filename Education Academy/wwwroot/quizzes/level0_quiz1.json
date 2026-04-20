@@ -1,9 +1,29 @@
 ﻿{
-  "Questions": [
+  "title": "اختبار المستوى 0 - الجزء الأول",
+  "xpValue": 30,
+  "timeLimitMinutes": 20,
+  "questions": [
     {
-      "Text": "ما هي الكلمة المفتاحية لتعريف متغير نصي؟",
-      "Options": [ "int", "string", "bool" ],
-      "Answer": "string"
+      "id": 1,
+      "text": "ما هي لغة البرمجة الأكثر استخداماً في تطوير الويب؟",
+      "options": [
+        "C#",
+        "Python",
+        "Java",
+        "HTML/CSS"
+      ],
+      "correctAnswer": "HTML/CSS"
+    },
+    {
+      "id": 2,
+      "text": "ماذا يرمز اختصار CSS؟",
+      "options": [
+        "Computer Style Sheets",
+        "Cascading Style Sheets",
+        "Creative Style Sheets",
+        "Colorful Style Sheets"
+      ],
+      "correctAnswer": "Cascading Style Sheets"
     }
   ]
 }

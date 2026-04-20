@@ -5,8 +5,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="@Assets["app.css"]" />
-    <link rel="stylesheet" href="@Assets["Education Academy.styles.css"]" />
+    <link rel="stylesheet" href="@Assets["EducationAcademy.styles.css"]" />
     <ImportMap />
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
@@ -14,6 +15,35 @@
 <body>
     <Routes @rendermode="InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
+    <script>
+        window.gameAudio = {
+            play: function (src, loop) {
+                let audio = document.getElementById('game-player');
+                if (!audio) {
+                    audio = document.createElement('audio');
+                    audio.id = 'game-player';
+                    document.body.appendChild(audio);
+                }
+                audio.src = src;
+                audio.loop = loop;
+                audio.play();
+            },
+            stop: function () {
+                const audio = document.getElementById('game-player');
+                if (audio) audio.pause();
+            }
+        };
+    </script>
+    <script>
+        window.addEventListener("keydown", function(e) {
+            // منع تحرك الصفحة فقط عند ضغط الأسهم أو المسافة، وبشرط ألا يكون اللاعب يكتب في مربع نص
+            if(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.code) > -1) {
+                if(e.target.tagName !== "TEXTAREA" && e.target.tagName !== "INPUT") {
+                    e.preventDefault();
+                }
+            }
+        }, false);
+    </script>
 </body>
 
 </html>

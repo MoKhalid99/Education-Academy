@@ -1,58 +1,43 @@
 ﻿@page "/courses"
-
-<div class="courses_div">كورسات</div>
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+@inject HttpClient Http
 <div class="courses_container">
+    @*التعديل الشنيع*@
     <div class="courses_lines">
-        <div class="anchor_container">
-            <a class="courses_buttons_anchor">
-                <button class="courses_buttons">
-                    <img src="gp images/level0.png" class="courses_icons" />
-                    <p class="courses_titles">LEVEL 0</p>
+        @for (int i = 0; i <= 4; i++)
+        {
+            var levelId = i;
+            var isLocked = IsLevelLocked(levelId); // تم استبدال الشرط القديم
+
+            <div class="anchor_container @(isLocked ? "level-locked" : "")">
+                <button class="courses_buttons"
+                        disabled="@isLocked"
+                        @onclick='() => { if (!isLocked) Nav.NavigateTo($"/level-details/{levelId}"); }'>
+
+                    @if (isLocked)
+                    {
+                        <div class="lock-overlay">🔒</div>
+                    }
+
+                    <img src="gp images/level@(levelId).png" class="courses_icons" />
+                    <p class="courses_titles">LEVEL @levelId</p>
                 </button>
-            </a>
-        </div>
-        <div class="anchor_container">
-            <a class="courses_buttons_anchor">
-                <button class="courses_buttons">
-                    <img src="gp images/level1.png" alt="" class="courses_icons" />
-                    <p class="courses_titles">LEVEL 1</p>
-                </button>
-            </a>
-        </div>
-        <div class="anchor_container">
-            <a class="courses_buttons_anchor">
-                <button class="courses_buttons">
-                    <img src="gp images/level2.png" alt="" class="courses_icons" />
-                    <p class="courses_titles">LEVEL 2</p>
-                </button>
-            </a>
-        </div>
+            </div>
+        }
     </div>
+    
     <div class="courses_lines">
         <div class="anchor_container">
             <a class="courses_buttons_anchor">
+                <NavLink href="/games">
                 <button class="courses_buttons">
-                    <img src="gp images/level3.png" alt="" class="courses_icons" />
-                    <p class="courses_titles">LEVEL 3</p>
-                </button>
-            </a>
-        </div>
-        <div class="anchor_container">
-            <a class="courses_buttons_anchor">
-                <button class="courses_buttons">
-                    <img src="gp images/level4.png" alt="" class="courses_icons" />
-                    <p class="courses_titles">LEVEL 4</p>
-                </button>
-            </a>
-        </div>
-        <div class="anchor_container">
-            <a class="courses_buttons_anchor">
-                <button class="courses_buttons">
-                    <img src="gp images/gamepad logo.png"
-                         alt=""
-                         class="courses_icons" />
+                    <img src="gp images/gamepad logo.png" alt="" class="courses_icons" />
                     <p class="courses_titles">GAMES</p>
                 </button>
+                </NavLink>
             </a>
         </div>
     </div>
@@ -104,5 +89,70 @@
         padding: 15px 0;
         margin: 0;
         border-top: 1px solid #eee;
+
+        level-locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .lock-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            z-index: 10;
+        }
+
+        .courses_buttons:disabled {
+            pointer-events: none;
+        }
     }
 </style>
+@code{
+    private int userXP = 0;
+    private bool isAdmin = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            // التحقق مما إذا كان المستخدم أدمن
+            isAdmin = user.IsInRole("Admin");
+
+            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                try
+                {
+                    // جلب نقاط الـ XP من الـ API
+                    userXP = await Http.GetFromJsonAsync<int>($"api/progression/get-xp/{userId}");
+                }
+                catch
+                {
+                    userXP = 0; // في حالة حدوث خطأ في الاتصال
+                }
+            }
+        }
+    }
+
+    private bool IsLevelLocked(int levelId)
+    {
+        // 1. إذا كان أدمن، كل المستويات مفتوحة
+        if (isAdmin) return false;
+
+        // 2. المستوى 0 و 1 مفتوحين للجميع افتراضياً
+        if (levelId <= 1) return false;
+
+        // 3. التحقق من المستويات الأخرى بناءً على النقاط
+        return levelId switch
+        {
+            2 => userXP < 200,
+            3 => userXP < 300,
+            4 => userXP < 400,
+            _ => true
+        };
+    }
+}

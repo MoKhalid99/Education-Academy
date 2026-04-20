@@ -1,17 +1,21 @@
 ﻿@page "/roadmap"
-@inject NavigationManager Nav
+@using EducationAcademy.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@inject NavigationManager Nav  
 @inject AuthenticationStateProvider AuthProvider
-
+@inject UserManager<ApplicationUser> UserManager
+@*لوجيك لا يجب العبث به*@
 <div class="staircase-container">
     <h2 class="text-center mb-5">رحلتك البرمجية</h2>
 
-    @for (int i = 0; i < 4; i++) // الأربعة ليفلات
+    @for (int i = 1; i <= 4; i++)
     {
         var levelIndex = i;
-        bool isLocked = currentUserLevel < levelIndex;
+        bool isLocked = currentUserLevel < levelIndex && !isAdmin;
 
         <div class="stair-step @(isLocked ? "locked" : "unlocked")"
-             style="margin-right: @(levelIndex * 80)px">
+             style="margin-right: @((levelIndex - 1) * 80)px">
 
             <div class="step-card shadow-lg @(levelIndex == currentUserLevel ? "active-glow" : "")"
                  @onclick="() => OpenLevel(levelIndex)">
@@ -23,32 +27,29 @@
                     }
                     else
                     {
-
                         <span class="level-number">@levelIndex</span>
                     }
                 </div>
 
                 <div class="step-info">
                     <h4>المستوى @levelIndex</h4>
-                    <p>@(GetLevelName(levelIndex))</p>
+                    <p>@GetLevelName(levelIndex)</p>
                 </div>
 
                 @if (!isLocked)
                 {
                     <div class="xp-bar">
-                        <div class="xp-progress" style="width: @(userXP)%"></div>
+                        <div class="xp-progress" style="width: @(CalculateProgress(levelIndex))%"></div>
                     </div>
                 }
             </div>
-
-            @if (levelIndex < 3) // رسم السهم الواصل للدرجة التالية
+            @if (levelIndex < 4)
             {
                 <div class="connector-line"></div>
             }
         </div>
     }
 </div>
-
 <style>
     .staircase-container { padding: 50px; background: #f0f4f8; min-height: 100vh; }
     .stair-step { position: relative; display: flex; align-items: center; margin-bottom: 60px; transition: 0.5s; }
@@ -68,20 +69,46 @@
 </style>
 
 @code {
-    private int currentUserLevel = 0; // سيجلب من قاعدة البيانات
-    private int userXP = 45; // سيجلب من قاعدة البيانات
+    private int currentUserLevel = 1;
+    private int userXP = 0;
+    private bool isAdmin = false; // تعريف المتغير المفقود
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
+
+        if (user != null)
+        {
+            currentUserLevel = user.CurrentLevel;
+            userXP = user.XP;
+            isAdmin = user.IsAdmin; // تحديث القيمة
+        }
+    }
+
+    // تعريف الدالة المفقودة CalculateProgress
+    private int CalculateProgress(int level)
+    {
+        if (level < currentUserLevel) return 100;
+        if (level > currentUserLevel) return 0;
+        return userXP % 100;
+    }
+
+    // تعريف الدالة المفقودة GetLevelName
+    private string GetLevelName(int i) => i switch
+    {
+        1 => "أساسيات البرمجة",
+        2 => "هياكل البيانات",
+        3 => "خوارزميات متقدمة",
+        4 => "مشروع التخرج",
+        _ => ""
+    };
 
     private void OpenLevel(int level)
     {
-        if (level <= currentUserLevel) Nav.NavigateTo($"/level/{level}");
+        if (currentUserLevel >= level || isAdmin)
+        {
+            Nav.NavigateTo($"/level-content/{level}");
+        }
     }
-
-    private string GetLevelName(int lv) => lv switch
-    {
-        0 => "أساسيات المنطق",
-        1 => "هياكل البيانات",
-        2 => "البرمجة الكائنية",
-        3 => "بناء المشاريع",
-        _ => ""
-    };
 }

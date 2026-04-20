@@ -1,5 +1,5 @@
 ﻿using System.Security.Cryptography;
-
+//ملف قديم ممكن نحتاجه
 public class FileSecurityService
 {
 	private readonly byte[] _key = Guid.Parse("YOUR-FIXED-GUID-KEY").ToByteArray(); // مفتاح ثابت

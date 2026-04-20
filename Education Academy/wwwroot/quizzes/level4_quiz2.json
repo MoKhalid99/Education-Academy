@@ -1,0 +1,13 @@
+﻿{
+  "title": "اختبار المستوى 4 - الجزء التاني",
+  "timeLimitMinutes": 20,
+  "questions": [
+    {
+      "id": 1,
+      "text": "ما هو لغة البرمجة الأكثر استخداماً في تطوير الويب؟",
+      "options": [ "C#", "Python", "Java", "HTML/CSS" ],
+      "correctAnswer": "HTML/CSS"
+    }
+    // ... كرر هذا لـ 25 سؤال
+  ]
+}

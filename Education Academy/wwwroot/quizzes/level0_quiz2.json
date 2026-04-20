@@ -1,0 +1,157 @@
+﻿{
+  "title": "اختبار المستوى 0 - الجزء الثاني",
+  "xpValue": 30,
+  "timeLimitMinutes": 20,
+  "questions": [
+    {
+      "id": 1,
+      "text": "ما هي لغة البرمجة الأكثر استخداماً في تطوير الويب؟",
+      "options": [ "C#", "Python", "Java", "HTML/CSS" ],
+      "correctAnswer": "HTML/CSS"
+    },
+    {
+      "id": 2,
+      "text": "ماذا يرمز اختصار CSS؟",
+      "options": [ "Computer Style Sheets", "Cascading Style Sheets", "Creative Style Sheets", "Colorful Style Sheets" ],
+      "correctAnswer": "Cascading Style Sheets"
+    },
+    {
+      "id": 3,
+      "text": "أي عنصر يُستخدم لإنشاء رابط تشعبي؟",
+      "options": [ "<link>", "<a>", "<href>", "<url>" ],
+      "correctAnswer": "<a>"
+    },
+    {
+      "id": 4,
+      "text": "ما هو البروتوكول المسؤول عن نقل صفحات الويب؟",
+      "options": [ "FTP", "SMTP", "HTTP", "TCP" ],
+      "correctAnswer": "HTTP"
+    },
+    {
+      "id": 5,
+      "text": "أي عنصر HTML يُستخدم لتعريف عنوان بأكبر حجم؟",
+      "options": [ "<h6>", "<head>", "<heading>", "<h1>" ],
+      "correctAnswer": "<h1>"
+    },
+    {
+      "id": 6,
+      "text": "أي لغة تُستخدم لجعل صفحات الويب تفاعلية؟",
+      "options": [ "SQL", "JavaScript", "CSS", "HTML" ],
+      "correctAnswer": "JavaScript"
+    },
+    {
+      "id": 7,
+      "text": "ما هو الامتداد الصحيح لملفات CSS؟",
+      "options": [ ".html", ".js", ".css", ".style" ],
+      "correctAnswer": ".css"
+    },
+    {
+      "id": 8,
+      "text": "كيف نكتب تعليقاً في لغة HTML؟",
+      "options": [ "// تعليق", "/* تعليق */", "", "# تعليق" ],
+      "correctAnswer": ""
+    },
+    {
+      "id": 9,
+      "text": "أي خاصية CSS تُستخدم لتغيير لون النص؟",
+      "options": [ "text-color", "color", "font-color", "background-color" ],
+      "correctAnswer": "color"
+    },
+    {
+      "id": 10,
+      "text": "ماذا يعني اختصار URL؟",
+      "options": [ "Uniform Resource Locator", "Universal Radio Line", "Unified Resource Link", "User Remote Login" ],
+      "correctAnswer": "Uniform Resource Locator"
+    },
+    {
+      "id": 11,
+      "text": "ما هو العنصر المستخدم لإضافة صورة في HTML؟",
+      "options": [ "<pic>", "<image>", "<img>", "<src>" ],
+      "correctAnswer": "<img>"
+    },
+    {
+      "id": 12,
+      "text": "أي وسام يُنشئ قائمة مرتبة (Ordered List)؟",
+      "options": [ "<ul>", "<li>", "<ol>", "<list>" ],
+      "correctAnswer": "<ol>"
+    },
+    {
+      "id": 13,
+      "text": "ما هي وظيفة الوسم <title>؟",
+      "options": [ "عنوان داخل الصفحة", "عنوان في شريط المتصفح", "عنوان للصورة", "تكبير الخط" ],
+      "correctAnswer": "عنوان في شريط المتصفح"
+    },
+    {
+      "id": 14,
+      "text": "أي رمز يُستخدم لتعريف المعرف (ID) في CSS؟",
+      "options": [ ".", "#", "*", "&" ],
+      "correctAnswer": "#"
+    },
+    {
+      "id": 15,
+      "text": "كيف يتم استدعاء ملف JavaScript خارجي؟",
+      "options": [ "<script link='...'>", "<script src='...'>", "<script href='...'>", "<js src='...'>" ],
+      "correctAnswer": "<script src='...'>"
+    },
+    {
+      "id": 16,
+      "text": "ما هو دور خادم الويب (Web Server)؟",
+      "options": [ "تصميم الواجهات", "تخزين وإرسال ملفات الموقع", "كتابة الكود", "توصيل الأسلاك" ],
+      "correctAnswer": "تخزين وإرسال ملفات الموقع"
+    },
+    {
+      "id": 17,
+      "text": "ما هي وحدة القياس النسبية في CSS؟",
+      "options": [ "px", "pt", "cm", "em" ],
+      "correctAnswer": "em"
+    },
+    {
+      "id": 18,
+      "text": "أي عنصر HTML يحتوي على محتوى الصفحة المرئي؟",
+      "options": [ "<head>", "<body>", "<html>", "<main>" ],
+      "correctAnswer": "<body>"
+    },
+    {
+      "id": 19,
+      "text": "ما هي الكلمة المحجوزة لتعريف متغير في JS الحديثة؟",
+      "options": [ "define", "let", "var", "string" ],
+      "correctAnswer": "let"
+    },
+    {
+      "id": 20,
+      "text": "أي خاصية CSS تُستخدم لعمل خط سميك (Bold)؟",
+      "options": [ "font-weight", "font-style", "text-bold", "weight" ],
+      "correctAnswer": "font-weight"
+    },
+    {
+      "id": 21,
+      "text": "ما هو المنفذ (Port) الافتراضي لبروتوكول HTTP؟",
+      "options": [ "443", "21", "80", "25" ],
+      "correctAnswer": "80"
+    },
+    {
+      "id": 22,
+      "text": "ماذا تفعل الخاصية target='_blank' في الرابط؟",
+      "options": [ "إغلاق الصفحة", "فتح الرابط في نافذة جديدة", "تحميل ملف", "تغيير اللون" ],
+      "correctAnswer": "فتح الرابط في نافذة جديدة"
+    },
+    {
+      "id": 23,
+      "text": "أي من التالي ليس من لغات البرمجة الخاصة بـ Backend؟",
+      "options": [ "PHP", "Python", "HTML", "Node.js" ],
+      "correctAnswer": "HTML"
+    },
+    {
+      "id": 24,
+      "text": "ما هو اختصار DOM في الويب؟",
+      "options": [ "Document Object Model", "Data Object Management", "Digital Ordinary Mode", "Document Online Menu" ],
+      "correctAnswer": "Document Object Model"
+    },
+    {
+      "id": 25,
+      "text": "أي خاصية تُستخدم لتباعد العناصر من الداخل (Padding)؟",
+      "options": [ "margin", "border", "padding", "gap" ],
+      "correctAnswer": "padding"
+    }
+  ]
+}

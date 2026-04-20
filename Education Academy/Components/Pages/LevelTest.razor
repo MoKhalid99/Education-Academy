@@ -1,33 +1,475 @@
-﻿@page "/leveltest"
+﻿@page "/leveltest/{Level:int}/{QuizNum:int}"
+@using System.Timers
+@using EducationAcademy.Models
+@using System.Text.Json
+@inject HttpClient Http
+@implements IDisposable
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+@*اتعدلت جامد بس محدش يلعب في اي حاجة *@
+<div class="test-wrapper">
+    @if (currentQuiz == null)
+    {
+        <div class="loading-status">
+            <div class="spinner"></div>
+            <p>جاري تحميل المستوى...</p>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <p class="error-text" style="color: #ff4c4c; margin-top: 10px;">@errorMessage</p>
+            }
+        </div>
+    }
+    else if (isFinished)
+    {
+        <div class="test-card result-card">
+            <h2>نتيجة الاختبار</h2>
+            <div class="score-display @(score >= 60 ? "success" : "fail")">
+                @score%
+            </div>
 
-<div class="upper_container">
-    <div></div>
-    <div class="game-container">
-        <canvas id="game-canvas"></canvas>
-    </div>
-    <div></div>
+            @if (score >= 60)
+            {
+                <h3 class="success-text">نجاح! لقد أكملت هذا المستوى ببراعة.</h3>
+                <p>تم إضافة <strong>@currentQuiz.XPValue</strong> نقطة إلى رصيدك.</p>
+            }
+            else
+            {
+                <h3 class="fail-text">للأسف، لم تصل لنسبة النجاح (60%).</h3>
+                <p>حاول مرة أخرى لتخطي هذا المستوى.</p>
+            }
+
+            <button class="btn-action" @onclick="GoToCourses">العودة للمراحل</button>
+        </div>
+    }
+    else
+    {
+        <div class="test-card">
+            <div class="test-header">
+                <div class="quiz-info">
+                    <h2>@currentQuiz.Title</h2>
+                    <span class="badge">المستوى @Level - اختبار @QuizNum</span>
+                </div>
+
+                <div class="timer-display @(timeLeft < 60 ? "timer-danger" : "")">
+                    <i class="bi bi-alarm"></i>
+                    <span>@FormatTime(timeLeft)</span>
+                </div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar" style="width: @(GetProgress())%"></div>
+            </div>
+
+            <div class="question-body">
+                <div class="question-meta">
+                    سؤال @(currentQuestionIndex + 1) من @currentQuiz.Questions.Count
+                </div>
+
+                <h4 class="question-text">@currentQuiz.Questions[currentQuestionIndex].Text</h4>
+
+                <div class="options-list">
+                    @foreach (var option in currentQuiz.Questions[currentQuestionIndex].Options)
+                    {
+                        <button class="option-item @(selectedOption == option ? "selected" : "")"
+                                @onclick="() => SelectOption(option)">
+                            <span class="option-indicator"></span>
+                            @option
+                        </button>
+                    }
+                </div>
+
+                <div class="action-container">
+                    <button class="btn-action"
+                            disabled="@string.IsNullOrEmpty(selectedOption)"
+                            @onclick="NextQuestion">
+                        @(IsLastQuestion ? "تسليم" : "التالي")
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
 </div>
+
 <style>
-    .upper_container {
+    /* تصميم داكن اللي معموم في المشروع اللي قبله */
+    .test-wrapper {
+        padding: 40px 20px;
+        direction: rtl;
+        min-height: 100vh;
         display: flex;
         justify-content: center;
-        align-items: center;
-        padding: 50px 0;
+        background-color: #121212;
+        color: #e0e0e0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    .game-container {
-        width: 800px;
-        height: 600px;
-        background-color: #000;
-        border: 5px solid #4b7983;
-        border-radius: 15px;
-        padding: 10px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-
-    #game-canvas {
+    .test-card {
+        background: #1e1e24;
         width: 100%;
+        max-width: 850px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        border: 1px solid #333;
+        overflow: hidden;
+        height: fit-content;
+    }
+
+    .result-card {
+        text-align: center;
+        padding: 50px 30px;
+    }
+
+    .score-display {
+        font-size: 4rem;
+        font-weight: bold;
+        margin: 20px 0;
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+        .score-display.success {
+            color: #00ffcc;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+
+        .score-display.fail {
+            color: #ff4c4c;
+            text-shadow: 0 0 10px rgba(255, 76, 76, 0.5);
+        }
+
+    .success-text {
+        color: #00ffcc;
+    }
+
+    .fail-text {
+        color: #ff4c4c;
+    }
+
+    .test-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 25px 30px;
+        background: #18181d;
+        border-bottom: 1px solid #333;
+    }
+
+    .quiz-info h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        color: #fff;
+    }
+
+    .badge {
+        background: #00ffcc;
+        color: #000;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .timer-display {
+        background: #000;
+        color: #00ffcc;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 1.4rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid #333;
+    }
+
+    .timer-danger {
+        color: #ff4c4c;
+        border-color: #ff4c4c;
+        animation: pulse 1s infinite;
+    }
+
+    .progress-container {
+        height: 8px;
+        background: #222;
+        width: 100%;
+    }
+
+    .progress-bar {
         height: 100%;
-        display: block;
+        background: #00ffcc;
+        transition: width 0.4s ease;
+        box-shadow: 0 0 8px #00ffcc;
+    }
+
+    .question-body {
+        padding: 40px;
+    }
+
+    .question-meta {
+        color: #888;
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+
+    .question-text {
+        font-size: 1.4rem;
+        line-height: 1.6;
+        color: #fff;
+        margin-bottom: 30px;
+    }
+
+    .options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .option-item {
+        background: #2a2a35;
+        border: 2px solid #3a3a48;
+        padding: 18px;
+        border-radius: 12px;
+        text-align: right;
+        font-size: 1.1rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+        .option-item:hover:not(.selected) {
+            border-color: #666;
+            background: #333342;
+        }
+
+        .option-item.selected {
+            border-color: #00ffcc;
+            background: rgba(0, 255, 204, 0.1);
+            color: #fff;
+        }
+
+    .option-indicator {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #666;
+        border-radius: 50%;
+        transition: 0.2s;
+    }
+
+    .option-item.selected .option-indicator {
+        border-color: #00ffcc;
+        background: #00ffcc;
+        box-shadow: 0 0 8px #00ffcc;
+    }
+
+    .action-container {
+        margin-top: 30px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-action {
+        background: #00ffcc;
+        color: #000;
+        border: none;
+        padding: 12px 30px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .btn-action:hover:not(:disabled) {
+            background: #00cca3;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+        }
+
+        .btn-action:disabled {
+            background: #444;
+            color: #777;
+            cursor: not-allowed;
+        }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .test-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+
+        .action-container {
+            justify-content: center;
+        }
     }
 </style>
+
+@code {
+    [Parameter] public int Level { get; set; }
+    [Parameter] public int QuizNum { get; set; }
+
+    private QuizData? currentQuiz;
+    private int currentQuestionIndex = 0;
+    private int timeLeft;
+    private Timer? timer;
+    private string errorMessage = "";
+    private string selectedOption = "";
+    private int correctAnswersCount = 0;
+    private bool isFinished = false;
+    private int score = 0;
+
+    private bool IsLastQuestion => currentQuiz != null && currentQuestionIndex == currentQuiz.Questions.Count - 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // ده بدل ماتكتب البورت
+            var fileUrl = $"{Nav.BaseUri}quizzes/level{Level}_quiz{QuizNum}.json";
+            Console.WriteLine($"[Debug] Attempting to load: {fileUrl}");
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                AllowTrailingCommas = true
+            };
+
+            currentQuiz = await Http.GetFromJsonAsync<QuizData>(fileUrl, jsonOptions);
+
+            if (currentQuiz != null)
+            {
+                // استخدام الوقت من الجيسون، أو 20 دقيقة كقيمة افتراضية
+                timeLeft = (currentQuiz.TimeLimitMinutes > 0 ? currentQuiz.TimeLimitMinutes : 20) * 60;
+                StartTimer();
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            errorMessage = "لم يتم العثور على ملف الاختبار (خطأ 404). تأكد من وجوده في مجلد wwwroot/quizzes";
+            Console.WriteLine($"HTTP Error: {e.Message}");
+        }
+        catch (JsonException e)
+        {
+            errorMessage = "هناك خطأ في صياغة ملف الـ JSON.";
+            Console.WriteLine($"JSON Error: {e.Message}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "حدث خطأ غير متوقع أثناء التحميل.";
+            Console.WriteLine($"General Error: {ex.Message}");
+        }
+    }
+
+    private void StartTimer()
+    {
+        timer = new Timer(1000);
+        timer.Elapsed += async (s, e) =>
+        {
+            if (timeLeft > 0)
+            {
+                timeLeft--;
+                await InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                timer.Stop();
+                await InvokeAsync(FinishQuiz);
+            }
+        };
+        timer.Start();
+    }
+
+    private string FormatTime(int seconds)
+    {
+        return $"{(seconds / 60):D2}:{(seconds % 60):D2}";
+    }
+
+    private double GetProgress()
+    {
+        if (currentQuiz == null) return 0;
+        return ((double)(currentQuestionIndex) / currentQuiz.Questions.Count) * 100;
+    }
+
+    private void SelectOption(string option)
+    {
+        selectedOption = option;
+    }
+
+    private async Task NextQuestion()
+    {
+        if (selectedOption == currentQuiz!.Questions[currentQuestionIndex].CorrectAnswer)
+        {
+            correctAnswersCount++;
+        }
+
+        if (!IsLastQuestion)
+        {
+            currentQuestionIndex++;
+            selectedOption = "";
+        }
+        else
+        {
+            await FinishQuiz();
+        }
+    }
+
+    private async Task FinishQuiz()
+    {
+        timer?.Stop();
+        isFinished = true;
+        score = (int)Math.Round(((double)correctAnswersCount / currentQuiz!.Questions.Count) * 100);
+
+        if (score >= 60)
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                await Http.PostAsJsonAsync("api/progression/update-xp", new { UserId = userId, Points = currentQuiz.XPValue });
+            }
+        }
+    }
+    private async Task SaveProgress()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            Console.WriteLine($"جاري حفظ تقدم الطالب ذو المعرف: {userId}");
+        }
+    }
+
+    private async Task UnlockNextLevel(int nextLevel)
+    {
+        await Http.PostAsJsonAsync($"api/user/unlock-level/{nextLevel}", new { });
+    }
+
+    private void GoToCourses()
+    {
+        Nav.NavigateTo("/courses");
+    }
+
+    public void Dispose() => timer?.Dispose();
+}

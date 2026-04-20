@@ -1,35 +1,46 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<LoadingOverlay IsVisible="isPageLoading" />
 
 <div class="page-wrapper">
     <Header />
 
 @Body
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
-</div>
-
-
-<div class="fab-container">
-    @if (isChatOpen)
-    {
-        <div class="chat-window">
-            <div class="chat-header">Education AI</div>
-            <div class="chat-content">
-            </div>
-            <input type="text" placeholder="اسأل AI..." class="chat-input" />
-        </div>
-    }
-    <button class="fab-btn" @onclick="() => isChatOpen = !isChatOpen">
-        Ask AI
-    </button>
-</div>
-
     <Footer />
 </div>
 
-@code {
-    private bool isChatOpen = false;
+@code
+{
+    private bool isPageLoading = false;
+
+    protected override void OnInitialized()
+    {
+        // الاشتراك في حدث تغيير الصفحة
+        Navigation.LocationChanged += HandleLocationChanged;
+    }
+
+    private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        //  إظهار شاشة التحميل عند بدء التنقل
+        isPageLoading = true;
+        StateHasChanged();
+
+        // محاكاة وقت التحميل
+        //يمكن تعديل الوقت
+        await Task.Delay(1000);
+
+        // إخفاء الشاشة بعد انتهاء التنقل
+        isPageLoading = false;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        // إلغاء الاشتراك عند إغلاق التطبيق لتجنب تسريب الذاكرة
+        Navigation.LocationChanged -= HandleLocationChanged;
+    }
+    
 }

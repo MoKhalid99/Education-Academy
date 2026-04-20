@@ -1,32 +1,74 @@
 ﻿@inject HttpClient Http
 
-<div class="loading-container">
-    <div class="loader-box">
-        <div class="spinner"></div>
-        <img src="images/cloud-upload.png" alt="Loading" class="cloud-icon" />
-        <p class="loading-text">Loading...</p>
+@if (IsVisible)
+{
+    <div class="loading-container">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <img src="images/cloud-upload.png" alt="Loading" class="cloud-icon" />
+            <p class="loading-text">جاري التحميل...</p>
 
-        @if (!string.IsNullOrEmpty(currentTip))
-        {
-            <div class="tip-box">
-                <span class="tip-title">نصيحة برمجية:</span>
-                <p class="tip-content">@currentTip</p>
-            </div>
-        }
+            @if (!string.IsNullOrEmpty(currentTip))
+            {
+                <div class="tip-box">
+                    <span class="tip-title">نصيحة برمجية:</span>
+                    <p class="tip-content">@currentTip</p>
+                </div>
+            }
+        </div>
     </div>
-</div>
-
+}
+<style>
+    .loading-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5); /* خلفية شفافة */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* ليكون فوق كل العناصر */
+    }
+</style>
 @code {
-    private string currentTip = "";
-    private List<string>? tips;
+    [Parameter] public bool IsVisible { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    private string currentTip = "";
+    private static List<string>? allTips;          // لتخزين القائمة الكاملة
+    private static List<string> remainingTips = new(); // لتخزين النصائح التي لم تظهر بعد
+
+    protected override async Task OnParametersSetAsync()
     {
-        // جلب النصائح من ملف JSON
-        tips = await Http.GetFromJsonAsync<List<string>>("data/tips.json");
-        if (tips != null && tips.Count > 0)
+        // عندما تظهر الشاشة (IsVisible يصبح true)، نختار نصيحة جديدة
+        if (IsVisible)
         {
-            currentTip = tips[new Random().Next(tips.Count)];
+            await LoadAndPickTip();
+        }
+    }
+
+    private async Task LoadAndPickTip()
+    {
+        // تحميل النصائح من الملف إذا لم تكن محملة
+        if (allTips == null)
+        {
+            allTips = await Http.GetFromJsonAsync<List<string>>("data/tips.json");
+            if (allTips != null) remainingTips = new List<string>(allTips);
+        }
+
+        // إذا انتهت النصائح، نعيد ملء القائمة من جديد
+        if (remainingTips.Count == 0 && allTips != null)
+        {
+            remainingTips = new List<string>(allTips);
+        }
+
+        // اختيار نصيحة عشوائية وحذفها من قائمة "المتبقي" لمنع التكرار
+        if (remainingTips.Count > 0)
+        {
+            var index = new Random().Next(remainingTips.Count);
+            currentTip = remainingTips[index];
+            remainingTips.RemoveAt(index);
         }
     }
 }

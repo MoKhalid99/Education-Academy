@@ -1,0 +1,784 @@
+﻿@page "/game/roadrad"
+@using System.Threading
+@implements IDisposable
+@inject IJSRuntime JSRuntime
+
+@*لعبة العربية و جهزه*@
+<PageTitle>Road Rep: Real Pursuit</PageTitle>
+
+<div class="page-background">
+    <div class="game-container" @onkeydown="HandleKeyDown" tabindex="0" @ref="gameDiv"
+         style="background-position: center @(roadOffsetY)px;">
+
+        @if (!isGameStarted && !isGameOver && !isRescueMode)
+        {
+            <div class="menu">
+                <h1 class="game-title">Road Rep</h1>
+                <p>تجاوز السيارات، أصلح الأكواد، دمر الأعداء</p>
+                <button class="btn start-btn" @onclick="StartGame">ابدأ اللعبة</button>
+            </div>
+        }
+        else if (isGameOver)
+        {
+            <div class="menu">
+                <h1 class="neon-text-red" style="font-size: 4rem;">SYSTEM FAILURE</h1>
+                <p>النقاط النهائية: @score</p>
+                <button class="btn-neon btn-purple" @onclick="StartGame">REBOOT SYSTEM</button>
+            </div>
+        }
+        else
+        {
+            <div class="hud">
+                <span>النقاط: @score</span> |
+                <span>السرعة: @Math.Round(gameSpeed, 1)x</span> |
+                <span class="text-danger">المحاولات: @lives ❤️</span>
+            </div>
+
+            <img src="assets/car.png" class="player-car @(isInvulnerable ? "blink" : "")"
+                 style="left: @(playerX)px; top: @(playerY)px; width: 45px; height: 90px;" />
+
+            @foreach (var bullet in bullets)
+            {
+                <div class="bullet" style="left: @(bullet.X)px; top: @(bullet.Y)px;"></div>
+            }
+
+            @foreach (var obj in gameObjects)
+            {
+                <img src="@obj.ImageUrl" class="game-obj @(obj.Type == GameObjectType.Hole ? "rolling-error" : "")"
+                     style="left: @(obj.X)px; top: @(obj.Y)px; width: @(obj.Width)px; height: @(obj.Height)px;" />
+            }
+
+            @foreach (var exp in explosions)
+            {
+                <div class="explosion" style="left: @(exp.X)px; top: @(exp.Y)px;"></div>
+            }
+
+            @if (currentChallenge != null && !isRescueMode)
+            {
+                <div class="overlay code-editor-modal">
+                    <h2 class="neon-text-red">CRITICAL_EXCEPTION_FOUND</h2>
+                    <div class="bug-desc" style="color: white; margin-bottom: 10px;"> أصلح الخطأ لتمر </div>
+
+                    <button class="btn-neon btn-blue hint-btn" @onclick="ToggleHint">View Hint</button>
+                    @if (showHint)
+                    {
+                        <div class="hint-box"><strong>HINT:</strong> @currentChallenge.Hint</div>
+                    }
+
+                    <p style="color: white; margin-top: 10px;"><strong>الكود المعطل:</strong></p>
+                    <div class="cyber-code-box">@currentChallenge.BrokenCode</div>
+
+                    <textarea @bind="playerCodeInput" spellcheck="false" class="cyber-textarea" placeholder="// اكتب الكود الصحيح هنا..."></textarea>
+
+                    @if (showWrongAnswerAlert)
+                    {
+                        <p class="error-text">> SYNTAX_ERROR: إجابة خاطئة</p>
+                    }
+                    <button class="btn-neon btn-red" style="margin-top: 15px;" @onclick="CheckCode">FIX_AND_DECODE</button>
+                </div>
+            }
+
+            @if (isRescueMode)
+            {
+                <div class="overlay code-editor-modal rescue-modal">
+                    <h2 class="neon-text-purple"> EMERGENCY_RECOVERY </h2>
+                    <p style="color: white;">لقد تدمرت سيارتك 3 مرات. فرصة أخيرة للإنقاذ!</p>
+
+                    <button class="btn-neon btn-blue hint-btn" @onclick="ToggleHint">View Hint</button>
+                    @if (showHint)
+                    {
+                        <div class="hint-box"><strong>HINT:</strong> @rescueChallenge?.Hint</div>
+                    }
+
+                    <p style="color: white; margin-top: 10px;"><strong>الكود المعطل:</strong></p>
+                    <div class="cyber-code-box">@rescueChallenge?.BrokenCode</div>
+
+                    <textarea @bind="playerCodeInput" spellcheck="false" class="cyber-textarea" placeholder="// اكتب الكود الصحيح هنا..."></textarea>
+
+                    @if (showWrongAnswerAlert)
+                    {
+                        <p class="error-text">> OVERRIDE_FAILED...</p>
+                    }
+                    <button class="btn-neon btn-purple" style="margin-top: 15px;" @onclick="CheckRescueCode">OVERRIDE_SYSTEM</button>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<style>
+    :root {
+        --neon-purple: #bc13fe;
+        --neon-blue: #05d9e8;
+        --neon-red: #ff2a6d;
+        --cyber-black: #050505;
+    }
+
+    .page-background {
+        min-height: 100vh;
+        background-color: #1a1a1a;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* تصميم الطريق */
+    .game-container {
+        width: 500px;
+        height: 700px;
+        background-color: #000000;
+        background-image: repeating-linear-gradient(0deg, #fff 0px, #fff 40px, transparent 40px, transparent 80px);
+        background-size: 10px 100%;
+        background-repeat: no-repeat;
+        position: relative;
+        overflow: hidden;
+        border: 5px solid #333;
+        border-radius: 10px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        outline: none;
+    }
+    /* تصميم السيارات، الرصاص، الانفجارات، والقوائم */
+    .player-car {
+        position: absolute;
+        transition: left 0.1s ease-out, top 0.1s ease-out;
+        z-index: 5;
+    }
+
+    .game-obj {
+        position: absolute;
+        z-index: 4;
+    }
+
+    .bullet {
+        position: absolute;
+        width: 6px;
+        height: 20px;
+        background-color: #ffaa00;
+        border-radius: 3px;
+        z-index: 3;
+    }
+
+    .explosion {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        background: radial-gradient(circle, #fff, #ffaa00, #ff0000, transparent);
+        border-radius: 50%;
+        transform: translate(-25%, -25%);
+        z-index: 6;
+        animation: boom 0.5s ease-out forwards;
+    }
+
+    @@keyframes boom {
+        0% {
+            transform: scale(0.2);
+            opacity: 1;
+        }
+
+        100% {
+            transform: scale(2);
+            opacity: 0;
+        }
+    }
+
+    .blink {
+        animation: blinker 0.2s linear infinite;
+    }
+
+    @@keyframes blinker {
+        50% {
+            opacity: 0.3;
+        }
+    }
+
+    .hud {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        color: white;
+        font-weight: bold;
+        z-index: 10;
+        background: rgba(0,0,0,0.7);
+        padding: 10px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .menu {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 20;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .start-btn {
+        background-color: #000;
+        color: #fff;
+        border: 2px solid #fff;
+        font-size: 1.2rem;
+        padding: 10px 30px;
+        transition: 0.3s;
+    }
+
+        .start-btn:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
+    .game-title {
+        color: #fff;
+        font-size: 3rem;
+        margin-bottom: 20px;
+    }
+
+    /* تصميم محرر الأكواد */
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+    }
+
+    .code-editor-modal {
+        border: 2px solid var(--neon-purple);
+        box-shadow: inset 0 0 20px rgba(188, 19, 254, 0.2);
+    }
+
+    .neon-text-red {
+        color: var(--neon-red);
+        text-shadow: 0 0 10px var(--neon-red);
+        margin-bottom: 5px;
+        font-family: monospace;
+    }
+
+    .neon-text-purple {
+        color: var(--neon-purple);
+        text-shadow: 0 0 10px var(--neon-purple);
+        font-family: monospace;
+    }
+
+    .cyber-code-box {
+        background: #111;
+        color: #fff;
+        padding: 10px;
+        border: 1px solid #555;
+        width: 90%;
+        font-family: monospace;
+        font-size: 1.1rem;
+        text-align: left;
+        direction: ltr;
+        margin-bottom: 15px;
+    }
+
+    .cyber-textarea {
+        width: 90%;
+        height: 120px;
+        background: #000;
+        color: #39ff14;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 1.2rem;
+        border: 1px solid var(--neon-blue);
+        outline: none;
+        resize: none;
+        text-align: left;
+        direction: ltr;
+    }
+
+        .cyber-textarea:focus {
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+    .btn-neon {
+        padding: 10px 20px;
+        border: 2px solid;
+        background: transparent;
+        color: #fff;
+        cursor: pointer;
+        font-weight: bold;
+        font-family: monospace;
+        transition: 0.3s;
+        margin: 5px;
+    }
+
+    .btn-red {
+        border-color: var(--neon-red);
+        color: var(--neon-red);
+    }
+
+        .btn-red:hover {
+            background: var(--neon-red);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-red);
+        }
+
+    .btn-purple {
+        border-color: var(--neon-purple);
+        color: var(--neon-purple);
+    }
+
+        .btn-purple:hover {
+            background: var(--neon-purple);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-purple);
+        }
+
+    .btn-blue {
+        border-color: var(--neon-blue);
+        color: var(--neon-blue);
+        padding: 5px 15px;
+        font-size: 0.9rem;
+    }
+
+        .btn-blue:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+    .hint-box {
+        background: rgba(5, 217, 232, 0.2);
+        border: 1px dashed var(--neon-blue);
+        color: #fff;
+        padding: 10px;
+        margin: 10px 0;
+        width: 90%;
+        text-align: left;
+        direction: ltr;
+        font-family: monospace;
+    }
+
+    .error-text {
+        color: var(--neon-red);
+        text-shadow: 0 0 5px var(--neon-red);
+        font-family: monospace;
+        margin-top: 10px;
+    }
+
+    .rolling-error {
+        border-radius: 50%;
+        animation: roll 1s linear infinite;
+    }
+
+    @@keyframes roll {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+@code {
+    private ElementReference gameDiv;
+    private PeriodicTimer? gameTimer;
+    private bool isGameStarted = false;
+    private bool isGameOver = false;
+    private bool isPaused = false;
+    private int score = 0;
+    private double gameSpeed = 1.0;
+    private double roadOffsetY = 0;
+    private int missedErrors = 0; // تتبع الأخطاء التي تم تفويتها
+
+    private int lives = 3;
+    private bool hasUsedRescue = false;
+    private bool isRescueMode = false;
+    private CodeChallenge? rescueChallenge;
+
+    private double playerX = 227.5;
+    private double playerY = 550;
+    private DateTime invulnerableUntil = DateTime.MinValue;
+    private bool isInvulnerable => DateTime.Now < invulnerableUntil;
+
+    private List<GameObject> gameObjects = new();
+    private List<Bullet> bullets = new();
+    private List<Explosion> explosions = new();
+    private Random rnd = new Random();
+
+    private DateTime lastHoleSpawnTime = DateTime.Now;
+    private CodeChallenge? currentChallenge;
+    private string playerCodeInput = "";
+    private bool showWrongAnswerAlert = false;
+    private bool showHint = false;
+
+    private double[] lanes = new double[] { 60, 160, 260, 360 };
+     //الاسئلة و التلميحات البايظة 
+    private List<CodeChallenge> allChallenges = new()
+    {
+        new CodeChallenge("Console.WriteLin(\"Road\");", "Console.WriteLine(\"Road\");", "Check the spelling of the WriteLine method."),
+        new CodeChallenge("int speed = \"100\";", "int speed = 100;", "Integers should not have quotes around them."),
+        new CodeChallenge("if(speed = 10)", "if(speed == 10)", "Use '==' for comparison, '=' is for assignment."),
+        new CodeChallenge("for(int i=0; i<5 i++)", "for(int i=0; i<5; i++)", "Missing a semicolon inside the for loop conditions."),
+        new CodeChallenge("string c = 'A';", "string c = \"A\";", "Strings require double quotes (\"), single quotes are for chars.")
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) { await gameDiv.FocusAsync(); }
+    }
+
+    private void ToggleHint() => showHint = !showHint;
+
+    private async Task StartGame()
+    {
+        isGameStarted = true; isGameOver = false; isPaused = false;
+        isRescueMode = false; hasUsedRescue = false;
+        score = 0; gameSpeed = 1.0; lives = 3; missedErrors = 0;
+        playerX = lanes[1]; playerY = 550;
+        gameObjects.Clear(); bullets.Clear(); explosions.Clear();
+        lastHoleSpawnTime = DateTime.Now;
+
+        await gameDiv.FocusAsync();
+        _ = GameLoopAsync();
+    }
+
+    private async Task GameLoopAsync()
+    {
+        gameTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(16));
+        while (await gameTimer.WaitForNextTickAsync())
+        {
+            if (isGameOver || isPaused || isRescueMode) continue;
+            UpdateGame();
+            StateHasChanged();
+        }
+    }
+
+    private void UpdateGame()
+    {
+        score++;
+        gameSpeed += 0.0002;
+        roadOffsetY += 10 * gameSpeed;
+        if (roadOffsetY > 100) roadOffsetY = 0;
+
+        // تحديث حركة الرصاص
+        for (int i = bullets.Count - 1; i >= 0; i--)
+        {
+            bullets[i].Y -= 15;
+            if (bullets[i].Y < -20) bullets.RemoveAt(i);
+        }
+
+        //  إزالة الانفجارات المنتهية
+        explosions.RemoveAll(e => (DateTime.Now - e.CreationTime).TotalMilliseconds > 500);
+
+        //  عناصر اللعبة
+        for (int i = gameObjects.Count - 1; i >= 0; i--)
+        {
+            var obj = gameObjects[i];
+
+            // لو كان العنصر تدمر في اصطدام سابق، احذفه 
+            if (obj.IsDestroyed)
+            {
+                gameObjects.RemoveAt(i);
+                continue;
+            }
+
+            // الحركة الأساسية للأسفل أو الأعلى 
+            if (obj.Direction == MoveDirection.Down)
+                obj.Y += (obj.Type == GameObjectType.Hole ? 5 : 8) * gameSpeed; // الخطأ أبطأ 
+            else
+                obj.Y -= 5 * gameSpeed;
+
+            // ملاحقة الأعداء للاعب
+            if (obj.Type == GameObjectType.Enemy)
+            {
+                double distanceY = Math.Abs(obj.Y - playerY);
+                if (distanceY < 350)
+                {
+                    if (obj.X < playerX - 5) obj.X += 1.5 * gameSpeed;
+                    else if (obj.X > playerX + 5) obj.X -= 1.5 * gameSpeed;
+                }
+            }
+
+            //الخطأ يتجه نحو اللاعب  
+            if (obj.Type == GameObjectType.Hole)
+            {
+                if (obj.X < playerX - 3) obj.X += 2 * gameSpeed;
+                else if (obj.X > playerX + 3) obj.X -= 2 * gameSpeed;
+            }
+
+            // اصطدام السيارات ببعضها البعض
+            for (int j = i - 1; j >= 0; j--)
+            {
+                var otherObj = gameObjects[j];
+                if (otherObj.IsDestroyed) continue;
+
+                if (IsCollision(obj.X, obj.Y, obj.Width, obj.Height, otherObj.X, otherObj.Y, otherObj.Width, otherObj.Height))
+                {
+                    bool isObjCar = obj.Type == GameObjectType.Enemy || obj.Type == GameObjectType.PeacefulCar;
+                    bool isOtherCar = otherObj.Type == GameObjectType.Enemy || otherObj.Type == GameObjectType.PeacefulCar;
+
+                    if (isObjCar && isOtherCar)
+                    {
+                        CreateExplosion(obj.X, obj.Y);
+                        CreateExplosion(otherObj.X, otherObj.Y);
+                        _ = JSRuntime.InvokeVoidAsync("playAudio", "assets/bad.mp3");
+
+                        // إعطاء نقاط فقط إذا كان أحد العناصر سيارة عدو
+                        if (obj.Type == GameObjectType.Enemy || otherObj.Type == GameObjectType.Enemy)
+                            score += 100;
+
+                        obj.IsDestroyed = true;
+                        otherObj.IsDestroyed = true;
+                        break;
+                    }
+                }
+            }
+
+            if (obj.IsDestroyed)
+            {
+                gameObjects.RemoveAt(i);
+                continue;
+            }
+
+            // الخروج من الشاشة واحتساب الأخطاء المفوتة
+            if (obj.Y > 800 || obj.Y < -200)
+            {
+                // إذا تجاوز الخطأ الشاشة من الأسفل، نعتبر أن اللاعب فوته
+                if (obj.Type == GameObjectType.Hole && obj.Y > 800)
+                {
+                    missedErrors++;
+                }
+                gameObjects.RemoveAt(i);
+                continue;
+            }
+
+            // اصطدام الرصاص بالسيارات 
+            for (int j = bullets.Count - 1; j >= 0; j--)
+            {
+                if ((obj.Type == GameObjectType.Enemy || obj.Type == GameObjectType.PeacefulCar) &&
+                    IsCollision(bullets[j].X, bullets[j].Y, 6, 20, obj.X, obj.Y, obj.Width, obj.Height))
+                {
+                    CreateExplosion(obj.X, obj.Y);
+                    _ = JSRuntime.InvokeVoidAsync("playAudio", "assets/df.mp3");
+
+                    // النقاط تُحتسب فقط عند تدمير الأعداء وليس السيارات المسالمة
+                    if (obj.Type == GameObjectType.Enemy)
+                        score += 100;
+
+                    gameObjects.RemoveAt(i);
+                    bullets.RemoveAt(j);
+                    break;
+                }
+            }
+
+            // التحقق من وجود العنصر قبل فحص اصطدامه باللاعب 
+            if (i < gameObjects.Count && gameObjects[i] == obj)
+            {
+                // اصطدام اللاعب بالعناصر
+                if (IsCollision(playerX, playerY, 35, 80, obj.X, obj.Y, obj.Width, obj.Height))
+                {
+                    if (obj.Type == GameObjectType.Enemy && !isInvulnerable)
+                    {
+                        HandlePlayerHit();
+                    }
+                    else if (obj.Type == GameObjectType.PeacefulCar && !isInvulnerable)
+                    {
+                        // انفجار السيارة المسالمة واللاعب
+                        CreateExplosion(obj.X, obj.Y);
+                        obj.IsDestroyed = true;
+                        HandlePlayerHit();
+                    }
+                    else if (obj.Type == GameObjectType.Hole)
+                    {
+                        HitHole(obj);
+                    }
+                }
+            }
+        }
+
+        SpawnObjects();
+    }
+
+    private void HandlePlayerHit()
+    {
+        CreateExplosion(playerX, playerY);
+        _ = JSRuntime.InvokeVoidAsync("playAudio", "assets/bad.mp3");
+        lives--;
+        invulnerableUntil = DateTime.Now.AddSeconds(2);
+        if (lives <= 0) { if (!hasUsedRescue) TriggerRescueMode(); else isGameOver = true; }
+    }
+
+    private void TriggerRescueMode()
+    {
+        isRescueMode = true;
+        playerCodeInput = ""; showWrongAnswerAlert = false; showHint = false;
+        rescueChallenge = allChallenges[rnd.Next(allChallenges.Count)];
+    }
+
+    private async Task CheckRescueCode()
+    {
+        if (rescueChallenge != null && playerCodeInput.Trim().Replace(" ", "") == rescueChallenge.CorrectFix.Replace(" ", ""))
+        {
+            hasUsedRescue = true; lives = 1; isRescueMode = false;
+            invulnerableUntil = DateTime.Now.AddSeconds(3); gameObjects.Clear(); await gameDiv.FocusAsync();
+        }
+        else showWrongAnswerAlert = true;
+    }
+
+    private void CreateExplosion(double x, double y) => explosions.Add(new Explosion { X = x, Y = y, CreationTime = DateTime.Now });
+
+    private void SpawnObjects()
+    {
+      if (rnd.Next(0, 100) < 4) // زادت النسبة قليلاً لوجود نوعين
+     {
+    int randomLane = rnd.Next(0, lanes.Length);
+    
+    // التعديل الثالث: السيارات تأتي من الخلف فقط إذا فوت اللاعب 2 أخطاء
+    bool spawnTop = true;
+    if (missedErrors >= 2)
+    {
+        spawnTop = rnd.Next(0, 2) == 0;
+    }
+
+    double spawnY = spawnTop ? -100 : 750;
+    bool areaIsClear = true;
+
+    foreach (var obj in gameObjects)
+    {
+        if (obj.X == lanes[randomLane] && Math.Abs(obj.Y - spawnY) < 250)
+        {
+            areaIsClear = false;
+            break;
+        }
+    }
+
+    if (areaIsClear)
+    {
+        int currentCarsCount = gameObjects.Count(o => o.Type == GameObjectType.Enemy || o.Type == GameObjectType.PeacefulCar);
+        
+        if (currentCarsCount < 3) // زيادة الحد الأقصى قليلاً لاستيعاب السيارات المسالمة
+        {
+            MoveDirection dir = spawnTop ? MoveDirection.Down : MoveDirection.Up;
+            
+            // التعديل الأول: تحديد نوع السيارة
+            bool isPeaceful = rnd.Next(0, 3) == 0; // فرصة 33% للسيارة المسالمة
+
+            gameObjects.Add(new GameObject
+            {
+                Type = isPeaceful ? GameObjectType.PeacefulCar : GameObjectType.Enemy,
+                X = lanes[randomLane],
+                Y = spawnY,
+                Width = 45,
+                Height = 90,
+                ImageUrl = isPeaceful ? "assets/carf.png" : "assets/carc.png",
+                Direction = dir,
+                Speed = isPeaceful ? 6 : 8 // السيارة المسالمة سرعتها أبطأ 
+            });
+        }
+    }
+
+  }
+
+        if ((DateTime.Now - lastHoleSpawnTime).TotalSeconds >= 18)
+        {
+            gameObjects.Add(new GameObject
+            {
+                Type = GameObjectType.Hole,
+                X = lanes[rnd.Next(0, lanes.Length)],
+                Y = -100,
+                Width = 60,
+                Height = 60,
+                ImageUrl = "assets/err.png",
+                Direction = MoveDirection.Down,
+                Speed = 8
+            });
+            lastHoleSpawnTime = DateTime.Now;
+        }
+    }
+
+    private bool IsCollision(double x1, double y1, double w1, double h1, double x2, double y2, double w2, double h2)
+    {
+        return x1 < x2 + w2 - 5 && x1 + w1 - 5 > x2 && y1 < y2 + h2 - 5 && h1 + y1 - 5 > y2;
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (isPaused || isGameOver || isRescueMode) return;
+        double moveSpeed = 35;
+
+        if (e.Key == "ArrowLeft" && playerX > 20) playerX -= moveSpeed;
+        if (e.Key == "ArrowRight" && playerX < 420) playerX += moveSpeed;
+        if (e.Key == "ArrowUp" && playerY > 50) playerY -= moveSpeed;
+        if (e.Key == "ArrowDown" && playerY < 580) playerY += moveSpeed;
+
+        if (e.Key == " ") Shoot();
+    }
+
+    private void Shoot()
+    {
+        bullets.Add(new Bullet { X = playerX + 19, Y = playerY - 10 });
+        _ = JSRuntime.InvokeVoidAsync("playAudio", "assets/df.mp3");
+    }
+
+    private void HitHole(GameObject hole)
+    {
+        isPaused = true;
+        gameObjects.Remove(hole);
+        playerCodeInput = ""; showWrongAnswerAlert = false; showHint = false;
+        currentChallenge = allChallenges[rnd.Next(allChallenges.Count)];
+    }
+
+    private async Task CheckCode()
+    {
+        // يتجاهل المسافات الفارغة ليكون أسهل للاعب
+        if (currentChallenge != null && playerCodeInput.Trim().Replace(" ", "") == currentChallenge.CorrectFix.Replace(" ", ""))
+        {
+            score += 500;
+            currentChallenge = null; isPaused = false; await gameDiv.FocusAsync();
+        }
+        else showWrongAnswerAlert = true;
+    }
+
+    public void Dispose() => gameTimer?.Dispose();
+
+    // Models
+    public class GameObject {
+        public double X {get; set;  } 
+        public double Y { get; set; } 
+        public double Width { get; set; } 
+        public double Height { get; set; } 
+        public string ImageUrl { get; set; } = ""; public GameObjectType Type { get; set; } 
+        public bool IsAggressive { get; set; } 
+        public MoveDirection Direction { get; set; }
+        public double Speed { get; set; } 
+        public bool IsDestroyed { get; set; } = false;
+    }
+    public enum MoveDirection { Up, Down }
+    public enum GameObjectType { Enemy, Hole , PeacefulCar }
+    public class Bullet { public double X { get; set; } public double Y { get; set; } }
+    public class Explosion { public double X { get; set; } public double Y { get; set; } public DateTime CreationTime { get; set; } }
+
+    //  Hint لل
+    public class CodeChallenge
+    {
+        public string BrokenCode { get; set; }
+        public string CorrectFix { get; set; }
+        public string Hint { get; set; }
+
+        public CodeChallenge(string b, string f, string h)
+        {
+            BrokenCode = b; CorrectFix = f; Hint = h;
+        }
+    }
+}

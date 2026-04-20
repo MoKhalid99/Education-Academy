@@ -1,0 +1,991 @@
+﻿@page "/game/codecombat"
+@using EducationAcademy.Models
+@using EducationAcademy.Services
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject IJSRuntime JS
+@*لعبة المتاهة المكتبسة من كود كومبت*@
+<div class="game-view">
+
+    <div class="level-progress">
+        @foreach (var level in AllLevels)
+        {
+            <div @onclick="() => LoadLevel(level.Id)"
+                 class="progress-dot @(level.Id <= CurrentLevel?.Id ? "completed" : "") @(level.Id > MaxUnlockedLevel ? "locked" : "")"
+                 title="@level.Title">
+                @(level.Id > MaxUnlockedLevel ? "🔒" : level.Id.ToString())
+            </div>
+        }
+    </div>
+
+    <div class="code-panel-overlay">
+
+        <div class="command-board">
+            <div class="board-header">📜 المرجع البرمجي (C# Commands)</div>
+            <div class="board-content">
+                <code>Hero.MoveRight(n);</code> <code>Hero.MoveLeft(n);</code><br />
+                <code>Hero.MoveUp(n);</code> <code>Hero.MoveDown(n);</code><br />
+                <code>Hero.AttackRight(n);</code> <code>Hero.AttackLeft(n);</code>
+                <div class="hint">// استبدل n برقم من 1 إلى 9</div>
+            </div>
+        </div>
+
+        <div class="ide-header">Program.cs</div>
+
+        <div class="ide-body">
+
+            <textarea @bind="CodeInput" spellcheck="false"
+                      placeholder="// اكتب أكواد C# هنا...&#10;Hero.MoveRight(3);&#10;Hero.AttackRight(1);"></textarea>
+
+            <div class="button-group">
+                <button class="execute-btn" @onclick="ExecuteCode" disabled="@IsRunning">
+                    @(IsRunning ? "▶ جاري التنفيذ..." : "▶ تنفيذ الأكواد")
+                </button>
+
+                @if (ShowNextLevelButton)
+                {
+                    <button class="next-level-btn pulse" @onclick="GoToNextLevel">
+                        المرحلة التالية ➡️
+                    </button>
+                }
+            </div>
+
+            <div class="game-logs">
+                @foreach (var log in GameLogs.AsEnumerable().Reverse().Take(1))
+                {
+                    <div class="@(log.Contains("❌") ? "log-error" : "")">> @log</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="dungeon-container">
+
+        @if (!string.IsNullOrEmpty(SyntaxErrorMessage))
+        {
+            <div class="error-modal">
+                <h2>⚠️ خطأ في الكود</h2>
+                <p>@SyntaxErrorMessage</p>
+                <button @onclick="ClearError">حسناً، سأصلحه</button>
+            </div>
+        }
+
+        <div class="battle-grid">
+
+            @if (ActiveFireball != null)
+            {
+                <div class="fireball" style="grid-column: @(ActiveFireball.StartX + 1); grid-row: @(ActiveFireball.StartY + 1); --end-x: @((ActiveFireball.EndX - ActiveFireball.StartX) * 100)px; --end-y: @((ActiveFireball.EndY - ActiveFireball.StartY) * 100)px;"></div>
+            }
+
+            @for (int row = 0; row < 6; row++)
+            {
+                @for (int col = 0; col < 6; col++)
+                {
+                    <div class="cell">
+                        @if (HeroPath.Any(p => p.X == col && p.Y == row))
+                        {
+                            <div class="path-dot"></div>
+                        }
+
+                        @if (PlayerPos.X == col && PlayerPos.Y == row)
+                        {
+                            <div class="hero-container @(IsMoving ? "walking" : "") @(IsHeroDamaged ? "hit-flash" : "") @(IsHeroPoisoned ? "slime-hit" : "") @(IsHeroBurned ? "dragon-hit" : "")">
+                                <div class="character-shadow"></div>
+                                <div class="hero-sprite"></div>
+                                <div class="hero-hp-bar">
+                                    <div class="hp-fill" style="width: @(HeroUnit.Health * 33.3)%"></div>
+                                </div>
+                            </div>
+                        }
+
+                        @if (CurrentLevel?.TargetPos.X == col && CurrentLevel?.TargetPos.Y == row)
+                        {
+                            <div class="entity gem-sprite pulse"></div>
+                        }
+
+                        @if (CurrentLevel?.Obstacles.Any(o => o.X == col && o.Y == row) == true)
+                        {
+                            <div class="entity stone-sprite"></div>
+                        }
+
+                        @{
+                            var enemy = CurrentLevel?.Enemies.FirstOrDefault(e => e.X == col && e.Y == row && e.IsAlive);
+                            if (enemy != null)
+                            {
+                                <div class="enemy-container">
+                                    <div class="enemy-shadow"></div>
+                                    <div class="@($"enemy-sprite type-{enemy.Type.ToString().ToLower()}")"></div>
+                                    <div class="enemy-hp-bar">
+                                        <div class="hp-fill" style="width:@(GetHpPercent(enemy))%"></div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                }
+            }
+        </div>
+        <div class="dungeon-shadow"></div>
+    </div>
+</div>
+
+<style>
+    /* الإعدادات الأساسية للصفحة (RTL للعربي) */
+    .game-view {
+        display: flex;
+        flex-direction: column;
+        background: #000;
+        min-height: 100vh;
+        position: relative;
+        font-family: 'Segoe UI', sans-serif;
+        overflow: hidden;
+        direction: rtl;
+    }
+
+    /* ابحث عن هذا الجزء وحدثه */
+    .game-logs {
+        margin-top: 10px;
+        font-family: 'Consolas', monospace;
+        font-size: 0.85rem;
+        color: #ffffff; /* جعل الخط باللون الأبيض */
+        height: 40px;
+        overflow: hidden;
+        direction: rtl;
+        text-align: right;
+    }
+
+        .game-logs div {
+            color: #ffffff !important; /* التأكيد على اللون الأبيض لجميع الرسائل */
+        }
+
+    .log-error {
+        color: #ff5555 !important; /* إبقاء الخطأ باللون الأحمر للتنبيه */
+        font-weight: bold;
+    }
+
+    /* حاوية اللعبة (LTR لمنع انعكاس حركة اللاعب) */
+    .dungeon-container {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        direction: ltr; /* هام جداً: يمنع الانعكاس! */
+    }
+
+    /* الشبكة (Grid) وتصميم الخلفية */
+    .battle-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 100px);
+        grid-template-rows: repeat(6, 100px);
+        background-image: url('images/Bachground.png');
+        background-size: cover;
+        padding: 20px;
+        border: 15px solid #2e1e0a;
+        border-radius: 10px;
+        box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        position: relative;
+    }
+
+    .cell {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100px;
+        height: 100px;
+    }
+
+    /* رسالة الخطأ (Error Modal) */
+    .error-modal {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(200, 0, 0, 0.95);
+        color: white;
+        padding: 30px;
+        border: 3px solid #ffca28;
+        border-radius: 15px;
+        z-index: 9999;
+        text-align: center;
+        box-shadow: 0 0 50px red;
+        min-width: 300px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        direction: rtl;
+    }
+
+        .error-modal h2 {
+            margin-top: 0;
+            text-shadow: 2px 2px #000;
+        }
+
+        .error-modal button {
+            background: #222;
+            color: #ffca28;
+            border: 1px solid #ffca28;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+            .error-modal button:hover {
+                background: #333;
+            }
+
+    /* لوحات التحكم البرمجية */
+    .command-board {
+        background: #252526;
+        padding: 10px;
+        border-bottom: 2px solid #3e3e42;
+        font-family: 'Consolas', monospace;
+        direction: ltr;
+        text-align: left;
+    }
+
+    .board-header {
+        color: #ffca28;
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+        font-weight: bold;
+        direction: rtl;
+        text-align: right;
+    }
+
+    .board-content code {
+        background: #1e1e1e;
+        color: #9cdcfe;
+        padding: 2px 5px;
+        margin: 2px;
+        display: inline-block;
+        border-radius: 3px;
+        font-size: 0.8rem;
+    }
+
+    .hint {
+        color: #6a9955;
+        font-size: 0.7rem;
+        margin-top: 5px;
+    }
+
+    .code-panel-overlay {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 400px;
+        background: rgba(30, 30, 30, 0.98);
+        border-radius: 10px;
+        border: 2px solid #ffca28;
+        z-index: 200;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        overflow: hidden;
+    }
+
+    .ide-header {
+        background: #333;
+        padding: 5px 15px;
+        color: #aaa;
+        font-size: 0.75rem;
+        direction: ltr;
+    }
+
+    .ide-body {
+        padding: 15px;
+    }
+
+    textarea {
+        width: 100%;
+        height: 250px;
+        background: #1e1e1e;
+        color: #9cdcfe;
+        border: 1px solid #444;
+        border-radius: 4px;
+        padding: 10px;
+        font-family: 'Consolas', monospace;
+        font-size: 1rem;
+        resize: none;
+        outline: none;
+        line-height: 1.5;
+        direction: ltr;
+    }
+
+    .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .execute-btn {
+        background: #ffca28;
+        color: #000;
+        border: none;
+        padding: 12px;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1rem;
+    }
+
+    .next-level-btn {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1rem;
+    }
+
+    .pulse {
+        animation: pulse-animation 1.5s infinite;
+    }
+
+    @@keyframes pulse-animation {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.03);
+            background: #66bb6a;
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* الجرافيكس والشخصيات */
+    .hero-container {
+        position: relative;
+        width: 90px;
+        height: 90px;
+        z-index: 100;
+        transform: scale(1.4);
+        filter: drop-shadow(0 0 10px rgba(0,0,0,0.6));
+        transition: filter 0.3s;
+    }
+
+    .hero-sprite {
+        width: 100%;
+        height: 100%;
+        background-image: url('images/Hero.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        animation: idle-breath 1.5s ease-in-out infinite;
+    }
+
+    .gem-sprite {
+        width: 80px;
+        height: 80px;
+        background-image: url('images/chest.png');
+        background-size: contain;
+        filter: drop-shadow(0 0 15px cyan);
+    }
+
+    .enemy-container {
+        position: relative;
+        width: 90px;
+        height: 90px;
+        z-index: 90;
+        transform: scale(1.3);
+    }
+
+    .enemy-sprite {
+        width: 100%;
+        height: 100%;
+        background-size: contain;
+        background-repeat: no-repeat;
+        animation: idle-breath 2s ease-in-out infinite;
+    }
+
+        .enemy-sprite.type-slime {
+            background-image: url('images/slime.png');
+        }
+
+        .enemy-sprite.type-dragon {
+            background-image: url('images/Dragon.png');
+        }
+
+    .stone-sprite {
+        width: 90px;
+        height: 90px;
+        background-image: url('images/Stone.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        filter: drop-shadow(0 5px 5px gray);
+        display: block;
+    }
+
+    .path-dot {
+        width: 12px;
+        height: 12px;
+        background: red;
+        border-radius: 50%;
+        box-shadow: 0 0 10px red;
+        z-index: 5;
+        opacity: 0.7;
+    }
+
+    .dungeon-shadow {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.9) 100%);
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    /* شريط التقدم وأشرطة الصحة */
+    .level-progress {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        display: flex;
+        gap: 8px;
+        z-index: 200;
+        direction: ltr;
+    }
+
+    .progress-dot {
+        width: 35px;
+        height: 35px;
+        background: #333;
+        color: #ccc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        border: 2px solid #555;
+        cursor: pointer;
+    }
+
+        .progress-dot.completed {
+            background: #ffca28;
+            color: #000;
+            border-color: #ff9f00;
+        }
+
+        .progress-dot.locked {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+    .hero-hp-bar, .enemy-hp-bar {
+        width: 80%;
+        height: 5px;
+        background: #400;
+        border: 1px solid #000;
+        position: absolute;
+        top: -10px;
+        z-index: 101;
+    }
+
+    .hp-fill {
+        height: 100%;
+        background: #0f0;
+        transition: width 0.3s;
+    }
+
+    /* الأنيميشنات والتأثيرات الجديدة */
+    @@keyframes idle-breath {
+        0%, 100% {
+            transform: scaleY(1);
+        }
+
+        50% {
+            transform: scaleY(1.05) translateY(-3px);
+        }
+    }
+
+    .walking {
+        animation: walk-sway 0.4s infinite;
+    }
+
+    @@keyframes walk-sway {
+        0% {
+            transform: rotate(-3deg);
+        }
+
+        50% {
+            transform: rotate(3deg);
+        }
+
+        100% {
+            transform: rotate(-3deg);
+        }
+    }
+
+    .hit-flash {
+        filter: brightness(3) sepia(1) hue-rotate(-50deg);
+    }
+
+    /* تأثير سم السلايم */
+    .slime-hit {
+        filter: sepia(1) hue-rotate(90deg) saturate(3) brightness(1.2) !important;
+    }
+
+    /* تأثير نار التنين مع اهتزاز */
+    .dragon-hit {
+        filter: brightness(2) sepia(1) hue-rotate(-10deg) saturate(5) !important;
+        animation: shake-hard 0.1s infinite;
+    }
+
+    @@keyframes shake-hard {
+        0% {
+            transform: scale(1.4) translate(2px, 1px) rotate(0deg);
+        }
+
+        50% {
+            transform: scale(1.4) translate(-2px, -2px) rotate(-2deg);
+        }
+
+        100% {
+            transform: scale(1.4) translate(2px, -1px) rotate(2deg);
+        }
+    }
+
+    /* كرة النار الخاصة بالبطل */
+    .fireball {
+        width: 40px;
+        height: 40px;
+        background: radial-gradient(circle, #ffca28, #ff3d00);
+        border-radius: 50%;
+        box-shadow: 0 0 20px #ff3d00, 0 0 40px #ffca28;
+        justify-self: center;
+        align-self: center;
+        z-index: 300;
+        animation: shoot-fireball 0.3s linear forwards;
+    }
+
+    @@keyframes shoot-fireball {
+        0% {
+            transform: translate(0, 0) scale(0.5);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translate(var(--end-x), var(--end-y)) scale(1.5);
+            opacity: 0;
+        }
+    }
+</style>
+
+@code {
+    // تعريف المتغيرات الأساسية للعبة
+    private List<GameLevel> AllLevels = LevelRepository.GetLevels();
+    private GameLevel? CurrentLevel;
+    private EducationAcademy.Models.Position PlayerPos = new(0, 0);
+    private List<EducationAcademy.Models.Position> HeroPath = new();
+    private Hero HeroUnit = new();
+
+    // متغيرات الواجهة والحالة
+    private int MaxUnlockedLevel = 1;
+    private string CodeInput = "Hero.MoveRight(3);\nHero.MoveUp(2);\nHero.AttackRight(1);";
+    private List<string> GameLogs = new();
+    private bool IsRunning, IsMoving, IsAttacking, IsHeroDamaged, ShowNextLevelButton;
+    private string SyntaxErrorMessage = "";
+
+    // متغيرات الأنيميشن الجديدة
+    private Projectile ActiveFireball;
+    private bool IsHeroPoisoned;
+    private bool IsHeroBurned;
+
+    // كلاس مساعد لنار
+    private class Projectile
+    {
+        public int StartX { get; set; }
+        public int StartY { get; set; }
+        public int EndX { get; set; }
+        public int EndY { get; set; }
+    }
+
+    // تُستدعى عند بدء تشغيل الصفحة لجلب مستوى التقدم المحفوظ
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var saved = await LocalStorage.GetItemAsync<int>("MaxUnlockedLevel");
+            MaxUnlockedLevel = saved == 0 ? 1 : saved;
+            await LoadLevel(1);
+            StateHasChanged();
+        }
+    }
+
+    // دالة تحميل المرحلة إغلاق المراحل
+    private async Task LoadLevel(int id)
+    {
+        // التحقق الفعلي من أن المرحلة مفتوحة
+        if (id > MaxUnlockedLevel)
+        {
+            GameLogs.Add($"> 🔒 عذراً، يجب تخطي المرحلة {id - 1} أولاً لفتح هذه المرحلة.");
+            StateHasChanged();
+            return;
+        }
+
+        ShowNextLevelButton = false;
+        SyntaxErrorMessage = "";
+        HeroPath.Clear();
+
+        var levelData = AllLevels.FirstOrDefault(l => l.Id == id);
+        if (levelData != null)
+        {
+            CurrentLevel = levelData.Copy();
+            PlayerPos = new EducationAcademy.Models.Position(CurrentLevel.StartPos.X, CurrentLevel.StartPos.Y);
+            HeroUnit.Reset();
+            GameLogs.Clear();
+            GameLogs.Add($"> تم تحميل: {CurrentLevel.Title}");
+            await ManageMusic(id);
+        }
+        StateHasChanged();
+    }
+
+    // دالة إخفاء الخطأ برمجياً
+    private void ClearError()
+    {
+        SyntaxErrorMessage = "";
+        IsRunning = false;
+    }
+
+    // المحرك الرئيسي لتنفيذ الأكواد
+    private async Task ExecuteCode()
+    {
+        if (IsRunning) return;
+
+        IsRunning = true;
+        ShowNextLevelButton = false;
+        SyntaxErrorMessage = "";
+        HeroPath.Clear();
+
+        if (CurrentLevel != null)
+        {
+            var levelData = AllLevels.FirstOrDefault(l => l.Id == CurrentLevel.Id);
+            CurrentLevel = levelData!.Copy();
+            PlayerPos = new EducationAcademy.Models.Position(CurrentLevel.StartPos.X, CurrentLevel.StartPos.Y);
+            HeroUnit.Reset();
+            StateHasChanged();
+            await Task.Delay(300);
+        }
+
+        var lines = CodeInput.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var line in lines)
+        {
+            if (HeroUnit.Health <= 0) break;
+
+            var rawCmd = line.Trim();
+
+            if (string.IsNullOrWhiteSpace(rawCmd) || rawCmd.StartsWith("//")) continue;
+
+            GameLogs.Add($"> جاري تنفيذ: {rawCmd}");
+            StateHasChanged();
+
+            bool success = await ParseAndExecuteCSharp(rawCmd);
+
+            if (!success)
+            {
+                break;
+            }
+
+            // حركة العدو التلقائية بعد كل دور
+            if (CurrentLevel?.Id >= 4) await ProcessEnemyAI();
+
+            // فحص حالة الفوز
+            if (PlayerPos.Equals(CurrentLevel?.TargetPos))
+            {
+                GameLogs.Add("> 🎉 أحسنت! اكتملت المرحلة.");
+                ShowNextLevelButton = true;
+                if (CurrentLevel.Id == MaxUnlockedLevel && MaxUnlockedLevel < AllLevels.Count)
+                {
+                    MaxUnlockedLevel++;
+                    await LocalStorage.SetItemAsync("MaxUnlockedLevel", MaxUnlockedLevel);
+                }
+                break;
+            }
+            StateHasChanged();
+        }
+        IsRunning = false;
+    }
+
+    // دالة الانتقال للمرحلة التالية
+    private async Task GoToNextLevel()
+    {
+        if (CurrentLevel != null && CurrentLevel.Id < AllLevels.Count)
+        {
+            await LoadLevel(CurrentLevel.Id + 1);
+        }
+    }
+
+    // محلل أكواد C# 
+    private async Task<bool> ParseAndExecuteCSharp(string rawCmd)
+    {
+        var cleanCmd = rawCmd.ToLower().Replace(" ", "");
+
+        try
+        {
+            if (cleanCmd.StartsWith("hero.") && cleanCmd.EndsWith(");"))
+            {
+                var startIndex = cleanCmd.IndexOf('(') + 1;
+                var endIndex = cleanCmd.IndexOf(')');
+
+                var paramStr = cleanCmd.Substring(startIndex, endIndex - startIndex);
+                var methodName = cleanCmd.Substring(5, startIndex - 6);
+
+                int count = 1;
+
+                if (!string.IsNullOrWhiteSpace(paramStr))
+                {
+                    if (int.TryParse(paramStr, out int result)) count = Math.Clamp(result, 1, 9);
+                    else throw new Exception("الرقم المدخل بين القوسين غير صحيح.");
+                }
+
+                if (methodName.StartsWith("move"))
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        await HandleMove(methodName);
+                        await Task.Delay(450);
+                        if (PlayerPos.Equals(CurrentLevel?.TargetPos)) break;
+                    }
+                    return true;
+                }
+                else if (methodName.StartsWith("attack"))
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        await HandleAttack(methodName);
+                        await Task.Delay(350);
+                    }
+                    return true;
+                }
+                else
+                {
+                    throw new Exception("الدالة غير موجودة في المرجع البرمجي.");
+                }
+            }
+            else
+            {
+                throw new Exception("يجب كتابة الكود بصيغة Hero.Command(); (لا تنسَ النقطة والأقواس والفاصلة المنقوطة)");
+            }
+        }
+        catch (Exception ex)
+        {
+            SyntaxErrorMessage = $"خطأ في السطر: {rawCmd}\n{ex.Message}";
+            GameLogs.Add($"> ❌ خطأ!");
+            return false;
+        }
+    }
+
+    //دالة الحركة
+    private async Task HandleMove(string cmd)
+    {
+        int nx = PlayerPos.X, ny = PlayerPos.Y;
+
+        if (cmd.Contains("right")) nx++;
+        else if (cmd.Contains("left")) nx--;
+        else if (cmd.Contains("up")) ny--;
+        else if (cmd.Contains("down")) ny++;
+
+        bool hasObstacle = CurrentLevel!.Obstacles.Any(o => o.X == nx && o.Y == ny);
+        bool hasAliveEnemy = CurrentLevel!.Enemies.Any(e => e.X == nx && e.Y == ny && e.IsAlive);
+
+        if (nx >= 0 && nx < 6 && ny >= 0 && ny < 6 && !hasObstacle && !hasAliveEnemy)
+        {
+            IsMoving = true;
+            StateHasChanged();
+            HeroPath.Add(new EducationAcademy.Models.Position(PlayerPos.X, PlayerPos.Y));
+            PlayerPos.X = nx; PlayerPos.Y = ny;
+            await Task.Delay(100); IsMoving = false;
+        }
+        else
+        {
+            if (hasAliveEnemy)
+                GameLogs.Add("> 💥 الطريق مسدود، هناك وحش! يجب مهاجمته.");
+            else
+                GameLogs.Add("> 💥 تصادم في الجدار!");
+        }
+    }
+
+    // دالة الهجوم المحدثة مع أنيميشن كرة النار
+    private async Task HandleAttack(string cmd)
+    {
+        IsAttacking = true;
+        StateHasChanged();
+
+        int tx = PlayerPos.X, ty = PlayerPos.Y;
+        if (cmd.Contains("right")) tx++;
+        else if (cmd.Contains("left")) tx--;
+        else if (cmd.Contains("up")) ty--;
+        else if (cmd.Contains("down")) ty++;
+
+        // تشغيل أنيميشن كرة النار
+        ActiveFireball = new Projectile { StartX = PlayerPos.X, StartY = PlayerPos.Y, EndX = tx, EndY = ty };
+        StateHasChanged();
+        await Task.Delay(300); // وقت انطلاق كرة النار
+        ActiveFireball = null;
+
+        var target = CurrentLevel?.Enemies.FirstOrDefault(e => e.X == tx && e.Y == ty && e.IsAlive);
+
+        if (target != null)
+        {
+            target.TakeDamage(1);
+            GameLogs.Add("> ⚔️ ضربة نارية ناجحة!");
+        }
+        await Task.Delay(100);
+        IsAttacking = false;
+    }
+
+    // دالة مساعدة للتحقق من إمكانية حركة العدو
+    private bool IsCellFreeForEnemy(int x, int y, Enemy currentEnemy)
+    {
+        if (x < 0 || x >= 6 || y < 0 || y >= 6) return false;
+        if (CurrentLevel!.Obstacles.Any(o => o.X == x && o.Y == y)) return false;
+        if (CurrentLevel.Enemies.Any(e => e != currentEnemy && e.IsAlive && e.X == x && e.Y == y)) return false; // منع التداخل بين الأعداء
+        if (PlayerPos.X == x && PlayerPos.Y == y) return false; // لا يقفز فوق اللاعب
+        return true;
+    }
+
+    private int GetHpPercent(Enemy e)
+    {
+        if (e == null || e.MaxHealth == 0) return 0;
+        return (int)((double)e.Health / e.MaxHealth * 100);
+    }
+
+    private async Task ManageMusic(int id)
+    {
+        try
+        {
+            //  
+            string track = id == 15 ? "audio/The boss ost.mp3" : "audio/ost.mpeg";
+            await JS.InvokeVoidAsync("gameAudio.play", track, true);
+        }
+        catch
+        {
+            // نتركها فارغة لتجنب توقف اللعبة إذا لم تكن ملفات الصوت موجودة
+        }
+    }
+
+    // ذكاء الأعداء المحسن
+    // يتحرك خطوتين في كل دور ليكون أسرع وأكثر خطورة
+    private async Task ProcessEnemyAI()
+    {
+        foreach (var enemy in CurrentLevel!.Enemies.Where(e => e.IsAlive))
+        {
+            // عدد الخطوات التي سيتحركها العدو في الدور الواحد
+            int enemySpeed = 2;
+
+            for (int i = 0; i < enemySpeed; i++)
+            {
+                // فحص المسافة بين العدو واللاعب
+                int dist = Math.Abs(enemy.X - PlayerPos.X) + Math.Abs(enemy.Y - PlayerPos.Y);
+
+                // إذا أصبح اللاعب بجوار العدو، يهاجمه ويتوقف عن الحركة في هذا الدور
+                if (dist == 1)
+                {
+                    await HandleEnemyAttack(enemy);
+                    break;
+                }
+
+                // خطوة واحدة في كل تكرار
+                int nextX = enemy.X;
+                int nextY = enemy.Y;
+
+                if (enemy.X < PlayerPos.X) nextX++;
+                else if (enemy.X > PlayerPos.X) nextX--;
+
+                bool isBlockedX = CurrentLevel.Obstacles.Any(o => o.X == nextX && o.Y == enemy.Y) ||
+                                  CurrentLevel.Enemies.Any(e => e.IsAlive && e != enemy && e.X == nextX && e.Y == enemy.Y);
+
+                if (!isBlockedX && nextX != enemy.X)
+                {
+                    enemy.X = nextX;
+                }
+                else
+                {
+                    if (enemy.Y < PlayerPos.Y) nextY++;
+                    else if (enemy.Y > PlayerPos.Y) nextY--;
+
+                    bool isBlockedY = CurrentLevel.Obstacles.Any(o => o.X == enemy.X && o.Y == nextY) ||
+                                      CurrentLevel.Enemies.Any(e => e.IsAlive && e != enemy && e.X == enemy.X && e.Y == nextY);
+
+                    if (!isBlockedY && nextY != enemy.Y)
+                    {
+                        enemy.Y = nextY;
+                    }
+                }
+
+                StateHasChanged();
+                await Task.Delay(150); // تأخير بسيط جداً ليرى اللاعب خطوات العدو 
+            }
+        }
+    }
+
+    // دالة مساعدة لمعالجة هجوم العدو
+    private async Task HandleEnemyAttack(Enemy enemy)
+    {
+        HeroUnit.Health--;
+        IsHeroDamaged = true;
+        GameLogs.Add($"> 💥 {enemy.Type} أصابك! صحتك: {HeroUnit.Health}");
+        StateHasChanged();
+        await Task.Delay(200);
+        IsHeroDamaged = false;
+
+        if (HeroUnit.Health <= 0)
+        {
+            GameLogs.Add("> 💀 هزمت! إعادة المرحلة...");
+            await Task.Delay(800);
+            await LoadLevel(CurrentLevel.Id);
+        }
+            // يختار المسار الأقصر غير المسدود
+            else
+            {
+                int nextX = enemy.X;
+                int nextY = enemy.Y;
+
+                // محاولة التحرك على محور X أولاً
+                if (enemy.X < PlayerPos.X) nextX++;
+                else if (enemy.X > PlayerPos.X) nextX--;
+
+                // التأكد من أن المربع الجديد ليس عائقاً وليس عدواً آخر
+                bool isBlockedX = CurrentLevel.Obstacles.Any(o => o.X == nextX && o.Y == enemy.Y) ||
+                                  CurrentLevel.Enemies.Any(e => e.IsAlive && e != enemy && e.X == nextX && e.Y == enemy.Y);
+
+                if (!isBlockedX && nextX != enemy.X)
+                {
+                    enemy.X = nextX;
+                }
+                else // إذا كان محور X مسدوداً، جرب محور Y
+                {
+                    if (enemy.Y < PlayerPos.Y) nextY++;
+                    else if (enemy.Y > PlayerPos.Y) nextY--;
+
+                    bool isBlockedY = CurrentLevel.Obstacles.Any(o => o.X == enemy.X && o.Y == nextY) ||
+                                      CurrentLevel.Enemies.Any(e => e.IsAlive && e != enemy && e.X == enemy.X && e.Y == nextY);
+
+                    if (!isBlockedY && nextY != enemy.Y)
+                    {
+                        enemy.Y = nextY;
+                    }
+                }
+                StateHasChanged();
+            }
+        }
+    }
+       // دالة الصوت
+    private async Task ManageMusic(int id) { try { string track = id == 15 ? "audio/The boss ost.mp3" : "audio/ost.mpeg"; await JS.InvokeVoidAsync("gameAudio.play", track, true); } catch { } }
+
+    // دالة حساب نسبة صحة العدو لشريط الصحة
+    private int GetHpPercent(Enemy e) => (int)((double)e.Health / e.MaxHealth * 100);
+    public void Dispose()
+    {
+        // استدعاء دالة stop التي قمت بتعريفها في App.razor
+        JS.InvokeVoidAsync("gameAudio.stop");
+    }
+ }

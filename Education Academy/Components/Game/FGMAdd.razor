@@ -1,0 +1,730 @@
+﻿@page "/game/fgmadd"
+@using System.Text.Json
+@using EducationAcademy.Models
+@using FG1MAdd
+@implements IDisposable
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+@*لعبة الفايت و لسه عايزة شغل*@
+<PageTitle>FG1MAdd - Roguelike Coder </PageTitle>
+
+<style>
+    body {
+        background-color: #121212;
+        color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow: hidden;
+    }
+
+    .game-arena {
+        position: relative;
+        width: 100%;
+        max-width: 900px;
+        height: 500px;
+        margin: 20px auto;
+        border: 4px solid white;
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .ground {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 50px;
+        background: #222;
+        border-top: 2px solid #555;
+    }
+
+    .no-select {
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* الأساسيات */
+    .fighter {
+        position: absolute;
+        bottom: 50px;
+        width: 70px;
+        height: 140px;
+        transition: left 0.1s linear;
+        z-index: 10;
+    }
+
+    .enemy-flip {
+        transform: scaleX(-1);
+    }
+
+    .head-logo {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        position: absolute;
+        top: -10px;
+        left: 10px;
+        z-index: 20;
+        border: 3px solid white;
+        background: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+        overflow: hidden;
+        transform: scaleX(1);
+    }
+
+    .fighter.enemy-flip .head-logo {
+        transform: scaleX(-1);
+    }
+
+    .torso {
+        width: 10px;
+        height: 60px;
+        background: white;
+        border-radius: 5px;
+        position: absolute;
+        top: 40px;
+        left: 30px;
+        transition: transform 0.1s;
+    }
+
+    .limb {
+        position: absolute;
+        background: white;
+        border-radius: 5px;
+        width: 8px;
+        transform-origin: top center;
+        transition: all 0.1s;
+    }
+
+    /* الأطراف الافتراضية */
+    .arm-left {
+        height: 45px;
+        top: 45px;
+        left: 31px;
+        transform: rotate(20deg);
+    }
+
+    .arm-right {
+        height: 45px;
+        top: 45px;
+        left: 31px;
+        transform: rotate(-20deg);
+    }
+
+    .leg-left {
+        height: 50px;
+        top: 90px;
+        left: 31px;
+        transform: rotate(15deg);
+    }
+
+    .leg-right {
+        height: 50px;
+        top: 90px;
+        left: 31px;
+        transform: rotate(-15deg);
+    }
+
+    /* 1. أنيميشن المشي */
+    @@keyframes walk-leg-l {
+        0% {
+            transform: rotate(25deg);
+        }
+
+        50% {
+            transform: rotate(-25deg);
+        }
+
+        100% {
+            transform: rotate(25deg);
+        }
+    }
+    @@keyframes walk-leg-r {
+        0% {
+            transform: rotate(-25deg);
+        }
+
+        50% {
+            transform: rotate(25deg);
+        }
+
+        100% {
+            transform: rotate(-25deg);
+        }
+    }
+
+    .walking .leg-left {
+        animation: walk-leg-l 0.4s infinite;
+    }
+
+    .walking .leg-right {
+        animation: walk-leg-r 0.4s infinite;
+    }
+
+    .walking .arm-left {
+        animation: walk-leg-l 0.4s infinite reverse;
+    }
+
+    .walking .arm-right {
+        animation: walk-leg-r 0.4s infinite reverse;
+    }
+
+    /* أنيميشن الخمول (Idle) */
+    .idle .arm-left {
+        animation: sway 1s infinite alternate;
+    }
+
+    .idle .arm-right {
+        animation: sway 1s infinite alternate-reverse;
+    }
+    @@keyframes sway {
+        from {
+            transform: rotate(15deg);
+        }
+
+        to {
+            transform: rotate(25deg);
+        }
+    }
+
+    /* 2. أنيميشن التفادي والتدحرج (Sonic Roll) */
+    .dodging {
+        animation: roll-behind 0.4s ease-in-out forwards;
+    }
+    @@keyframes roll-behind {
+        0% {
+            transform: translateY(0) rotate(0deg) scale(1);
+        }
+
+        50% {
+            transform: translateY(-40px) rotate(360deg) scale(0.6);
+            filter: blur(2px);
+        }
+
+        100% {
+            transform: translateY(0) rotate(720deg) scale(1);
+        }
+    }
+
+    .dodging .limb {
+        opacity: 0;
+    }
+    /* إخفاء الأطراف لتبدو ككرة */
+
+    /* تأثيرات درع و سمّ */
+    .shielded {
+        filter: drop-shadow(0 0 15px cyan);
+        background: rgba(0,255,255,0.2) !important;
+        border-radius: 10px;
+    }
+
+    .poisoned {
+        filter: drop-shadow(0 0 10px lime);
+    }
+
+    /* ضربات اللاعب */
+    .attacking-rhand .arm-right {
+        transform: rotate(-110deg) !important;
+        background: yellow;
+        height: 60px;
+    }
+
+    .attacking-lhand .arm-left {
+        transform: rotate(-110deg) !important;
+        background: orange;
+        height: 60px;
+        z-index: 25;
+    }
+
+    .attacking-kick .leg-right {
+        transform: rotate(-90deg) !important;
+        background: orangered;
+        height: 65px;
+        top: 85px;
+    }
+
+    /* ضربات الأعداء */
+    .enemy.attacking-cpp .arm-right {
+        transform: rotate(-140deg) !important;
+        background: red;
+        height: 70px;
+    }
+
+    .enemy.attacking-csharp .arm-right {
+        animation: csharpSlash 0.3s forwards;
+        background: #a64dff;
+        height: 80px;
+    }
+    @@keyframes csharpSlash {
+        0% {
+            transform: rotate(-20deg);
+        }
+
+        50% {
+            transform: rotate(-160deg);
+        }
+
+        100% {
+            transform: rotate(-20deg);
+        }
+    }
+
+    .enemy.attacking-python .arm-right {
+        animation: pyWiggle 0.4s infinite;
+        background: #D89E00;
+        height: 70px;
+    }
+    @@keyframes pyWiggle {
+        0%, 100% {
+            transform: rotate(-90deg) scaleY(1);
+        }
+
+        50% {
+            transform: rotate(-110deg) scaleY(1.2);
+        }
+    }
+
+    .hit-effect {
+        animation: shake 0.3s both;
+        filter: brightness(2) drop-shadow(0 0 10px red);
+    }
+    @@keyframes shake {
+        10%, 90% {
+            transform: translate3d(-2px, 0, 0);
+        }
+
+        20%, 80% {
+            transform: translate3d(4px, 0, 0);
+        }
+    }
+
+    /* أشرطة و UI */
+    .bars-container {
+        width: 250px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .hud-bar {
+        width: 100%;
+        height: 20px;
+        background: #333;
+        border: 2px solid #fff;
+        position: relative;
+    }
+
+    .hp-fill, .ep-fill {
+        height: 100%;
+        transition: width 0.3s;
+    }
+
+    .hp-fill {
+        background: #28a745;
+    }
+
+    .ep-fill {
+        background: #0dcaf0;
+    }
+
+    .bar-text {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        top: -2px;
+        line-height: 20px;
+        font-weight: bold;
+        text-shadow: 1px 1px 2px black;
+        font-size: 13px;
+    }
+
+    .menu-card, .upgrade-card {
+        cursor: pointer;
+        transition: 0.3s;
+        padding: 20px;
+        border: 2px solid #444;
+        margin: 10px;
+        border-radius: 10px;
+        background: #222;
+        width: 220px;
+        display: inline-block;
+    }
+
+        .menu-card:hover, .upgrade-card:hover {
+            background: #333;
+            border-color: gold;
+            transform: scale(1.05);
+        }
+
+    .input-window {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        z-index: 200;
+        background: rgba(0,0,0,0.95);
+        padding: 30px;
+        border-radius: 10px;
+    }
+</style>
+
+<div class="container text-center">
+
+    @if (gameState == "MENU")
+    {
+        <h1 class="my-5 display-3">ROGUELIKE CODER</h1>
+        <p class="text-muted fs-4">If you die, you lose everything. Choose your target:</p>
+        <div class="d-flex justify-content-center flex-wrap mt-4">
+            @foreach (var lang in allLevels)
+            {
+                <div class="menu-card" @onclick="() => StartRun(lang)">
+                    <h2 style="color: @lang.Color">@lang.Language</h2>
+                    <p>Start Run</p>
+                </div>
+            }
+        </div>
+    }
+    else if (gameState == "PLAYING" || gameState == "COMBO" || gameState == "HEAL")
+    {
+        <div class="game-arena" tabindex="0" @onkeydown="HandleKeyDown" @onkeyup="HandleKeyUp" @ref="gameContainerRef" style="background: linear-gradient(to bottom, @(selectedLang?.Color ?? "#333"), #111);">
+
+            @if (comboBeam.IsActive)
+            {
+                <div class="projectile-beam" style="left: @(comboBeam.X)%; top: @(comboBeam.Y)%"></div>
+            }
+
+            <div class="d-flex justify-content-between p-3 text-white position-absolute w-100" style="z-index: 100;">
+                <div class="bars-container text-start">
+                    <div class="hud-bar"><div class="hp-fill" style="width: @(Math.Max(0, player.HP) / player.MaxHP * 100)%"></div><div class="bar-text">HP: @player.HP / @player.MaxHP</div></div>
+                    <div class="hud-bar"><div class="ep-fill" style="width: @(Math.Max(0, player.EP) / player.MaxEP * 100)%"></div><div class="bar-text">EP: @player.EP / @player.MaxEP</div></div>
+                    @if (player.PoisonStacks > 0)
+                    {
+                        <span class="badge bg-success mt-1">Poison: -@player.PoisonStacks HP/s</span>
+                    }
+                </div>
+
+                <div class="text-center">
+                    <h3 class="mb-0">Stage @currentStageData.Level</h3>
+                    <small>Atk: @player.BaseDamage</small>
+                </div>
+
+                <div class="bars-container text-end">
+                    <div class="hud-bar"><div class="hp-fill bg-danger" style="width: @(Math.Max(0, enemy.HP) / enemy.MaxHP * 100)%"></div><div class="bar-text">@selectedLang?.Language: @enemy.HP / @enemy.MaxHP</div></div>
+                    @if (enemy.IsShielded)
+                    {
+                        <span class="badge bg-info mt-1">SHIELDED (Immune)</span>
+                    }
+                </div>
+            </div>
+
+            <div class="fighter @player.StateClass @player.FlipClass @(player.PoisonStacks > 0 ? "poisoned" : "")" style="left: @(player.X)%">
+                <div class="head-logo text-primary bg-white">YOU</div>
+                <div class="torso"></div><div class="limb arm-left"></div><div class="limb arm-right"></div><div class="limb leg-left"></div><div class="limb leg-right"></div>
+            </div>
+
+            <div class="fighter enemy @enemy.StateClass @enemy.FlipClass @(enemy.IsHit ? "hit-effect" : "") @(enemy.IsShielded ? "shielded" : "")" style="left: @(enemy.X)%">
+                <div class="head-logo" style="background:@selectedLang?.Color; color:white;">@selectedLang?.Language.Substring(0, 1)</div>
+                <div class="torso" style="background: #ffcccc"></div><div class="limb arm-left" style="background: #ffcccc"></div><div class="limb arm-right" style="background: #ffcccc"></div><div class="limb leg-left" style="background: #ffcccc"></div><div class="limb leg-right" style="background: #ffcccc"></div>
+            </div>
+            <div class="ground"></div>
+        </div>
+    }
+    else if (gameState == "STAGE_CLEAR")
+    {
+        <div class="alert alert-success mt-5 p-5">
+            <h1>STAGE CLEARED!</h1>
+            <button class="btn btn-primary mt-3 btn-lg" @onclick="GenerateUpgrades">Continue to Upgrades</button>
+        </div>
+    }
+    else if (gameState == "UPGRADE_SELECT")
+    {
+        <div class="mt-5">
+            <h1 class="text-warning display-4 mb-4">CHOOSE YOUR UPGRADE</h1>
+            <div class="d-flex justify-content-center flex-wrap">
+                @foreach (var upgrade in currentUpgrades)
+                {
+                    <div class="upgrade-card" @onclick="() => SelectUpgrade(upgrade)">
+                        <h1 class="mb-3">@upgrade.Icon</h1>
+                        <h4 class="text-info">@upgrade.Title</h4>
+                        <p class="text-muted">@upgrade.Description</p>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else if (gameState == "GAMEOVER" || gameState == "VICTORY")
+    {
+        <div class="alert mt-5 p-5 @(gameState == "VICTORY" ? "alert-warning border-warning" : "alert-danger border-danger")">
+            <h1 class="display-1">@(gameState == "VICTORY" ? "RUN COMPLETE!" : "PERMADEATH!")</h1>
+            <button class="btn btn-dark btn-lg mt-4" @onclick="GoToMenu">Return to Menu</button>
+        </div>
+    }
+</div>
+
+@code {
+    private string gameState = "MENU";
+    private ElementReference gameContainerRef;
+    private List<LevelData> allLevels = new();
+    private LevelData? selectedLang;
+
+    private Fighter player = new() { HP = 100, MaxHP = 100, EP = 100, MaxEP = 100, BaseDamage = 3, X = 10 };
+    private Fighter enemy = new() { X = 80 };
+    private StageData currentStageData = new();
+    private List<UpgradeOption> currentUpgrades = new();
+    private Projectile comboBeam = new();
+
+    private int currentStageIndex = 0;
+    private System.Threading.Timer? gameTimer;
+
+    // مؤقتات الذكاء الاصطناعي والتأثيرات
+    private int specialAttackTimer = 0;
+    private int poisonTickTimer = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // إضافة خيارات لجعل القراءة غير حساسة لحالة الأحرف
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            allLevels = await Http.GetFromJsonAsync<List<LevelData>>($"{Nav.BaseUri}data/levels.json", options) ?? new();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading levels: {ex.Message}");
+        }
+    }
+
+   protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+    if (firstRender)
+    {
+        // هذا الكود سيعمل فقط مرة واحدة عند تحميل الصفحة لأول مرة في المتصفح
+        try 
+        {
+            await JS.InvokeVoidAsync("playAudio", "op.mp3");
+        }
+        catch (Exception ex) 
+        {
+            Console.WriteLine("Audio error: " + ex.Message);
+        }
+    }
+}
+
+    private async Task StartRun(LevelData lang)
+    {
+        selectedLang = lang;
+        currentStageIndex = 0;
+        player = new Fighter { HP = 100, MaxHP = 100, EP = 100, MaxEP = 100, BaseDamage = 3, X = 10, PoisonStacks = 0 };
+
+        // تشغيل موسيقى المرحلة الخاصة باللغة
+        await JS.InvokeVoidAsync("playAudio", $"{lang.StyleSuffix}.mp3");
+        LoadStage();
+    }
+
+    private void LoadStage()
+    {
+        if (selectedLang == null || currentStageIndex >= selectedLang.Stages.Count) { gameState = "VICTORY"; return; }
+
+        currentStageData = selectedLang.Stages[currentStageIndex];
+        player.X = 10; player.StateClass = "idle";
+        enemy = new Fighter { MaxHP = currentStageData.Hp, HP = currentStageData.Hp, X = 80, StateClass = "idle", IsShielded = false };
+        specialAttackTimer = 0; // تصفير مؤقت الضربة الخاصة للمرحلة الجديدة
+
+        gameState = "PLAYING";
+        gameTimer = new System.Threading.Timer(GameLoop, null, 0, 16);
+        FocusGame();
+    }
+
+    // --- حلقة اللعبة الأساسية (Game Loop) 60 إطار في الثانية ---
+    private void GameLoop(object? state)
+    {
+        if (gameState != "PLAYING") return;
+
+        // تحديث اتجاه الوجوه (Flip Dynamics)
+        player.FlipClass = player.X > enemy.X ? "enemy-flip" : "";
+        enemy.FlipClass = enemy.X < player.X ? "enemy-flip" : "";
+
+        // تحرك العدو التلقائي (الاقتراب من اللاعب)
+        if (Math.Abs(enemy.X - player.X) > 10 && !enemy.IsHit && enemy.StateClass == "idle")
+        {
+            enemy.X += enemy.X > player.X ? -0.15 : 0.15;
+            enemy.StateClass = "walking";
+        }
+        else if (enemy.StateClass == "walking") enemy.StateClass = "idle";
+
+        // هجوم العدو العادي (عشوائي عند الاقتراب)
+        if (Math.Abs(enemy.X - player.X) < 15 && enemy.StateClass == "idle" && !enemy.IsHit && new Random().Next(100) < 2)
+            EnemyAttack();
+
+        // نظام الضربة الخاصة للذكاء الاصطناعي (كل 15 ثانية)
+        specialAttackTimer += 16;
+        if (specialAttackTimer >= 15000)
+        {
+            ExecuteEnemySpecial();
+            specialAttackTimer = 0;
+        }
+
+        // نظام سم البايثون (ينقص الصحة كل ثانية بناءً على عدد الـ Stacks)
+        if (player.PoisonStacks > 0)
+        {
+            poisonTickTimer += 16;
+            if (poisonTickTimer >= 1000)
+            {
+                player.HP -= player.PoisonStacks;
+                poisonTickTimer = 0;
+            }
+        }
+
+        // فحص الموت
+        if (player.HP <= 0) { player.HP = 0; gameState = "GAMEOVER"; gameTimer?.Dispose(); }
+
+        InvokeAsync(StateHasChanged);
+    }
+
+    // --- هجمات الذكاء الاصطناعي ---
+    private void EnemyAttack()
+    {
+        enemy.StateClass = $"attacking-{selectedLang?.StyleSuffix ?? "generic"}";
+        Task.Delay(150).ContinueWith(_ => { if (Math.Abs(enemy.X - player.X) < 16 && !player.IsBlocking) player.HP -= 5; });
+        Task.Delay(400).ContinueWith(_ => { enemy.StateClass = "idle"; InvokeAsync(StateHasChanged); });
+    }
+
+    // تنفيذ الضربة الخاصة بناءً على لغة البرمجة (المتطلب 3)
+    private void ExecuteEnemySpecial()
+    {
+        if (selectedLang?.Language == "Python")
+        {
+            // بايثون: ضربة سامة تتراكم
+            player.PoisonStacks += 1;
+            enemy.StateClass = "attacking-python";
+            Task.Delay(500).ContinueWith(_ => { enemy.StateClass = "idle"; });
+        }
+        else if (selectedLang?.Language == "C++")
+        {
+            // سي++: 5 ضربات متتالية لا يمكن صدها
+            Task.Run(async () =>
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    enemy.StateClass = "attacking-cpp";
+                    await InvokeAsync(StateHasChanged);
+                    await Task.Delay(150);
+
+                    if (Math.Abs(enemy.X - player.X) < 20) player.HP -= 3; // Unblockable range check
+
+                    enemy.StateClass = "idle";
+                    await InvokeAsync(StateHasChanged);
+                    await Task.Delay(100);
+                }
+            });
+        }
+        else if (selectedLang?.Language == "C#")
+        {
+            // سي شارب: درع مناعة لمدة 5 ثواني
+            enemy.IsShielded = true;
+            Task.Delay(5000).ContinueWith(_ => { enemy.IsShielded = false; });
+        }
+    }
+
+    // --- مدخلات لوحة المفاتيح والتحكم ---
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (gameState != "PLAYING" || player.StateClass == "dodging") return;
+
+        // الحركة (المتطلب 1)
+        if (e.Key == "ArrowLeft") { player.X = Math.Max(0, player.X - 3); player.StateClass = "walking"; }
+        if (e.Key == "ArrowRight") { player.X = Math.Min(100, player.X + 3); player.StateClass = "walking"; }
+
+        // التفادي (المتطلب 2: تدحرج خلف العدو)
+        if (e.Key == " ")
+        {
+            player.IsBlocking = true;
+            player.StateClass = "dodging";
+            // القفز خلف العدو
+            player.X = player.X < enemy.X ? enemy.X + 15 : enemy.X - 15;
+
+            Task.Delay(400).ContinueWith(_ =>
+            {
+                player.StateClass = "idle";
+                player.IsBlocking = false;
+            });
+        }
+        if (e.Key.ToLower() == "z") PlayerAttackSequence();
+    }
+
+    private void HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "ArrowLeft" || e.Key == "ArrowRight") player.StateClass = "idle";
+    }
+
+    private void PlayerAttackSequence()
+    {
+        if (player.StateClass != "idle" && player.StateClass != "walking") return;
+
+        player.StateClass = player.AttackIndex switch { 0 => "attacking-rhand", 1 => "attacking-lhand", 2 => "attacking-kick", _ => "attacking-rhand" };
+        player.AttackIndex = (player.AttackIndex + 1) % 3;
+
+        if (Math.Abs(player.X - enemy.X) < 16)
+        {
+            // تفادي العدو الذكي للضربة (فرصة 20%)
+            if (new Random().Next(100) < 20 && enemy.StateClass == "idle")
+            {
+                enemy.StateClass = "dodging";
+                enemy.X = enemy.X < player.X ? player.X + 15 : player.X - 15;
+                Task.Delay(400).ContinueWith(_ => { enemy.StateClass = "idle"; });
+            }
+            else
+            {
+                ApplyDamageToEnemy(player.BaseDamage);
+                player.EP = Math.Min(player.MaxEP, player.EP + 10);
+            }
+        }
+        Task.Delay(250).ContinueWith(_ => { if (player.StateClass.Contains("attack")) player.StateClass = "idle"; InvokeAsync(StateHasChanged); });
+    }
+
+    private void ApplyDamageToEnemy(double dmg)
+    {
+        // درع السي شارب يمنع الضرر
+        if (enemy.IsShielded) return;
+
+        enemy.HP -= dmg;
+        enemy.IsHit = true;
+        Task.Delay(300).ContinueWith(_ => { enemy.IsHit = false; InvokeAsync(StateHasChanged); });
+
+        if (enemy.HP <= 0) { gameState = "STAGE_CLEAR"; gameTimer?.Dispose(); }
+    }
+
+    // --- الترقيات ---
+    private void GenerateUpgrades()
+    {
+        var pool = new List<UpgradeOption>
+        {
+            new UpgradeOption { Title = "Max HP", Description = "+20 HP", Icon = "❤️", ApplyUpgrade = () => { player.MaxHP += 20; player.HP += 20; } },
+            new UpgradeOption { Title = "Max EP", Description = "+30 EP", Icon = "⚡", ApplyUpgrade = () => { player.MaxEP += 30; player.EP += 30; } },
+            new UpgradeOption { Title = "Damage Up", Description = "+2 Base Damage", Icon = "⚔️", ApplyUpgrade = () => player.BaseDamage += 2 },
+            new UpgradeOption { Title = "Antidote", Description = "Remove Poison", Icon = "🧪", ApplyUpgrade = () => player.PoisonStacks = 0 }
+        };
+        currentUpgrades = pool.OrderBy(x => new Random().Next()).Take(3).ToList();
+        gameState = "UPGRADE_SELECT";
+    }
+
+    private void SelectUpgrade(UpgradeOption upgrade)
+    {
+        upgrade.ApplyUpgrade();
+        currentStageIndex++;
+        LoadStage();
+    }
+
+    private async Task GoToMenu()
+    {
+        gameState = "MENU";
+        await JS.InvokeVoidAsync("playAudio", "op.mp3"); // العودة لموسيقى القائمة
+    }
+
+    private void FocusGame() => Task.Delay(100).ContinueWith(_ => InvokeAsync(() => JS.InvokeVoidAsync("HTMLElement.prototype.focus.call", gameContainerRef)));
+    public void Dispose() => gameTimer?.Dispose();
+}

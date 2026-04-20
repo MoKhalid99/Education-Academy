@@ -1,46 +1,181 @@
-﻿@page "/Games"
+﻿@page "/games"
+@using EducationAcademy.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@inject AuthenticationStateProvider AuthProvider
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager Nav
 
-<div class="main_container">
-    @for (int i = 0; i < 3; i++)
-    {
-        <div class="content_container">
-            <a href="#" target="_blank" rel="noopener noreferrer">
-                <img src="~/images/game-placeholder.png" alt="Game Image">
-            </a>
-            <button class="start_button">
-                ابدأ الآن
-            </button>
-        </div>
-    }
+<div class="games-zone-container">
+    <div class="text-center mb-5">
+        <h2 class="display-4 fw-bold text-primary">منطقة الألعاب التعليمية</h2>
+        <p class="text-muted">لنتعم بطريقة فعالة بنظام التلعيب</p>
+    </div>
+
+    <div class="games-grid">
+        @* اللعبة الأولى: CodeCombatBlazor *@
+        @renderGameCard("المتاهة", "اهلا بك في المغارة العجيبة و لكي تعود للمنزل الحصول على الكنز", 2, "fas fa-code", "/game/codecombat")
+
+        @* اللعبة الثانية: FGmAdd *@
+        @renderGameCard("FG", "لعبة قتالية حيث الاعداء هي لغة البرمجة", 3, "fas fa-plus-circle", "/game/fgmadd")
+
+        @* اللعبة الثالثة: Road Rad *@
+        @renderGameCard("تصليح الطرق", "لعبة سيارات حيث مهمتك الوحيدة تفادي الاعداء و تصليح الاخطاء", 4, "fas fa-car-side", "/game/roadrad")
+    </div>
 </div>
-<style>
-    .main_container {
-        display: flex;
-        flex-direction: column;
-        row-gap: 100px;
-        align-items: center;
-    }
 
-    .content_container {
-        flex: 1;
-    }
+@code {
+    private int userLevel = 1;
+    private bool isAdmin = false;
 
-    .start_button {
-        font-size: 30px;
-        color: #f1efef;
-        border: 1px lightgray solid;
-        background-color: #8DCAD6;
-        padding-left: 100px;
-        padding-right: 100px;
-        padding-top: 20px;
-        padding-bottom: 20px;
-        border-radius: 20px;
-        box-shadow: 0px 0px 10px rgba(0,0,0,0.35);
-        transition: 0.2s;
-    }
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authState.User);
 
-
-        .start_button:hover {
-            transform: scale(1.2);
+        if (user != null)
+        {
+            userLevel = user.CurrentLevel;
+            isAdmin = user.IsAdmin;
         }
+    }
+
+    private void TryNavigate(string url, int requiredLevel)
+    {
+        if (isAdmin || userLevel >= requiredLevel)
+        {
+            Nav.NavigateTo(url);
+        }
+    }
+
+    // Helper لدعم بناء البطاقات برمجياً وتقليل تكرار الكود
+    RenderFragment renderGameCard(string name, string desc, int reqLevel, string icon, string url) => __builder =>
+    {
+        bool isLocked = !isAdmin && userLevel < reqLevel;
+
+        <div class="game-card @(isLocked ? "locked" : "unlocked")" @onclick="() => TryNavigate(url, reqLevel)">
+            <div class="card-content shadow">
+                <div class="level-badge">المستوى @reqLevel</div>
+
+                <div class="icon-box">
+                    @if (isLocked)
+                    {
+                        <i class="fas fa-lock lock-icon"></i>
+                    }
+                    else
+                    {
+                        <i class="@icon game-icon"></i>
+                    }
+                </div>
+
+                <h3>@name</h3>
+                <p>@desc</p>
+
+                @if (isLocked)
+                {
+                    <div class="status-btn locked-btn">مغلق</div>
+                }
+                else
+                {
+                    <div class="status-btn play-btn">العب الآن</div>
+                }
+            </div>
+        </div>
+    };
+}
+
+<style>
+    .games-zone-container {
+        padding: 60px 10%;
+        background: #f8fafc;
+        min-height: 100vh;
+        direction: rtl;
+    }
+
+    .games-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+
+    .game-card {
+        transition: transform 0.3s ease, filter 0.3s ease;
+        position: relative;
+    }
+
+    .card-content {
+        background: white;
+        border-radius: 20px;
+        padding: 40px 20px;
+        text-align: center;
+        border: 2px solid transparent;
+        cursor: pointer;
+    }
+
+    .game-card.unlocked:hover {
+        transform: translateY(-10px);
+    }
+
+        .game-card.unlocked:hover .card-content {
+            border-color: #4b7983;
+        }
+
+    .game-card.locked {
+        filter: grayscale(0.8);
+        cursor: not-allowed;
+    }
+
+    .level-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: #4b7983;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+    }
+
+    .icon-box {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        color: #4b7983;
+    }
+
+    .game-icon {
+        color: #4b7983;
+    }
+
+    .lock-icon {
+        color: #94a3b8;
+    }
+
+    .status-btn {
+        margin-top: 20px;
+        padding: 10px 30px;
+        border-radius: 10px;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+    .play-btn {
+        background: #4b7983;
+        color: white;
+    }
+
+    .locked-btn {
+        background: #e2e8f0;
+        color: #64748b;
+    }
+
+    h3 {
+        color: #1e293b;
+        margin-bottom: 10px;
+    }
+
+    p {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
 </style>
