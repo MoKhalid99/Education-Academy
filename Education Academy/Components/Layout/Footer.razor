@@ -1,77 +1,95 @@
-﻿<div class="footer_div">
-    <img src="gp images/Rectangle 2770.png" alt="" class="footer_photo" />
-    <div class="footer_logo">
-        <div class="container_for_notes_title">
-            <img class="open_book_pic" src="gp images/Book open.png" />
-            <p class="education_academy_footer">Education Academy</p>
+﻿<footer class="site-footer">
+    <div class="footer_div">
+        <img src="gp images/Rectangle 2770.png" alt="" class="footer_photo" />
+
+        <div class="footer_logo">
+            <div class="container_for_notes_title">
+                <img class="open_book_pic" src="gp images/Book open.png" alt="Book Icon" />
+                <p class="education_academy_footer">Education Academy</p>
+            </div>
+        </div>
+
+        <div class="code_academy_container">
+            <p class="code_academy">Code Academy</p>
+            <p>learn programming with tutorials, Courses, and challenges</p>
+        </div>
+
+        <div class="footer_links">
+            <a href="/" class="footer_link_click"><p class="footer_link">Platform</p></a>
+            <a href="/courses" class="footer_link_click"><p class="footer_link">Courses</p></a>
+            <a href="/" class="footer_link_click"><p class="footer_link">Tutorials</p></a>
+            <a href="/" class="footer_link_click"><p class="footer_link">Contact</p></a>
+        </div>
+
+        <div class="footer_communication">
+            <a href="/" class="footer_link_click"><p class="footer_link">Community</p></a>
+            <a href="/" target="_blank" class="footer_link_click"><p class="footer_link">Github</p></a>
+            <a href="/" class="footer_link_click"><p class="footer_link">Newsletter</p></a>
         </div>
     </div>
-    <div class="code_academy_container">
-        <p class="code_academy">Code Academy</p>
-        <p>learn programming with tutorials, Courses, and challenges</p>
-    </div>
-    <div class="footer_links">
-        <NavLink href="/" class="footer_link_click"><p class="footer_link">Platform</p></NavLink>
-        <NavLink href="/courses" class="footer_link_click"><p class="footer_link">Courses</p></NavLink>
-        <NavLink href="#" class="footer_link_click"><p class="footer_link">Tutorials</p></NavLink>
-        <NavLink href="#" class="footer_link_click"><p class="footer_link">Contact</p></NavLink>
-    </div>
-    <div class="footer_communication">
-        <NavLink href="#" class="footer_link_click"><p class="footer_link">Community</p></NavLink>
-        <NavLink href="#" class="footer_link_click"><p class="footer_link">Github</p></NavLink>
-        <NavLink href="#" class="footer_link_click"><p class="footer_link">Newsletter</p></NavLink>
-    </div>
-</div>
+</footer>
+
 <style>
-    .footer_div {
+    footer.site-footer {
+        display: flex;
+        background-image: url("gp images/Rectangle 2770.png");
+        background-repeat: no-repeat;
+        background-size: cover;
+        color: #fff;
+        background-position-y: bottom;
+        border-top-left-radius: 60px;
+        height: 400px;
+        text-align: center;
+        font-size: 16px;
+        box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.15);
+        border-top: 3px solid #6baab6;
         position: relative;
         width: 100%;
-        min-height: 250px;
-        margin-top: auto;
+    }
+
+    .footer_div {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-start;
+        width: 100%;
+        padding: 50px 5% 20px 5%;
+        position: relative;
+        flex-wrap: wrap;
     }
 
     .footer_photo {
-        width: 100%;
-        height: 250px;
-        object-fit: cover;
-    }
-
-    .footer_logo, .code_academy_container, .footer_links, .footer_communication {
         position: absolute;
-        color: #000;
-    }
-
-    .footer_logo {
-        top: 60px;
-        left: 50px;
-    }
-
-    .code_academy_container {
-        bottom: 40px;
-        left: 270px;
-    }
-
-    .footer_links {
-        bottom: 30px;
-        right: 250px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .footer_communication {
-        bottom: 35px;
-        right: 50px;
-        display: flex;
-        flex-direction: column;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        z-index: -1; 
+        object-fit: cover;
+        opacity: 0.3; 
     }
 
     .footer_link_click {
-        color: #000;
         text-decoration: none;
-        margin-bottom: 5px;
+        color: white;
+        transition: opacity 0.3s;
     }
 
         .footer_link_click:hover {
-            color: orange;
+            opacity: 0.8;
         }
+
+    .education_academy_footer {
+        font-weight: bold;
+        font-size: 20px;
+    }
+
+    .footer_links, .footer_communication {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+    }
+
+    .footer_link {
+        margin: 5px 0;
+    }
 </style>

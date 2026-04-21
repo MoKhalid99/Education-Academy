@@ -4,43 +4,64 @@
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthStateProvider
 @inject HttpClient Http
+<div class="courses_div">كورسات</div>
 <div class="courses_container">
-    @*التعديل الشنيع*@
+
     <div class="courses_lines">
-        @for (int i = 0; i <= 4; i++)
+        @for (int i = 0; i <= 2; i++)
         {
             var levelId = i;
-            var isLocked = IsLevelLocked(levelId); // تم استبدال الشرط القديم
+            var isLocked = IsLevelLocked(levelId);
 
             <div class="anchor_container @(isLocked ? "level-locked" : "")">
-                <button class="courses_buttons"
-                        disabled="@isLocked"
-                        @onclick='() => { if (!isLocked) Nav.NavigateTo($"/level-details/{levelId}"); }'>
+                <a class="courses_buttons_anchor" href="@(isLocked ? null : $"/level-details/{levelId}")">
+                    <button class="courses_buttons" disabled="@isLocked">
 
-                    @if (isLocked)
-                    {
-                        <div class="lock-overlay">🔒</div>
-                    }
+                        @if (isLocked)
+                        {
+                            <div class="lock-overlay">🔒</div>
+                        }
 
-                    <img src="gp images/level@(levelId).png" class="courses_icons" />
-                    <p class="courses_titles">LEVEL @levelId</p>
-                </button>
+                        <img src="gp images/level@(levelId).png" alt="" class="courses_icons" />
+                        <p class="courses_titles">LEVEL @levelId</p>
+                    </button>
+                </a>
             </div>
         }
     </div>
-    
+
     <div class="courses_lines">
+        @for (int i = 3; i <= 4; i++)
+        {
+            var levelId = i;
+            var isLocked = IsLevelLocked(levelId);
+
+            <div class="anchor_container @(isLocked ? "level-locked" : "")">
+                <a class="courses_buttons_anchor" href="@(isLocked ? null : $"/level-details/{levelId}")">
+                    <button class="courses_buttons" disabled="@isLocked">
+
+                        @if (isLocked)
+                        {
+                            <div class="lock-overlay">🔒</div>
+                        }
+
+                        <img src="gp images/level@(levelId).png" alt="" class="courses_icons" />
+                        <p class="courses_titles">LEVEL @levelId</p>
+                    </button>
+                </a>
+            </div>
+        }
+
         <div class="anchor_container">
-            <a class="courses_buttons_anchor">
-                <NavLink href="/games">
+            <a class="courses_buttons_anchor" href="/games">
                 <button class="courses_buttons">
                     <img src="gp images/gamepad logo.png" alt="" class="courses_icons" />
                     <p class="courses_titles">GAMES</p>
                 </button>
-                </NavLink>
             </a>
         </div>
     </div>
+
 </div>
 <style>
     .courses_div {
