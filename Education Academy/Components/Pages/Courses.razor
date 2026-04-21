@@ -4,6 +4,7 @@
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthStateProvider
 @inject HttpClient Http
+@inject EducationAcademy.Services.IProgressionService ProgressionService
 <div class="courses_div">كورسات</div>
 <div class="courses_container">
 
@@ -131,6 +132,7 @@
 </style>
 @code{
     private int userXP = 0;
+    private int maxLevel = 1;
     private bool isAdmin = false;
 
     protected override async Task OnInitializedAsync()
@@ -140,40 +142,30 @@
 
         if (user.Identity != null && user.Identity.IsAuthenticated)
         {
-            // التحقق مما إذا كان المستخدم أدمن
             isAdmin = user.IsInRole("Admin");
-
             var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
             if (!string.IsNullOrEmpty(userId))
             {
-                try
-                {
-                    // جلب نقاط الـ XP من الـ API
-                    userXP = await Http.GetFromJsonAsync<int>($"api/progression/get-xp/{userId}");
-                }
-                catch
-                {
-                    userXP = 0; // في حالة حدوث خطأ في الاتصال
-                }
+                // جلب البيانات مباشرة من الخدمة وليس من رابط API
+                userXP = await ProgressionService.GetUserXPAsync(userId);
+
+                // جلب أقصى مستوى وصل إليه المستخدم (تحتاج لإضافة دالة في الخدمة أو جلب المستخدم كاملاً)
+                // لنفترض أننا سنعتمد على الـ XP لفتح الأقفال حالياً
             }
         }
     }
 
     private bool IsLevelLocked(int levelId)
     {
-        // 1. إذا كان أدمن، كل المستويات مفتوحة
         if (isAdmin) return false;
-
-        // 2. المستوى 0 و 1 مفتوحين للجميع افتراضياً
         if (levelId <= 1) return false;
 
-        // 3. التحقق من المستويات الأخرى بناءً على النقاط
-        return levelId switch
-        {
-            2 => userXP < 200,
-            3 => userXP < 300,
-            4 => userXP < 400,
-            _ => true
-        };
+        // منطق فتح الأقفال بناءً على الـ XP (تأكد أن القيم متوافقة مع AcademyDbContext)
+        if (levelId == 2 && userXP >= 100) return false;
+        if (levelId == 3 && userXP >= 200) return false;
+        if (levelId == 4 && userXP >= 300) return false;
+
+        return true;
     }
 }

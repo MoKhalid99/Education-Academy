@@ -6,6 +6,7 @@
 @implements IDisposable
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
+@inject EducationAcademy.Services.IProgressionService ProgressionService
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthStateProvider
 @*اتعدلت جامد بس محدش يلعب في اي حاجة *@
@@ -445,25 +446,32 @@
 
             if (!string.IsNullOrEmpty(userId))
             {
-                await Http.PostAsJsonAsync("api/progression/update-xp", new { UserId = userId, Points = currentQuiz.XPValue });
+                try
+                {
+                    //  إضافة نقاط الـ XP للطالب
+                    await ProgressionService.UpdateXPAsync(userId, currentQuiz.XPValue);
+
+                    // تسجيل أن الطالب اجتاز هذا الاختبار 
+                    var progress = new UserProgress
+                    {
+                        UserId = userId,
+                        LevelId = Level,
+                        IsCompleted = true,
+                        CompletionDate = DateTime.Now
+                    };
+                    await ProgressionService.SaveQuizAttemptAsync(progress);
+
+                    // محاولة فتح المستوى التالي 
+                    await ProgressionService.UnlockNextLevelAsync(userId, Level);
+
+                    Console.WriteLine($"[Success] XP updated and progress saved for user {userId}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Error] Failed to save progress: {ex.Message}");
+                }
             }
         }
-    }
-    private async Task SaveProgress()
-    {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity != null && user.Identity.IsAuthenticated)
-        {
-            var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            Console.WriteLine($"جاري حفظ تقدم الطالب ذو المعرف: {userId}");
-        }
-    }
-
-    private async Task UnlockNextLevel(int nextLevel)
-    {
-        await Http.PostAsJsonAsync($"api/user/unlock-level/{nextLevel}", new { });
     }
 
     private void GoToCourses()

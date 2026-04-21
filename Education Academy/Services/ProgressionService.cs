@@ -5,35 +5,38 @@ namespace EducationAcademy.Services
 {
 	public class ProgressionService : IProgressionService
 	{
-		private readonly AcademyDbContext _context;
+		private readonly IServiceScopeFactory _scopeFactory;
 
-		public ProgressionService(AcademyDbContext context)
+		// حقن IServiceScopeFactory بدلاً من DbContext المباشر
+		public ProgressionService(IServiceScopeFactory scopeFactory)
 		{
-			_context = context;
+			_scopeFactory = scopeFactory;
 		}
 
 		public async Task UpdateXPAsync(string userId, int points)
 		{
-			var user = await _context.Users.FindAsync(userId);
+			using var scope = _scopeFactory.CreateScope();
+			var context = scope.ServiceProvider.GetRequiredService<AcademyDbContext>();
+
+			var user = await context.Users.FindAsync(userId);
 			if (user != null)
 			{
 				user.XP += points;
-				await _context.SaveChangesAsync();
+				await context.SaveChangesAsync();
 			}
 		}
 
 		public async Task<bool> UnlockNextLevelAsync(string userId, int currentLevel)
 		{
-			var user = await _context.Users.FindAsync(userId);
+			using var scope = _scopeFactory.CreateScope();
+			var context = scope.ServiceProvider.GetRequiredService<AcademyDbContext>();
 
-			// شرط فتح المستوى: 
-			//  المستخدم موجود
-			//  المستوى الذي حله الطالب هو نفسه أعلى مستوى وصل إليه حالياً ليمنع التلاعب بفتح مستويات مستقبلية
-			// المستوى الحالي ليس المستوى الأخير
+			var user = await context.Users.FindAsync(userId);
+
 			if (user != null && user.MaxLevelReached == currentLevel && currentLevel < 4)
 			{
 				user.MaxLevelReached++;
-				await _context.SaveChangesAsync();
+				await context.SaveChangesAsync();
 				return true;
 			}
 			return false;
@@ -41,33 +44,42 @@ namespace EducationAcademy.Services
 
 		public async Task<UserProgress?> GetUserProgressAsync(string userId, int levelId)
 		{
-			return await _context.UserProgresses
+			using var scope = _scopeFactory.CreateScope();
+			var context = scope.ServiceProvider.GetRequiredService<AcademyDbContext>();
+
+			return await context.UserProgresses
 				.FirstOrDefaultAsync(p => p.UserId == userId && p.LevelId == levelId);
 		}
 
 		public async Task<int> GetUserXPAsync(string userId)
 		{
-			var user = await _context.Users.FindAsync(userId);
+			using var scope = _scopeFactory.CreateScope();
+			var context = scope.ServiceProvider.GetRequiredService<AcademyDbContext>();
+
+			var user = await context.Users.FindAsync(userId);
 			return user?.XP ?? 0;
 		}
 
 		public async Task SaveQuizAttemptAsync(UserProgress progress)
 		{
-			// نتحقق إذا كان المستخدم قد أنهى هذا المستوى من قبل لتجنب التكرار 
-			var existing = await GetUserProgressAsync(progress.UserId, progress.LevelId);
+			using var scope = _scopeFactory.CreateScope();
+			var context = scope.ServiceProvider.GetRequiredService<AcademyDbContext>();
+
+			var existing = await context.UserProgresses
+				.FirstOrDefaultAsync(p => p.UserId == progress.UserId && p.LevelId == progress.LevelId);
 
 			if (existing == null)
 			{
-				_context.UserProgresses.Add(progress);
+				context.UserProgresses.Add(progress);
 			}
 			else
 			{
 				existing.IsCompleted = true;
 				existing.CompletionDate = DateTime.Now;
+				context.UserProgresses.Update(existing); // تأكيد التحديث
 			}
 
-			await _context.SaveChangesAsync();
+			await context.SaveChangesAsync();
 		}
 	}
 }
-
