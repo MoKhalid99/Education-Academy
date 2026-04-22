@@ -1,13 +1,282 @@
 ﻿{
-  "title": "اختبار المستوى 3 - الجزء التاني",
-  "timeLimitMinutes": 20,
+  "title": "اختبار Compilers - مستوى أساسي (Arabic + English)",
+  "xpValue": 30,
+  "timeLimitMinutes": 15,
   "questions": [
     {
       "id": 1,
-      "text": "ما هو لغة البرمجة الأكثر استخداماً في تطوير الويب؟",
-      "options": [ "C#", "Python", "Java", "HTML/CSS" ],
-      "correctAnswer": "HTML/CSS"
+      "text": "ما هو Compiler؟ / What is a Compiler?",
+      "options": [
+        "برنامج يحول الكود إلى Machine Code / Translates code to machine code",
+        "نظام تشغيل",
+        "قاعدة بيانات",
+        "محرر نصوص"
+      ],
+      "correctAnswer": "برنامج يحول الكود إلى Machine Code / Translates code to machine code"
+    },
+    {
+      "id": 2,
+      "text": "ما هو الفرق بين Compiler و Interpreter؟",
+      "options": [
+        "Compiler يترجم دفعة واحدة / Interpreter سطر بسطر",
+        "لا يوجد فرق",
+        "Interpreter أسرع دائماً",
+        "Compiler لا ينفذ الكود"
+      ],
+      "correctAnswer": "Compiler يترجم دفعة واحدة / Interpreter سطر بسطر"
+    },
+    {
+      "id": 3,
+      "text": "ما هي أول مرحلة في Compiler؟",
+      "options": [
+        "Lexical Analysis",
+        "Parsing",
+        "Code Generation",
+        "Optimization"
+      ],
+      "correctAnswer": "Lexical Analysis"
+    },
+    {
+      "id": 4,
+      "text": "ما وظيفة Lexical Analysis؟",
+      "options": [
+        "تحويل الكود إلى Tokens",
+        "تحليل الجرامر",
+        "تنفيذ الكود",
+        "إدارة الذاكرة"
+      ],
+      "correctAnswer": "تحويل الكود إلى Tokens"
+    },
+    {
+      "id": 5,
+      "text": "ما هو Token؟",
+      "options": [
+        "أصغر وحدة في الكود / Smallest unit",
+        "ملف",
+        "برنامج",
+        "متغير فقط"
+      ],
+      "correctAnswer": "أصغر وحدة في الكود / Smallest unit"
+    },
+    {
+      "id": 6,
+      "text": "ما هي المرحلة الثانية في Compiler؟",
+      "options": [
+        "Syntax Analysis (Parsing)",
+        "Lexical Analysis",
+        "Code Execution",
+        "Memory Management"
+      ],
+      "correctAnswer": "Syntax Analysis (Parsing)"
+    },
+    {
+      "id": 7,
+      "text": "ما وظيفة Parser؟",
+      "options": [
+        "تحليل القواعد النحوية / Check syntax",
+        "تشغيل البرنامج",
+        "تحسين الأداء",
+        "إدارة الملفات"
+      ],
+      "correctAnswer": "تحليل القواعد النحوية / Check syntax"
+    },
+    {
+      "id": 8,
+      "text": "ما هو Syntax Error؟",
+      "options": [
+        "خطأ في كتابة الكود / Grammar error",
+        "خطأ في التنفيذ",
+        "خطأ في الذاكرة",
+        "خطأ في الشبكة"
+      ],
+      "correctAnswer": "خطأ في كتابة الكود / Grammar error"
+    },
+    {
+      "id": 9,
+      "text": "ما هي المرحلة الثالثة؟",
+      "options": [
+        "Semantic Analysis",
+        "Parsing",
+        "Lexical",
+        "Execution"
+      ],
+      "correctAnswer": "Semantic Analysis"
+    },
+    {
+      "id": 10,
+      "text": "ما وظيفة Semantic Analysis؟",
+      "options": [
+        "فحص المعنى / Meaning check",
+        "تحويل إلى machine code",
+        "تشغيل البرنامج",
+        "إدارة الملفات"
+      ],
+      "correctAnswer": "فحص المعنى / Meaning check"
+    },
+    {
+      "id": 11,
+      "text": "ما هو Intermediate Code؟",
+      "options": [
+        "كود وسيط بين المصدر والآلة",
+        "كود نهائي",
+        "كود خاطئ",
+        "كود المستخدم"
+      ],
+      "correctAnswer": "كود وسيط بين المصدر والآلة"
+    },
+    {
+      "id": 12,
+      "text": "ما هي Code Optimization؟",
+      "options": [
+        "تحسين الأداء / Improve performance",
+        "إضافة أخطاء",
+        "إيقاف البرنامج",
+        "تشغيل الكود"
+      ],
+      "correctAnswer": "تحسين الأداء / Improve performance"
+    },
+    {
+      "id": 13,
+      "text": "ما هي Code Generation؟",
+      "options": [
+        "تحويل إلى Machine Code",
+        "تحليل الكود",
+        "تنفيذ الكود",
+        "كتابة الكود"
+      ],
+      "correctAnswer": "تحويل إلى Machine Code"
+    },
+    {
+      "id": 14,
+      "text": "ما هو Symbol Table؟",
+      "options": [
+        "جدول يحتوي على المتغيرات / Stores variables info",
+        "جدول المستخدمين",
+        "ملف",
+        "برنامج"
+      ],
+      "correctAnswer": "جدول يحتوي على المتغيرات / Stores variables info"
+    },
+    {
+      "id": 15,
+      "text": "ما هو Abstract Syntax Tree (AST)؟",
+      "options": [
+        "تمثيل شجري للكود / Tree representation",
+        "ملف",
+        "كود نهائي",
+        "Stack"
+      ],
+      "correctAnswer": "تمثيل شجري للكود / Tree representation"
+    },
+    {
+      "id": 16,
+      "text": "ما هو Parse Tree؟",
+      "options": [
+        "شجرة تمثل القواعد النحوية",
+        "كود نهائي",
+        "ملف",
+        "Array"
+      ],
+      "correctAnswer": "شجرة تمثل القواعد النحوية"
+    },
+    {
+      "id": 17,
+      "text": "ما الفرق بين AST و Parse Tree؟",
+      "options": [
+        "AST أبسط / Parse Tree أدق",
+        "لا فرق",
+        "Parse Tree أسرع",
+        "AST لا يستخدم"
+      ],
+      "correctAnswer": "AST أبسط / Parse Tree أدق"
+    },
+    {
+      "id": 18,
+      "text": "ما هو Lexer؟",
+      "options": [
+        "جزء من Lexical Analysis",
+        "Parser",
+        "Compiler كامل",
+        "OS"
+      ],
+      "correctAnswer": "جزء من Lexical Analysis"
+    },
+    {
+      "id": 19,
+      "text": "ما هو Regular Expression؟",
+      "options": [
+        "نمط لوصف النصوص / Pattern for strings",
+        "كود تنفيذ",
+        "Memory",
+        "Process"
+      ],
+      "correctAnswer": "نمط لوصف النصوص / Pattern for strings"
+    },
+    {
+      "id": 20,
+      "text": "ما هو Context-Free Grammar (CFG)؟",
+      "options": [
+        "قواعد لوصف اللغة / Grammar rules",
+        "كود",
+        "برنامج",
+        "Memory"
+      ],
+      "correctAnswer": "قواعد لوصف اللغة / Grammar rules"
+    },
+    {
+      "id": 21,
+      "text": "ما هو Error Handling؟",
+      "options": [
+        "التعامل مع الأخطاء",
+        "تشغيل البرنامج",
+        "إيقاف النظام",
+        "إدارة المستخدم"
+      ],
+      "correctAnswer": "التعامل مع الأخطاء"
+    },
+    {
+      "id": 22,
+      "text": "ما هو Optimization هدفه؟",
+      "options": [
+        "تقليل الوقت والذاكرة",
+        "زيادة الأخطاء",
+        "إبطاء البرنامج",
+        "تشغيل البرنامج"
+      ],
+      "correctAnswer": "تقليل الوقت والذاكرة"
+    },
+    {
+      "id": 23,
+      "text": "ما هو Interpreter؟",
+      "options": [
+        "ينفذ الكود سطر بسطر",
+        "يحول الكود مرة واحدة",
+        "OS",
+        "Database"
+      ],
+      "correctAnswer": "ينفذ الكود سطر بسطر"
+    },
+    {
+      "id": 24,
+      "text": "ما هو Machine Code؟",
+      "options": [
+        "لغة يفهمها المعالج / Binary code",
+        "لغة عالية المستوى",
+        "لغة بشرية",
+        "كود وهمي"
+      ],
+      "correctAnswer": "لغة يفهمها المعالج / Binary code"
+    },
+    {
+      "id": 25,
+      "text": "ما هو الهدف النهائي من Compiler؟",
+      "options": [
+        "تشغيل البرنامج بكفاءة",
+        "كتابة الكود",
+        "إدارة المستخدم",
+        "تخزين البيانات"
+      ],
+      "correctAnswer": "تشغيل البرنامج بكفاءة"
     }
-    // ... كرر هذا لـ 25 سؤال
   ]
 }

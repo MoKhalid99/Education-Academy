@@ -1,13 +1,282 @@
 ﻿{
-  "title": "اختبار المستوى 3 - الجزء التالت",
-  "timeLimitMinutes": 20,
+  "title": "اختبار Microprocessor & Assembly - مستوى أساسي (Arabic + English)",
+  "xpValue": 40,
+  "timeLimitMinutes": 15,
   "questions": [
     {
       "id": 1,
-      "text": "ما هو لغة البرمجة الأكثر استخداماً في تطوير الويب؟",
-      "options": [ "C#", "Python", "Java", "HTML/CSS" ],
-      "correctAnswer": "HTML/CSS"
+      "text": "ما هو Microprocessor؟ / What is a Microprocessor?",
+      "options": [
+        "CPU على شريحة واحدة / CPU on a single chip",
+        "ذاكرة / Memory",
+        "نظام تشغيل / OS",
+        "قرص صلب / Hard disk"
+      ],
+      "correctAnswer": "CPU على شريحة واحدة / CPU on a single chip"
+    },
+    {
+      "id": 2,
+      "text": "ما وظيفة الـ ALU؟",
+      "options": [
+        "تنفيذ العمليات الحسابية والمنطقية / Arithmetic & Logic operations",
+        "تخزين البيانات",
+        "إدارة الملفات",
+        "تشغيل النظام"
+      ],
+      "correctAnswer": "تنفيذ العمليات الحسابية والمنطقية / Arithmetic & Logic operations"
+    },
+    {
+      "id": 3,
+      "text": "ما هو Register؟",
+      "options": [
+        "ذاكرة صغيرة وسريعة داخل CPU / Small fast memory",
+        "قرص صلب",
+        "برنامج",
+        "شبكة"
+      ],
+      "correctAnswer": "ذاكرة صغيرة وسريعة داخل CPU / Small fast memory"
+    },
+    {
+      "id": 4,
+      "text": "ما هو Instruction Set؟",
+      "options": [
+        "مجموعة الأوامر التي يفهمها المعالج / CPU instructions",
+        "نظام تشغيل",
+        "ذاكرة",
+        "ملف"
+      ],
+      "correctAnswer": "مجموعة الأوامر التي يفهمها المعالج / CPU instructions"
+    },
+    {
+      "id": 5,
+      "text": "ما هو Assembly Language؟",
+      "options": [
+        "لغة منخفضة المستوى قريبة من الآلة / Low-level language",
+        "لغة عالية المستوى",
+        "نظام تشغيل",
+        "متصفح"
+      ],
+      "correctAnswer": "لغة منخفضة المستوى قريبة من الآلة / Low-level language"
+    },
+    {
+      "id": 6,
+      "text": "ما هو Assembly Instruction؟",
+      "options": [
+        "أمر بسيط للمعالج / CPU instruction",
+        "برنامج كامل",
+        "ملف",
+        "ذاكرة"
+      ],
+      "correctAnswer": "أمر بسيط للمعالج / CPU instruction"
+    },
+    {
+      "id": 7,
+      "text": "ما هو Opcode؟",
+      "options": [
+        "جزء يحدد العملية / Operation code",
+        "ذاكرة",
+        "Register",
+        "File"
+      ],
+      "correctAnswer": "جزء يحدد العملية / Operation code"
+    },
+    {
+      "id": 8,
+      "text": "ما هو Operand؟",
+      "options": [
+        "البيانات المستخدمة في العملية / Data used in operation",
+        "CPU",
+        "OS",
+        "Instruction"
+      ],
+      "correctAnswer": "البيانات المستخدمة في العملية / Data used in operation"
+    },
+    {
+      "id": 9,
+      "text": "ما هو Program Counter (PC)؟",
+      "options": [
+        "يشير للـ instruction التالي / Next instruction pointer",
+        "ذاكرة",
+        "CPU",
+        "Disk"
+      ],
+      "correctAnswer": "يشير للـ instruction التالي / Next instruction pointer"
+    },
+    {
+      "id": 10,
+      "text": "ما هو Accumulator؟",
+      "options": [
+        "Register لتخزين النتائج / Stores results",
+        "CPU",
+        "OS",
+        "Disk"
+      ],
+      "correctAnswer": "Register لتخزين النتائج / Stores results"
+    },
+    {
+      "id": 11,
+      "text": "ما هو Fetch Cycle؟",
+      "options": [
+        "جلب التعليمة / Fetch instruction",
+        "تنفيذ البرنامج",
+        "حذف البيانات",
+        "تشغيل OS"
+      ],
+      "correctAnswer": "جلب التعليمة / Fetch instruction"
+    },
+    {
+      "id": 12,
+      "text": "ما هو Execute Cycle؟",
+      "options": [
+        "تنفيذ التعليمة / Execute instruction",
+        "جلب البيانات",
+        "حذف الملفات",
+        "تشغيل النظام"
+      ],
+      "correctAnswer": "تنفيذ التعليمة / Execute instruction"
+    },
+    {
+      "id": 13,
+      "text": "ما هو Bus في المعالج؟",
+      "options": [
+        "قناة نقل البيانات / Data transfer path",
+        "CPU",
+        "Memory",
+        "Program"
+      ],
+      "correctAnswer": "قناة نقل البيانات / Data transfer path"
+    },
+    {
+      "id": 14,
+      "text": "ما هو Address Bus؟",
+      "options": [
+        "ينقل العناوين / Carries memory addresses",
+        "ينقل البيانات",
+        "ينقل البرامج",
+        "ينقل CPU"
+      ],
+      "correctAnswer": "ينقل العناوين / Carries memory addresses"
+    },
+    {
+      "id": 15,
+      "text": "ما هو Data Bus؟",
+      "options": [
+        "ينقل البيانات / Transfers data",
+        "ينقل العناوين",
+        "ينقل التعليمات فقط",
+        "ينقل النظام"
+      ],
+      "correctAnswer": "ينقل البيانات / Transfers data"
+    },
+    {
+      "id": 16,
+      "text": "ما هو Control Bus؟",
+      "options": [
+        "ينقل إشارات التحكم / Control signals",
+        "ينقل البيانات",
+        "ينقل العناوين",
+        "ينقل الملفات"
+      ],
+      "correctAnswer": "ينقل إشارات التحكم / Control signals"
+    },
+    {
+      "id": 17,
+      "text": "ما هو Interrupt؟",
+      "options": [
+        "إشارة توقف مؤقت / Interrupt signal",
+        "برنامج",
+        "ذاكرة",
+        "CPU"
+      ],
+      "correctAnswer": "إشارة توقف مؤقت / Interrupt signal"
+    },
+    {
+      "id": 18,
+      "text": "ما هو RAM؟",
+      "options": [
+        "ذاكرة مؤقتة / Volatile memory",
+        "قرص صلب",
+        "CPU",
+        "Network"
+      ],
+      "correctAnswer": "ذاكرة مؤقتة / Volatile memory"
+    },
+    {
+      "id": 19,
+      "text": "ما هو ROM؟",
+      "options": [
+        "ذاكرة دائمة / Permanent memory",
+        "ذاكرة مؤقتة",
+        "CPU",
+        "Cache"
+      ],
+      "correctAnswer": "ذاكرة دائمة / Permanent memory"
+    },
+    {
+      "id": 20,
+      "text": "ما هو Cache Memory؟",
+      "options": [
+        "ذاكرة سريعة بين CPU و RAM / Fast memory",
+        "قرص صلب",
+        "شبكة",
+        "OS"
+      ],
+      "correctAnswer": "ذاكرة سريعة بين CPU و RAM / Fast memory"
+    },
+    {
+      "id": 21,
+      "text": "ما هو Clock Cycle؟",
+      "options": [
+        "نبضة زمنية لتنفيذ التعليمات / Timing signal",
+        "برنامج",
+        "ذاكرة",
+        "ملف"
+      ],
+      "correctAnswer": "نبضة زمنية لتنفيذ التعليمات / Timing signal"
+    },
+    {
+      "id": 22,
+      "text": "ما هو Microarchitecture؟",
+      "options": [
+        "تصميم داخلي للمعالج / CPU internal design",
+        "نظام تشغيل",
+        "لغة برمجة",
+        "شبكة"
+      ],
+      "correctAnswer": "تصميم داخلي للمعالج / CPU internal design"
+    },
+    {
+      "id": 23,
+      "text": "ما هو Assembly Register AX يستخدم لـ؟",
+      "options": [
+        "تخزين البيانات / Data storage",
+        "تشغيل النظام",
+        "الشبكات",
+        "التخزين الدائم"
+      ],
+      "correctAnswer": "تخزين البيانات / Data storage"
+    },
+    {
+      "id": 24,
+      "text": "ما هو الهدف من Assembly Language؟",
+      "options": [
+        "التحكم المباشر في المعالج / Low-level control",
+        "تصميم مواقع",
+        "إدارة قواعد البيانات",
+        "تشغيل الإنترنت"
+      ],
+      "correctAnswer": "التحكم المباشر في المعالج / Low-level control"
+    },
+    {
+      "id": 25,
+      "text": "ما هو Machine Code؟",
+      "options": [
+        "كود يفهمه المعالج مباشرة / Binary instructions",
+        "لغة بشرية",
+        "ملف نصي",
+        "برنامج عالي المستوى"
+      ],
+      "correctAnswer": "كود يفهمه المعالج مباشرة / Binary instructions"
     }
-    // ... كرر هذا لـ 25 سؤال
   ]
 }

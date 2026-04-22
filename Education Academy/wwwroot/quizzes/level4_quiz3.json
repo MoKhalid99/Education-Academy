@@ -1,13 +1,282 @@
 ﻿{
-  "title": "اختبار المستوى 4 - الجزء التالت",
-  "timeLimitMinutes": 20,
+  "title": "اختبار Differential Equations - مستوى أساسي (Arabic + English)",
+  "xpValue": 40,
+  "timeLimitMinutes": 15,
   "questions": [
     {
       "id": 1,
-      "text": "ما هو لغة البرمجة الأكثر استخداماً في تطوير الويب؟",
-      "options": [ "C#", "Python", "Java", "HTML/CSS" ],
-      "correctAnswer": "HTML/CSS"
+      "text": "ما هي المعادلة التفاضلية؟ / What is a Differential Equation?",
+      "options": [
+        "معادلة تحتوي مشتقات / Equation involving derivatives",
+        "معادلة جبرية فقط",
+        "مصفوفة",
+        "دالة ثابتة"
+      ],
+      "correctAnswer": "معادلة تحتوي مشتقات / Equation involving derivatives"
+    },
+    {
+      "id": 2,
+      "text": "ما هو حل المعادلة التفاضلية؟",
+      "options": [
+        "دالة تحقق المعادلة / Function satisfying the equation",
+        "رقم ثابت",
+        "مصفوفة",
+        "مشتقة فقط"
+      ],
+      "correctAnswer": "دالة تحقق المعادلة / Function satisfying the equation"
+    },
+    {
+      "id": 3,
+      "text": "ما هي الدرجة (Order) في المعادلة التفاضلية؟",
+      "options": [
+        "أعلى مشتقة موجودة / Highest derivative order",
+        "عدد المتغيرات",
+        "عدد الحلول",
+        "ثابت المعادلة"
+      ],
+      "correctAnswer": "أعلى مشتقة موجودة / Highest derivative order"
+    },
+    {
+      "id": 4,
+      "text": "ما هي الدرجة (Degree)؟",
+      "options": [
+        "قوة أعلى مشتقة / Power of highest derivative",
+        "عدد الحلول",
+        "عدد الثوابت",
+        "عدد المتغيرات"
+      ],
+      "correctAnswer": "قوة أعلى مشتقة / Power of highest derivative"
+    },
+    {
+      "id": 5,
+      "text": "ما هو ODE؟",
+      "options": [
+        "Ordinary Differential Equation",
+        "Partial Data Equation",
+        "Open Differential Expression",
+        "Order Data Equation"
+      ],
+      "correctAnswer": "Ordinary Differential Equation"
+    },
+    {
+      "id": 6,
+      "text": "ما هو PDE؟",
+      "options": [
+        "Partial Differential Equation",
+        "Primary Data Equation",
+        "Power Differential Equation",
+        "Polynomial Differential Equation"
+      ],
+      "correctAnswer": "Partial Differential Equation"
+    },
+    {
+      "id": 7,
+      "text": "ما هو الحل العام؟",
+      "options": [
+        "حل يحتوي ثوابت / General solution with constants",
+        "حل رقمي فقط",
+        "حل ثابت",
+        "مصفوفة"
+      ],
+      "correctAnswer": "حل يحتوي ثوابت / General solution with constants"
+    },
+    {
+      "id": 8,
+      "text": "ما هو الحل الخاص؟",
+      "options": [
+        "حل بدون ثوابت / Specific solution",
+        "حل عام",
+        "مشتقة",
+        "تكامل"
+      ],
+      "correctAnswer": "حل بدون ثوابت / Specific solution"
+    },
+    {
+      "id": 9,
+      "text": "ما هو Separation of Variables؟",
+      "options": [
+        "فصل المتغيرات / Separating variables",
+        "جمع المتغيرات",
+        "طرح المتغيرات",
+        "ضرب المتغيرات"
+      ],
+      "correctAnswer": "فصل المتغيرات / Separating variables"
+    },
+    {
+      "id": 10,
+      "text": "متى نستخدم Separation of Variables؟",
+      "options": [
+        "عندما يمكن فصل x و y / When variables can be separated",
+        "دائماً",
+        "في الجبر فقط",
+        "في المصفوفات"
+      ],
+      "correctAnswer": "عندما يمكن فصل x و y / When variables can be separated"
+    },
+    {
+      "id": 11,
+      "text": "ما هو Integrating Factor؟",
+      "options": [
+        "عامل يساعد في الحل / Helper function",
+        "مشتقة",
+        "ثابت",
+        "مصفوفة"
+      ],
+      "correctAnswer": "عامل يساعد في الحل / Helper function"
+    },
+    {
+      "id": 12,
+      "text": "ما نوع المعادلة dy/dx = x + y؟",
+      "options": [
+        "First Order Linear",
+        "Second Order",
+        "PDE",
+        "Non-linear always"
+      ],
+      "correctAnswer": "First Order Linear"
+    },
+    {
+      "id": 13,
+      "text": "ما هو Initial Condition؟",
+      "options": [
+        "قيمة ابتدائية / Starting value",
+        "حل نهائي",
+        "مشتقة",
+        "ثابت عشوائي"
+      ],
+      "correctAnswer": "قيمة ابتدائية / Starting value"
+    },
+    {
+      "id": 14,
+      "text": "ما فائدة Initial Conditions؟",
+      "options": [
+        "تحديد حل خاص / Determine specific solution",
+        "زيادة التعقيد",
+        "حذف الحلول",
+        "تحويل المعادلة"
+      ],
+      "correctAnswer": "تحديد حل خاص / Determine specific solution"
+    },
+    {
+      "id": 15,
+      "text": "ما هو Homogeneous Equation؟",
+      "options": [
+        "معادلة بدون حدود ثابتة / No constant term",
+        "معادلة جبرية",
+        "معادلة عشوائية",
+        "مصفوفة"
+      ],
+      "correctAnswer": "معادلة بدون حدود ثابتة / No constant term"
+    },
+    {
+      "id": 16,
+      "text": "ما هو Non-Homogeneous Equation؟",
+      "options": [
+        "معادلة بها حد إضافي / Has extra term",
+        "بدون مشتقات",
+        "ثابتة فقط",
+        "بدون متغيرات"
+      ],
+      "correctAnswer": "معادلة بها حد إضافي / Has extra term"
+    },
+    {
+      "id": 17,
+      "text": "ما هو Characteristic Equation؟",
+      "options": [
+        "معادلة لحل ODE / Used to solve ODE",
+        "مصفوفة",
+        "تكامل",
+        "حد ثابت"
+      ],
+      "correctAnswer": "معادلة لحل ODE / Used to solve ODE"
+    },
+    {
+      "id": 18,
+      "text": "ما هو الحل لـ dy/dx = 0؟",
+      "options": [
+        "y = constant",
+        "y = x",
+        "y = x^2",
+        "y = e^x"
+      ],
+      "correctAnswer": "y = constant"
+    },
+    {
+      "id": 19,
+      "text": "ما هو التكامل في المعادلات التفاضلية؟",
+      "options": [
+        "عكس المشتقة / Reverse of derivative",
+        "جمع أرقام",
+        "طرح أرقام",
+        "ضرب مصفوفات"
+      ],
+      "correctAnswer": "عكس المشتقة / Reverse of derivative"
+    },
+    {
+      "id": 20,
+      "text": "ما هو الهدف من حل Differential Equations؟",
+      "options": [
+        "إيجاد علاقة بين المتغيرات / Find relationship",
+        "حذف البيانات",
+        "ضغط الملفات",
+        "زيادة السرعة"
+      ],
+      "correctAnswer": "إيجاد علاقة بين المتغيرات / Find relationship"
+    },
+    {
+      "id": 21,
+      "text": "ما هو Exponential Growth؟",
+      "options": [
+        "نمو أسي / y = e^x",
+        "نمو خطي",
+        "ثابت",
+        "صفر"
+      ],
+      "correctAnswer": "نمو أسي / y = e^x"
+    },
+    {
+      "id": 22,
+      "text": "ما هو Exponential Decay؟",
+      "options": [
+        "تناقص أسي / Decreasing exponential",
+        "زيادة خطية",
+        "ثابت",
+        "عشوائي"
+      ],
+      "correctAnswer": "تناقص أسي / Decreasing exponential"
+    },
+    {
+      "id": 23,
+      "text": "ما نوع المعادلة y' = ky؟",
+      "options": [
+        "First order separable",
+        "Second order",
+        "PDE",
+        "Matrix equation"
+      ],
+      "correctAnswer": "First order separable"
+    },
+    {
+      "id": 24,
+      "text": "ما هو steady state solution؟",
+      "options": [
+        "حل مستقر / Stable solution",
+        "حل مؤقت",
+        "خطأ",
+        "مصفوفة"
+      ],
+      "correctAnswer": "حل مستقر / Stable solution"
+    },
+    {
+      "id": 25,
+      "text": "ما أهمية Differential Equations؟",
+      "options": [
+        "نمذجة الظواهر الطبيعية / Modeling real systems",
+        "برمجة فقط",
+        "تصميم مواقع",
+        "تخزين بيانات"
+      ],
+      "correctAnswer": "نمذجة الظواهر الطبيعية / Modeling real systems"
     }
-    // ... كرر هذا لـ 25 سؤال
   ]
 }

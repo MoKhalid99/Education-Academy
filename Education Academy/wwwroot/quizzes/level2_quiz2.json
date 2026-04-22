@@ -1,13 +1,202 @@
 ﻿{
-  "title": "اختبار المستوى 2 - الجزء التاني",
-  "timeLimitMinutes": 20,
+  "title": "اختبار Data Structures - المستوى الأساسي",
+  "xpValue": 30,
+  "timeLimitMinutes": 15,
   "questions": [
     {
       "id": 1,
-      "text": "ما هو لغة البرمجة الأكثر استخداماً في تطوير الويب؟",
-      "options": [ "C#", "Python", "Java", "HTML/CSS" ],
-      "correctAnswer": "HTML/CSS"
+      "text": "ما هو الهيكل البياني الذي يعمل بمبدأ LIFO؟",
+      "options": [ "Queue", "Stack", "Linked List", "Tree" ],
+      "correctAnswer": "Stack"
+    },
+    {
+      "id": 2,
+      "text": "ما هو الهيكل البياني الذي يعمل بمبدأ FIFO؟",
+      "options": [ "Stack", "Queue", "Tree", "Graph" ],
+      "correctAnswer": "Queue"
+    },
+    {
+      "id": 3,
+      "text": "ما هو التعقيد الزمني لإضافة عنصر في Stack؟",
+      "options": [ "O(1)", "O(n)", "O(log n)", "O(n^2)" ],
+      "correctAnswer": "O(1)"
+    },
+    {
+      "id": 4,
+      "text": "ما هو التعقيد الزمني لحذف عنصر من Queue؟",
+      "options": [ "O(1)", "O(n)", "O(log n)", "O(n^2)" ],
+      "correctAnswer": "O(1)"
+    },
+    {
+      "id": 5,
+      "text": "ما هو الهيكل المستخدم لتمثيل البيانات بشكل هرمي؟",
+      "options": [ "Array", "Tree", "Stack", "Queue" ],
+      "correctAnswer": "Tree"
+    },
+    {
+      "id": 6,
+      "text": "ما هو التعقيد الزمني للوصول إلى عنصر في Array؟",
+      "options": [ "O(1)", "O(n)", "O(log n)", "O(n log n)" ],
+      "correctAnswer": "O(1)"
+    },
+    {
+      "id": 7,
+      "text": "ما هو التعقيد الزمني للبحث في Linked List؟",
+      "options": [ "O(1)", "O(log n)", "O(n)", "O(n^2)" ],
+      "correctAnswer": "O(n)"
+    },
+    {
+      "id": 8,
+      "text": "أي من التالي يسمح بإضافة وحذف عناصر بسهولة من المنتصف؟",
+      "options": [ "Array", "Linked List", "Stack", "Queue" ],
+      "correctAnswer": "Linked List"
+    },
+    {
+      "id": 9,
+      "text": "ما هو Root في Tree؟",
+      "options": [
+        "أصغر عنصر",
+        "العقدة الأولى في الشجرة",
+        "آخر عنصر",
+        "العقدة الوسطى"
+      ],
+      "correctAnswer": "العقدة الأولى في الشجرة"
+    },
+    {
+      "id": 10,
+      "text": "ما هو Leaf Node؟",
+      "options": [
+        "عقدة لها أبناء",
+        "عقدة بدون أبناء",
+        "العقدة الأولى",
+        "العقدة الوسطى"
+      ],
+      "correctAnswer": "عقدة بدون أبناء"
+    },
+    {
+      "id": 11,
+      "text": "ما هو التعقيد الزمني للبحث في Binary Search Tree في الحالة المثالية؟",
+      "options": [ "O(n)", "O(log n)", "O(1)", "O(n^2)" ],
+      "correctAnswer": "O(log n)"
+    },
+    {
+      "id": 12,
+      "text": "ما هو التعقيد في أسوأ حالة لـ Binary Search Tree؟",
+      "options": [ "O(log n)", "O(n)", "O(1)", "O(n log n)" ],
+      "correctAnswer": "O(n)"
+    },
+    {
+      "id": 13,
+      "text": "ما هو Heap؟",
+      "options": [
+        "نوع من القوائم",
+        "شجرة تحقق خاصية معينة",
+        "نوع من الجراف",
+        "نوع من الStack"
+      ],
+      "correctAnswer": "شجرة تحقق خاصية معينة"
+    },
+    {
+      "id": 14,
+      "text": "في Max Heap، أين يوجد أكبر عنصر؟",
+      "options": [ "في الجذر", "في الأوراق", "في المنتصف", "في آخر عنصر" ],
+      "correctAnswer": "في الجذر"
+    },
+    {
+      "id": 15,
+      "text": "ما هو التعقيد الزمني لإدخال عنصر في Heap؟",
+      "options": [ "O(1)", "O(log n)", "O(n)", "O(n^2)" ],
+      "correctAnswer": "O(log n)"
+    },
+    {
+      "id": 16,
+      "text": "ما هو Graph؟",
+      "options": [
+        "مجموعة من العناصر المرتبة",
+        "مجموعة من العقد والحواف",
+        "قائمة خطية",
+        "مصفوفة"
+      ],
+      "correctAnswer": "مجموعة من العقد والحواف"
+    },
+    {
+      "id": 17,
+      "text": "ما هو Edge في Graph؟",
+      "options": [
+        "عقدة",
+        "اتصال بين عقدتين",
+        "قيمة",
+        "مصفوفة"
+      ],
+      "correctAnswer": "اتصال بين عقدتين"
+    },
+    {
+      "id": 18,
+      "text": "أي هيكل يستخدم في BFS؟",
+      "options": [ "Stack", "Queue", "Tree", "Heap" ],
+      "correctAnswer": "Queue"
+    },
+    {
+      "id": 19,
+      "text": "أي هيكل يستخدم في DFS؟",
+      "options": [ "Queue", "Stack", "Heap", "Array" ],
+      "correctAnswer": "Stack"
+    },
+    {
+      "id": 20,
+      "text": "ما هو Hash Table؟",
+      "options": [
+        "قائمة مرتبة",
+        "هيكل يعتمد على دالة Hash",
+        "شجرة",
+        "Stack"
+      ],
+      "correctAnswer": "هيكل يعتمد على دالة Hash"
+    },
+    {
+      "id": 21,
+      "text": "ما هو التعقيد الزمني للبحث في Hash Table (في المتوسط)؟",
+      "options": [ "O(1)", "O(n)", "O(log n)", "O(n^2)" ],
+      "correctAnswer": "O(1)"
+    },
+    {
+      "id": 22,
+      "text": "ما هي Collision في Hash Table؟",
+      "options": [
+        "عدم وجود بيانات",
+        "تخزين بيانات خاطئة",
+        "تصادم قيمتين في نفس المكان",
+        "فقدان البيانات"
+      ],
+      "correctAnswer": "تصادم قيمتين في نفس المكان"
+    },
+    {
+      "id": 23,
+      "text": "ما هو Doubly Linked List؟",
+      "options": [
+        "قائمة باتجاه واحد",
+        "قائمة لها مؤشرين (التالي والسابق)",
+        "Stack",
+        "Queue"
+      ],
+      "correctAnswer": "قائمة لها مؤشرين (التالي والسابق)"
+    },
+    {
+      "id": 24,
+      "text": "ما هو Circular Queue؟",
+      "options": [
+        "Queue عادية",
+        "Queue متصلة ببعضها على شكل دائرة",
+        "Stack دائري",
+        "Tree دائري"
+      ],
+      "correctAnswer": "Queue متصلة ببعضها على شكل دائرة"
+    },
+    {
+      "id": 25,
+      "text": "ما هو التعقيد الزمني لإدخال عنصر في Array (في المنتصف)؟",
+      "options": [ "O(1)", "O(log n)", "O(n)", "O(n^2)" ],
+      "correctAnswer": "O(n)"
     }
-    // ... كرر هذا لـ 25 سؤال
   ]
 }

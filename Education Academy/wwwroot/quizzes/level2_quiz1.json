@@ -1,13 +1,182 @@
 ﻿{
-  "title": "اختبار المستوى 2 - الجزء الأول",
-  "timeLimitMinutes": 20,
+  "title": "اختبار Algorithms - المستوى الأساسي",
+  "xpValue": 30,
+  "timeLimitMinutes": 15,
   "questions": [
     {
       "id": 1,
-      "text": "ما هو لغة البرمجة الأكثر استخداماً في تطوير الويب؟",
-      "options": [ "C#", "Python", "Java", "HTML/CSS" ],
-      "correctAnswer": "HTML/CSS"
+      "text": "ما هو التعقيد الزمني للبحث الخطي (Linear Search)؟",
+      "options": [ "O(1)", "O(log n)", "O(n)", "O(n^2)" ],
+      "correctAnswer": "O(n)"
+    },
+    {
+      "id": 2,
+      "text": "ما هو التعقيد الزمني للبحث الثنائي (Binary Search)؟",
+      "options": [ "O(n)", "O(log n)", "O(n log n)", "O(1)" ],
+      "correctAnswer": "O(log n)"
+    },
+    {
+      "id": 3,
+      "text": "أي خوارزمية تعتمد على مبدأ Divide and Conquer؟",
+      "options": [ "Bubble Sort", "Merge Sort", "Selection Sort", "Insertion Sort" ],
+      "correctAnswer": "Merge Sort"
+    },
+    {
+      "id": 4,
+      "text": "ما هو أسوأ تعقيد زمني لـ Bubble Sort؟",
+      "options": [ "O(n)", "O(log n)", "O(n log n)", "O(n^2)" ],
+      "correctAnswer": "O(n^2)"
+    },
+    {
+      "id": 5,
+      "text": "ما هي الفكرة الأساسية في خوارزميات Greedy؟",
+      "options": [
+        "اختيار أفضل حل شامل",
+        "اختيار أفضل حل محلي في كل خطوة",
+        "تجربة كل الحلول",
+        "استخدام recursion دائماً"
+      ],
+      "correctAnswer": "اختيار أفضل حل محلي في كل خطوة"
+    },
+    {
+      "id": 6,
+      "text": "أي خوارزمية تُستخدم لإيجاد أقصر مسار في الجراف؟",
+      "options": [ "DFS", "BFS", "Dijkstra", "Binary Search" ],
+      "correctAnswer": "Dijkstra"
+    },
+    {
+      "id": 7,
+      "text": "ما هو التعقيد الزمني لخوارزمية Merge Sort؟",
+      "options": [ "O(n)", "O(n log n)", "O(n^2)", "O(log n)" ],
+      "correctAnswer": "O(n log n)"
+    },
+    {
+      "id": 8,
+      "text": "ما هي الفكرة الأساسية في Dynamic Programming؟",
+      "options": [
+        "حل المشكلة مرة واحدة فقط",
+        "تقسيم المشكلة وتخزين النتائج الجزئية",
+        "اختيار الحل الأفضل محلياً",
+        "تجاهل النتائج السابقة"
+      ],
+      "correctAnswer": "تقسيم المشكلة وتخزين النتائج الجزئية"
+    },
+    {
+      "id": 9,
+      "text": "أي من التالي مثال على Dynamic Programming؟",
+      "options": [ "Binary Search", "Fibonacci باستخدام memoization", "Linear Search", "Selection Sort" ],
+      "correctAnswer": "Fibonacci باستخدام memoization"
+    },
+    {
+      "id": 10,
+      "text": "ما هو التعقيد الزمني للـ Insertion Sort في أسوأ حالة؟",
+      "options": [ "O(n)", "O(log n)", "O(n log n)", "O(n^2)" ],
+      "correctAnswer": "O(n^2)"
+    },
+    {
+      "id": 11,
+      "text": "أي من التالي يستخدم recursion؟",
+      "options": [ "Binary Search", "Linear Search", "Bubble Sort", "Selection Sort" ],
+      "correctAnswer": "Binary Search"
+    },
+    {
+      "id": 12,
+      "text": "ما هو التعقيد الزمني للـ Quick Sort في المتوسط؟",
+      "options": [ "O(n)", "O(n log n)", "O(n^2)", "O(log n)" ],
+      "correctAnswer": "O(n log n)"
+    },
+    {
+      "id": 13,
+      "text": "ما هو أسوأ تعقيد لـ Quick Sort؟",
+      "options": [ "O(n)", "O(n log n)", "O(n^2)", "O(log n)" ],
+      "correctAnswer": "O(n^2)"
+    },
+    {
+      "id": 14,
+      "text": "أي خوارزمية تستخدم Stack ضمنياً؟",
+      "options": [ "BFS", "DFS", "Dijkstra", "Greedy" ],
+      "correctAnswer": "DFS"
+    },
+    {
+      "id": 15,
+      "text": "ما هو التعقيد الزمني للـ BFS؟",
+      "options": [ "O(V + E)", "O(n)", "O(log n)", "O(n^2)" ],
+      "correctAnswer": "O(V + E)"
+    },
+    {
+      "id": 16,
+      "text": "ما هو التعقيد الزمني للـ DFS؟",
+      "options": [ "O(V + E)", "O(n)", "O(log n)", "O(n^2)" ],
+      "correctAnswer": "O(V + E)"
+    },
+    {
+      "id": 17,
+      "text": "أي خوارزمية مناسبة لإيجاد Minimum Spanning Tree؟",
+      "options": [ "Dijkstra", "Prim", "Binary Search", "DFS" ],
+      "correctAnswer": "Prim"
+    },
+    {
+      "id": 18,
+      "text": "ما هي فكرة Backtracking؟",
+      "options": [
+        "تجربة كل الحلول الممكنة مع الرجوع عند الفشل",
+        "اختيار الحل الأفضل فقط",
+        "تقسيم المشكلة لنصفين",
+        "تخزين النتائج"
+      ],
+      "correctAnswer": "تجربة كل الحلول الممكنة مع الرجوع عند الفشل"
+    },
+    {
+      "id": 19,
+      "text": "أي من التالي مثال على Backtracking؟",
+      "options": [ "Binary Search", "N-Queens", "Merge Sort", "BFS" ],
+      "correctAnswer": "N-Queens"
+    },
+    {
+      "id": 20,
+      "text": "ما هو التعقيد الزمني لـ Selection Sort؟",
+      "options": [ "O(n)", "O(n log n)", "O(n^2)", "O(log n)" ],
+      "correctAnswer": "O(n^2)"
+    },
+    {
+      "id": 21,
+      "text": "ما هي الفكرة الأساسية لـ Divide and Conquer؟",
+      "options": [
+        "تقسيم المشكلة لأجزاء أصغر ثم حلها",
+        "اختيار أفضل حل محلي",
+        "تخزين النتائج",
+        "تجربة كل الحلول"
+      ],
+      "correctAnswer": "تقسيم المشكلة لأجزاء أصغر ثم حلها"
+    },
+    {
+      "id": 22,
+      "text": "أي من التالي ليس خوارزمية ترتيب؟",
+      "options": [ "Merge Sort", "Quick Sort", "Binary Search", "Bubble Sort" ],
+      "correctAnswer": "Binary Search"
+    },
+    {
+      "id": 23,
+      "text": "ما هو التعقيد الزمني الأفضل لـ Bubble Sort؟",
+      "options": [ "O(n)", "O(n log n)", "O(n^2)", "O(log n)" ],
+      "correctAnswer": "O(n)"
+    },
+    {
+      "id": 24,
+      "text": "ما هي خاصية Stability في الخوارزميات؟",
+      "options": [
+        "الحفاظ على ترتيب العناصر المتساوية",
+        "سرعة التنفيذ",
+        "تقليل الذاكرة",
+        "تقليل العمليات"
+      ],
+      "correctAnswer": "الحفاظ على ترتيب العناصر المتساوية"
+    },
+    {
+      "id": 25,
+      "text": "أي خوارزمية تعتمد على Priority Queue؟",
+      "options": [ "DFS", "BFS", "Dijkstra", "Selection Sort" ],
+      "correctAnswer": "Dijkstra"
     }
-    // ... كرر هذا لـ 25 سؤال
   ]
 }

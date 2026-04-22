@@ -1,13 +1,282 @@
 ﻿{
-  "title": "اختبار المستوى 3 - الجزء الأول",
-  "timeLimitMinutes": 20,
+  "title": "اختبار Operating Systems - مستوى أساسي (Arabic + English)",
+  "xpValue": 30,
+  "timeLimitMinutes": 15,
   "questions": [
     {
       "id": 1,
-      "text": "ما هو لغة البرمجة الأكثر استخداماً في تطوير الويب؟",
-      "options": [ "C#", "Python", "Java", "HTML/CSS" ],
-      "correctAnswer": "HTML/CSS"
+      "text": "ما هو نظام التشغيل؟ / What is an Operating System?",
+      "options": [
+        "برنامج لإدارة الموارد / Software that manages hardware resources",
+        "لغة برمجة / Programming language",
+        "قاعدة بيانات / Database",
+        "متصفح / Browser"
+      ],
+      "correctAnswer": "برنامج لإدارة الموارد / Software that manages hardware resources"
+    },
+    {
+      "id": 2,
+      "text": "ما هو Process؟",
+      "options": [
+        "برنامج قيد التنفيذ / Program in execution",
+        "ملف / File",
+        "ذاكرة / Memory",
+        "مستخدم / User"
+      ],
+      "correctAnswer": "برنامج قيد التنفيذ / Program in execution"
+    },
+    {
+      "id": 3,
+      "text": "ما هو Thread؟",
+      "options": [
+        "أصغر وحدة تنفيذ داخل Process / Smallest unit of execution",
+        "Process كامل",
+        "ملف",
+        "نظام تشغيل"
+      ],
+      "correctAnswer": "أصغر وحدة تنفيذ داخل Process / Smallest unit of execution"
+    },
+    {
+      "id": 4,
+      "text": "ما الفرق بين Process و Thread؟",
+      "options": [
+        "Thread أخف ويشارك الذاكرة / Thread is lighter and shares memory",
+        "لا يوجد فرق",
+        "Process أسرع دائماً",
+        "Thread مستقل تماماً"
+      ],
+      "correctAnswer": "Thread أخف ويشارك الذاكرة / Thread is lighter and shares memory"
+    },
+    {
+      "id": 5,
+      "text": "ما هو Scheduling؟",
+      "options": [
+        "تنظيم تنفيذ العمليات / Process scheduling",
+        "إدارة الملفات",
+        "إدارة المستخدمين",
+        "تشغيل البرامج فقط"
+      ],
+      "correctAnswer": "تنظيم تنفيذ العمليات / Process scheduling"
+    },
+    {
+      "id": 6,
+      "text": "أي Scheduling Algorithm يعتمد على أولوية؟ / Which uses priority?",
+      "options": [
+        "FCFS",
+        "Priority Scheduling",
+        "Round Robin",
+        "FIFO"
+      ],
+      "correctAnswer": "Priority Scheduling"
+    },
+    {
+      "id": 7,
+      "text": "ما هو FCFS؟",
+      "options": [
+        "First Come First Serve",
+        "Fast CPU First",
+        "File Control System",
+        "Full Control Scheduling"
+      ],
+      "correctAnswer": "First Come First Serve"
+    },
+    {
+      "id": 8,
+      "text": "ما هو Round Robin؟",
+      "options": [
+        "تقسيم الوقت بين العمليات / Time slicing",
+        "تنفيذ عملية واحدة فقط",
+        "تنفيذ حسب الأولوية",
+        "تنفيذ عشوائي"
+      ],
+      "correctAnswer": "تقسيم الوقت بين العمليات / Time slicing"
+    },
+    {
+      "id": 9,
+      "text": "ما هو Deadlock؟",
+      "options": [
+        "توقف العمليات بسبب انتظار متبادل / Processes waiting forever",
+        "زيادة سرعة النظام",
+        "انتهاء العملية",
+        "خطأ في الكود"
+      ],
+      "correctAnswer": "توقف العمليات بسبب انتظار متبادل / Processes waiting forever"
+    },
+    {
+      "id": 10,
+      "text": "ما أحد شروط حدوث Deadlock؟",
+      "options": [
+        "Mutual Exclusion",
+        "High Speed",
+        "Low Memory",
+        "Fast CPU"
+      ],
+      "correctAnswer": "Mutual Exclusion"
+    },
+    {
+      "id": 11,
+      "text": "ما هو Starvation؟",
+      "options": [
+        "عملية لا تحصل على CPU / Process never gets CPU",
+        "زيادة الأداء",
+        "تقليل الذاكرة",
+        "حذف عملية"
+      ],
+      "correctAnswer": "عملية لا تحصل على CPU / Process never gets CPU"
+    },
+    {
+      "id": 12,
+      "text": "ما هو Context Switching؟",
+      "options": [
+        "تبديل بين العمليات / Switching between processes",
+        "إيقاف النظام",
+        "تشغيل برنامج",
+        "حذف Process"
+      ],
+      "correctAnswer": "تبديل بين العمليات / Switching between processes"
+    },
+    {
+      "id": 13,
+      "text": "ما هو CPU Scheduling؟",
+      "options": [
+        "اختيار العملية التالية / Selecting next process",
+        "إدارة الملفات",
+        "تشغيل الألعاب",
+        "تنظيم الشبكة"
+      ],
+      "correctAnswer": "اختيار العملية التالية / Selecting next process"
+    },
+    {
+      "id": 14,
+      "text": "ما هو RAM؟",
+      "options": [
+        "ذاكرة مؤقتة / Volatile memory",
+        "قرص صلب",
+        "CPU",
+        "Network"
+      ],
+      "correctAnswer": "ذاكرة مؤقتة / Volatile memory"
+    },
+    {
+      "id": 15,
+      "text": "ما هو Virtual Memory؟",
+      "options": [
+        "استخدام القرص كذاكرة / Using disk as memory",
+        "RAM فقط",
+        "CPU cache",
+        "ROM"
+      ],
+      "correctAnswer": "استخدام القرص كذاكرة / Using disk as memory"
+    },
+    {
+      "id": 16,
+      "text": "ما هو Paging؟",
+      "options": [
+        "تقسيم الذاكرة لصفحات / Memory divided into pages",
+        "حذف الذاكرة",
+        "زيادة السرعة",
+        "تشغيل البرامج"
+      ],
+      "correctAnswer": "تقسيم الذاكرة لصفحات / Memory divided into pages"
+    },
+    {
+      "id": 17,
+      "text": "ما هو Segmentation؟",
+      "options": [
+        "تقسيم الذاكرة لأجزاء منطقية / Logical memory division",
+        "تقسيم الوقت",
+        "تقسيم CPU",
+        "تقسيم الملفات"
+      ],
+      "correctAnswer": "تقسيم الذاكرة لأجزاء منطقية / Logical memory division"
+    },
+    {
+      "id": 18,
+      "text": "ما هو File System؟",
+      "options": [
+        "تنظيم الملفات / Organizing files",
+        "تشغيل CPU",
+        "إدارة الشبكة",
+        "إدارة المستخدم"
+      ],
+      "correctAnswer": "تنظيم الملفات / Organizing files"
+    },
+    {
+      "id": 19,
+      "text": "ما هو Kernel؟",
+      "options": [
+        "نواة نظام التشغيل / Core of OS",
+        "برنامج عادي",
+        "ملف",
+        "Network tool"
+      ],
+      "correctAnswer": "نواة نظام التشغيل / Core of OS"
+    },
+    {
+      "id": 20,
+      "text": "ما هو Interrupt؟",
+      "options": [
+        "إشارة توقف مؤقت / Signal to CPU",
+        "تشغيل برنامج",
+        "إغلاق النظام",
+        "حذف ملف"
+      ],
+      "correctAnswer": "إشارة توقف مؤقت / Signal to CPU"
+    },
+    {
+      "id": 21,
+      "text": "ما هو Multitasking؟",
+      "options": [
+        "تشغيل أكثر من عملية / Running multiple processes",
+        "عملية واحدة",
+        "إيقاف النظام",
+        "حذف البيانات"
+      ],
+      "correctAnswer": "تشغيل أكثر من عملية / Running multiple processes"
+    },
+    {
+      "id": 22,
+      "text": "ما هو Semaphore؟",
+      "options": [
+        "أداة للتحكم في التزامن / Synchronization tool",
+        "نوع CPU",
+        "نوع RAM",
+        "ملف"
+      ],
+      "correctAnswer": "أداة للتحكم في التزامن / Synchronization tool"
+    },
+    {
+      "id": 23,
+      "text": "ما هو Critical Section؟",
+      "options": [
+        "جزء حساس من الكود / Shared resource section",
+        "ملف",
+        "Process",
+        "Queue"
+      ],
+      "correctAnswer": "جزء حساس من الكود / Shared resource section"
+    },
+    {
+      "id": 24,
+      "text": "ما هو Throughput؟",
+      "options": [
+        "عدد العمليات المنفذة / Number of completed processes",
+        "سرعة CPU فقط",
+        "حجم الذاكرة",
+        "عدد المستخدمين"
+      ],
+      "correctAnswer": "عدد العمليات المنفذة / Number of completed processes"
+    },
+    {
+      "id": 25,
+      "text": "ما هو Turnaround Time؟",
+      "options": [
+        "زمن تنفيذ العملية بالكامل / Total execution time",
+        "وقت الانتظار فقط",
+        "وقت الإدخال",
+        "وقت الحذف"
+      ],
+      "correctAnswer": "زمن تنفيذ العملية بالكامل / Total execution time"
     }
-    // ... كرر هذا لـ 25 سؤال
   ]
 }

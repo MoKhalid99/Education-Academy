@@ -1,13 +1,282 @@
 ﻿{
-  "title": "اختبار المستوى 4 - الجزء الأول",
-  "timeLimitMinutes": 20,
+  "title": "اختبار Game Programming - مستوى أساسي (Arabic + English)",
+  "xpValue": 30,
+  "timeLimitMinutes": 15,
   "questions": [
     {
       "id": 1,
-      "text": "ما هو لغة البرمجة الأكثر استخداماً في تطوير الويب؟",
-      "options": [ "C#", "Python", "Java", "HTML/CSS" ],
-      "correctAnswer": "HTML/CSS"
+      "text": "ما هو Game Loop؟ / What is a Game Loop?",
+      "options": [
+        "حلقة تشغيل اللعبة المستمرة / Continuous game execution loop",
+        "قاعدة بيانات",
+        "نظام تشغيل",
+        "محرك بحث"
+      ],
+      "correctAnswer": "حلقة تشغيل اللعبة المستمرة / Continuous game execution loop"
+    },
+    {
+      "id": 2,
+      "text": "ما وظيفة Game Loop؟",
+      "options": [
+        "تحديث ورسم اللعبة باستمرار / Update & render game",
+        "حذف الملفات",
+        "تشغيل النظام",
+        "إدارة الشبكة"
+      ],
+      "correctAnswer": "تحديث ورسم اللعبة باستمرار / Update & render game"
+    },
+    {
+      "id": 3,
+      "text": "ما هو Frame؟",
+      "options": [
+        "صورة واحدة من اللعبة / Single rendered image",
+        "برنامج",
+        "ذاكرة",
+        "CPU"
+      ],
+      "correctAnswer": "صورة واحدة من اللعبة / Single rendered image"
+    },
+    {
+      "id": 4,
+      "text": "ما معنى FPS؟",
+      "options": [
+        "Frames Per Second",
+        "Fast Processing System",
+        "File Processing Speed",
+        "Frame Pixel System"
+      ],
+      "correctAnswer": "Frames Per Second"
+    },
+    {
+      "id": 5,
+      "text": "ما هو Game Engine؟",
+      "options": [
+        "أداة لتطوير الألعاب / Tool for building games",
+        "نظام تشغيل",
+        "لغة برمجة",
+        "Database"
+      ],
+      "correctAnswer": "أداة لتطوير الألعاب / Tool for building games"
+    },
+    {
+      "id": 6,
+      "text": "أمثلة على Game Engines؟",
+      "options": [
+        "Unity & Unreal",
+        "Chrome & Firefox",
+        "Windows & Linux",
+        "MySQL & MongoDB"
+      ],
+      "correctAnswer": "Unity & Unreal"
+    },
+    {
+      "id": 7,
+      "text": "ما هو Sprite؟",
+      "options": [
+        "صورة ثنائية الأبعاد في اللعبة / 2D image",
+        "CPU",
+        "Server",
+        "Database"
+      ],
+      "correctAnswer": "صورة ثنائية الأبعاد في اللعبة / 2D image"
+    },
+    {
+      "id": 8,
+      "text": "ما هو Collision Detection؟",
+      "options": [
+        "اكتشاف التصادم بين العناصر / Detect collisions",
+        "تشغيل اللعبة",
+        "حذف ملفات",
+        "تخزين بيانات"
+      ],
+      "correctAnswer": "اكتشاف التصادم بين العناصر / Detect collisions"
+    },
+    {
+      "id": 9,
+      "text": "ما هو Physics Engine؟",
+      "options": [
+        "محاكاة قوانين الفيزياء / Simulating physics",
+        "Database",
+        "Compiler",
+        "OS"
+      ],
+      "correctAnswer": "محاكاة قوانين الفيزياء / Simulating physics"
+    },
+    {
+      "id": 10,
+      "text": "ما هو Vector في الألعاب؟",
+      "options": [
+        "اتجاه + مقدار / Direction & magnitude",
+        "ملف",
+        "CPU",
+        "Game Engine"
+      ],
+      "correctAnswer": "اتجاه + مقدار / Direction & magnitude"
+    },
+    {
+      "id": 11,
+      "text": "ما هو Delta Time؟",
+      "options": [
+        "الوقت بين الفريمات / Time between frames",
+        "حجم اللعبة",
+        "سرعة الإنترنت",
+        "ذاكرة"
+      ],
+      "correctAnswer": "الوقت بين الفريمات / Time between frames"
+    },
+    {
+      "id": 12,
+      "text": "لماذا نستخدم Delta Time؟",
+      "options": [
+        "لجعل الحركة ثابتة على كل الأجهزة / Consistent movement",
+        "لزيادة السرعة",
+        "لحذف الأخطاء",
+        "لتقليل الذاكرة"
+      ],
+      "correctAnswer": "لجعل الحركة ثابتة على كل الأجهزة / Consistent movement"
+    },
+    {
+      "id": 13,
+      "text": "ما هو Input Handling؟",
+      "options": [
+        "التعامل مع إدخال المستخدم / User input processing",
+        "تشغيل الصوت",
+        "عرض الرسوم",
+        "تخزين البيانات"
+      ],
+      "correctAnswer": "التعامل مع إدخال المستخدم / User input processing"
+    },
+    {
+      "id": 14,
+      "text": "ما هو Render؟",
+      "options": [
+        "رسم المشهد على الشاشة / Drawing graphics",
+        "تشغيل كود",
+        "حذف ملفات",
+        "ضغط بيانات"
+      ],
+      "correctAnswer": "رسم المشهد على الشاشة / Drawing graphics"
+    },
+    {
+      "id": 15,
+      "text": "ما هو Scene في الألعاب؟",
+      "options": [
+        "مستوى أو شاشة في اللعبة / Game level",
+        "CPU",
+        "Database",
+        "File system"
+      ],
+      "correctAnswer": "مستوى أو شاشة في اللعبة / Game level"
+    },
+    {
+      "id": 16,
+      "text": "ما هو Animation؟",
+      "options": [
+        "تحريك الصور / Movement of frames",
+        "تخزين بيانات",
+        "شبكة",
+        "Compile"
+      ],
+      "correctAnswer": "تحريك الصور / Movement of frames"
+    },
+    {
+      "id": 17,
+      "text": "ما هو Game Object؟",
+      "options": [
+        "عنصر داخل اللعبة / Entity in game",
+        "OS",
+        "Compiler",
+        "Database"
+      ],
+      "correctAnswer": "عنصر داخل اللعبة / Entity in game"
+    },
+    {
+      "id": 18,
+      "text": "ما هو AI في الألعاب؟",
+      "options": [
+        "ذكاء اصطناعي للشخصيات / Artificial Intelligence",
+        "Audio Input",
+        "Application Interface",
+        "Auto Installer"
+      ],
+      "correctAnswer": "ذكاء اصطناعي للشخصيات / Artificial Intelligence"
+    },
+    {
+      "id": 19,
+      "text": "ما هو Pathfinding؟",
+      "options": [
+        "إيجاد طريق للشخصيات / Finding path",
+        "حذف ملفات",
+        "تشغيل الصوت",
+        "ضغط اللعبة"
+      ],
+      "correctAnswer": "إيجاد طريق للشخصيات / Finding path"
+    },
+    {
+      "id": 20,
+      "text": "ما هو A* Algorithm؟",
+      "options": [
+        "خوارزمية إيجاد أقصر طريق / Pathfinding algorithm",
+        "Sorting algorithm",
+        "Compression algorithm",
+        "Encryption"
+      ],
+      "correctAnswer": "خوارزمية إيجاد أقصر طريق / Pathfinding algorithm"
+    },
+    {
+      "id": 21,
+      "text": "ما هو Game State؟",
+      "options": [
+        "حالة اللعبة الحالية / Current game state",
+        "CPU",
+        "RAM",
+        "Network"
+      ],
+      "correctAnswer": "حالة اللعبة الحالية / Current game state"
+    },
+    {
+      "id": 22,
+      "text": "ما هو UI in Games؟",
+      "options": [
+        "واجهة المستخدم / User Interface",
+        "CPU",
+        "Database",
+        "Compiler"
+      ],
+      "correctAnswer": "واجهة المستخدم / User Interface"
+    },
+    {
+      "id": 23,
+      "text": "ما هو Audio System؟",
+      "options": [
+        "نظام الصوت في اللعبة / Sound system",
+        "Network system",
+        "OS",
+        "Compiler"
+      ],
+      "correctAnswer": "نظام الصوت في اللعبة / Sound system"
+    },
+    {
+      "id": 24,
+      "text": "ما هو Level Design؟",
+      "options": [
+        "تصميم مراحل اللعبة / Designing game levels",
+        "كتابة كود",
+        "Database design",
+        "Networking"
+      ],
+      "correctAnswer": "تصميم مراحل اللعبة / Designing game levels"
+    },
+    {
+      "id": 25,
+      "text": "ما الهدف من Game Programming؟",
+      "options": [
+        "إنشاء ألعاب تفاعلية / Building interactive games",
+        "إدارة شبكات",
+        "تشغيل أنظمة",
+        "تحليل بيانات فقط"
+      ],
+      "correctAnswer": "إنشاء ألعاب تفاعلية / Building interactive games"
     }
-    // ... كرر هذا لـ 25 سؤال
   ]
 }

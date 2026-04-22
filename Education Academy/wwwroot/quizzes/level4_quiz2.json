@@ -1,13 +1,282 @@
 ﻿{
-  "title": "اختبار المستوى 4 - الجزء التاني",
-  "timeLimitMinutes": 20,
+  "title": "اختبار Network Security - مستوى أساسي (Arabic + English)",
+  "xpValue": 30,
+  "timeLimitMinutes": 15,
   "questions": [
     {
       "id": 1,
-      "text": "ما هو لغة البرمجة الأكثر استخداماً في تطوير الويب؟",
-      "options": [ "C#", "Python", "Java", "HTML/CSS" ],
-      "correctAnswer": "HTML/CSS"
+      "text": "ما هو Network Security؟ / What is Network Security?",
+      "options": [
+        "حماية الشبكات والبيانات / Protecting networks and data",
+        "تصميم مواقع",
+        "إدارة قواعد بيانات",
+        "تطوير ألعاب"
+      ],
+      "correctAnswer": "حماية الشبكات والبيانات / Protecting networks and data"
+    },
+    {
+      "id": 2,
+      "text": "ما هو الهدف الأساسي من الأمن السيبراني؟",
+      "options": [
+        "حماية السرية والسلامة والتوافر / CIA triad",
+        "زيادة السرعة",
+        "تقليل التكلفة",
+        "تصميم البرامج"
+      ],
+      "correctAnswer": "حماية السرية والسلامة والتوافر / CIA triad"
+    },
+    {
+      "id": 3,
+      "text": "ما معنى CIA في الأمن؟",
+      "options": [
+        "Confidentiality, Integrity, Availability",
+        "Control, Internet, Access",
+        "Code, Input, Action",
+        "None"
+      ],
+      "correctAnswer": "Confidentiality, Integrity, Availability"
+    },
+    {
+      "id": 4,
+      "text": "ما هو Encryption؟",
+      "options": [
+        "تشفير البيانات / Converting data to unreadable form",
+        "حذف البيانات",
+        "نسخ البيانات",
+        "عرض البيانات"
+      ],
+      "correctAnswer": "تشفير البيانات / Converting data to unreadable form"
+    },
+    {
+      "id": 5,
+      "text": "ما هو Decryption؟",
+      "options": [
+        "فك التشفير / Converting back to readable form",
+        "تشفير البيانات",
+        "حذف البيانات",
+        "ضغط البيانات"
+      ],
+      "correctAnswer": "فك التشفير / Converting back to readable form"
+    },
+    {
+      "id": 6,
+      "text": "ما هو Symmetric Encryption؟",
+      "options": [
+        "نفس المفتاح للتشفير وفك التشفير / Same key",
+        "مفتاحين مختلفين",
+        "بدون مفاتيح",
+        "Hashing فقط"
+      ],
+      "correctAnswer": "نفس المفتاح للتشفير وفك التشفير / Same key"
+    },
+    {
+      "id": 7,
+      "text": "ما هو Asymmetric Encryption؟",
+      "options": [
+        "مفتاح عام وخاص / Public & Private key",
+        "نفس المفتاح",
+        "بدون مفاتيح",
+        "Compression"
+      ],
+      "correctAnswer": "مفتاح عام وخاص / Public & Private key"
+    },
+    {
+      "id": 8,
+      "text": "ما هو Hashing؟",
+      "options": [
+        "تحويل البيانات لقيمة ثابتة / One-way function",
+        "تشفير قابل للفك",
+        "نسخ البيانات",
+        "ضغط الملفات"
+      ],
+      "correctAnswer": "تحويل البيانات لقيمة ثابتة / One-way function"
+    },
+    {
+      "id": 9,
+      "text": "هل يمكن عكس Hashing؟",
+      "options": [
+        "لا / No",
+        "نعم / Yes",
+        "أحياناً",
+        "حسب الحالة"
+      ],
+      "correctAnswer": "لا / No"
+    },
+    {
+      "id": 10,
+      "text": "ما هو Firewall؟",
+      "options": [
+        "نظام حماية الشبكة / Network filter system",
+        "برنامج تشغيل",
+        "Database",
+        "Compiler"
+      ],
+      "correctAnswer": "نظام حماية الشبكة / Network filter system"
+    },
+    {
+      "id": 11,
+      "text": "ما هو Phishing؟",
+      "options": [
+        "سرقة بيانات عبر مواقع مزيفة / Fake websites",
+        "تشفير",
+        "ضغط ملفات",
+        "تحديث نظام"
+      ],
+      "correctAnswer": "سرقة بيانات عبر مواقع مزيفة / Fake websites"
+    },
+    {
+      "id": 12,
+      "text": "ما هو Malware؟",
+      "options": [
+        "برامج ضارة / Malicious software",
+        "نظام تشغيل",
+        "متصفح",
+        "Database"
+      ],
+      "correctAnswer": "برامج ضارة / Malicious software"
+    },
+    {
+      "id": 13,
+      "text": "ما هو Virus؟",
+      "options": [
+        "برنامج يضر النظام / Harmful program",
+        "ملف عادي",
+        "موقع",
+        "Network"
+      ],
+      "correctAnswer": "برنامج يضر النظام / Harmful program"
+    },
+    {
+      "id": 14,
+      "text": "ما هو Worm؟",
+      "options": [
+        "ينتشر عبر الشبكة بدون تدخل / Self-spreading malware",
+        "برنامج مفيد",
+        "Firewall",
+        "Compiler"
+      ],
+      "correctAnswer": "ينتشر عبر الشبكة بدون تدخل / Self-spreading malware"
+    },
+    {
+      "id": 15,
+      "text": "ما هو Trojan Horse؟",
+      "options": [
+        "برنامج خبيث مخفي / Hidden malicious software",
+        "Virus طبيعي",
+        "OS",
+        "Browser"
+      ],
+      "correctAnswer": "برنامج خبيث مخفي / Hidden malicious software"
+    },
+    {
+      "id": 16,
+      "text": "ما هو DDoS Attack؟",
+      "options": [
+        "إغراق السيرفر بطلبات / Overloading server",
+        "تشفير بيانات",
+        "ضغط ملفات",
+        "تحديث نظام"
+      ],
+      "correctAnswer": "إغراق السيرفر بطلبات / Overloading server"
+    },
+    {
+      "id": 17,
+      "text": "ما هو Man-in-the-Middle Attack؟",
+      "options": [
+        "اعتراض الاتصال / Intercept communication",
+        "تشفير",
+        "Firewall",
+        "Compression"
+      ],
+      "correctAnswer": "اعتراض الاتصال / Intercept communication"
+    },
+    {
+      "id": 18,
+      "text": "ما هو Authentication؟",
+      "options": [
+        "التحقق من الهوية / Verify identity",
+        "تشفير البيانات",
+        "حذف المستخدم",
+        "ضغط البيانات"
+      ],
+      "correctAnswer": "التحقق من الهوية / Verify identity"
+    },
+    {
+      "id": 19,
+      "text": "ما هو Authorization؟",
+      "options": [
+        "تحديد الصلاحيات / Permissions",
+        "تسجيل الدخول",
+        "تشفير",
+        "نسخ"
+      ],
+      "correctAnswer": "تحديد الصلاحيات / Permissions"
+    },
+    {
+      "id": 20,
+      "text": "ما هو VPN؟",
+      "options": [
+        "شبكة خاصة آمنة / Secure private network",
+        "Virus program",
+        "Database",
+        "Compiler"
+      ],
+      "correctAnswer": "شبكة خاصة آمنة / Secure private network"
+    },
+    {
+      "id": 21,
+      "text": "ما هو Port in Networking؟",
+      "options": [
+        "نقطة اتصال للخدمات / Service endpoint",
+        "CPU",
+        "RAM",
+        "File"
+      ],
+      "correctAnswer": "نقطة اتصال للخدمات / Service endpoint"
+    },
+    {
+      "id": 22,
+      "text": "ما هو HTTPS؟",
+      "options": [
+        "نسخة آمنة من HTTP / Secure HTTP",
+        "Database",
+        "Compiler",
+        "OS"
+      ],
+      "correctAnswer": "نسخة آمنة من HTTP / Secure HTTP"
+    },
+    {
+      "id": 23,
+      "text": "ما هو SSL/TLS؟",
+      "options": [
+        "بروتوكول تشفير الاتصال / Encryption protocol",
+        "Virus",
+        "Browser",
+        "Database"
+      ],
+      "correctAnswer": "بروتوكول تشفير الاتصال / Encryption protocol"
+    },
+    {
+      "id": 24,
+      "text": "ما هو Brute Force Attack؟",
+      "options": [
+        "تجربة كل كلمات المرور / Trying all passwords",
+        "تشفير",
+        "Firewall",
+        "Compression"
+      ],
+      "correctAnswer": "تجربة كل كلمات المرور / Trying all passwords"
+    },
+    {
+      "id": 25,
+      "text": "ما أهمية Network Security؟",
+      "options": [
+        "حماية البيانات والأنظمة / Protect data & systems",
+        "زيادة السرعة فقط",
+        "تصميم برامج",
+        "إدارة قواعد بيانات"
+      ],
+      "correctAnswer": "حماية البيانات والأنظمة / Protect data & systems"
     }
-    // ... كرر هذا لـ 25 سؤال
   ]
 }

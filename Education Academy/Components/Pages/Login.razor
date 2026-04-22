@@ -5,32 +5,30 @@
 @layout EmptyLayout
 @inject SignInManager<ApplicationUser> SignInManager
 @inject NavigationManager NavigationManager
-@*بص يا معلم عايزك تعد الستايل من اول سطر 56*@
-@*و وازن مبين html , css و الباك هنا من38 ل55*@
+
 <PageTitle>تسجيل الدخول - Education Academy</PageTitle>
 
-<div class="auth-wrapper">
-    <div class="auth-card">
-        <h2 class="auth-title">سجل دخولك</h2>
+<div class="big_container">
+    <div class="container">
+        <div>
+            <form action="account/login" method="post" class="form_container">
+                <AntiforgeryToken />
 
-<Component />
-        <form action="account/login" method="post">
-            <AntiforgeryToken />
+                <input name="email" type="email" placeholder="الايميل" required />
+                <input name="password" type="password" placeholder="كلمة السر" required />
 
-            <div class="form-group">
-                <input name="email" type="email" class="form-input" placeholder="الايميل" required />
-            </div>
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div style="color: red; font-size: 14px; text-align: center; margin-top: -10px;">@errorMessage</div>
+                }
 
-            <div class="form-group">
-                <input name="password" type="password" class="form-input" placeholder="الباسورد" required />
-            </div>
+                <button type="submit" class="register_button">سجل الدخول</button>
 
-            <button type="submit" class="btn-primary">دخول</button>
-        </form>
-
-        <p class="divider-text">أو</p>
-        <div class="login-redirect">
-            ليس لديك حساب؟ <a href="/register" class="redirect-link">أنشئ حساباً الآن</a>
+                <div class="login-redirect">
+                    ليس لديك حساب؟
+                    <a href="/register" class="redirect-link">أنشئ حساباً الآن</a>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -42,7 +40,6 @@
     private async Task HandleLogin()
     {
         var result = await SignInManager.PasswordSignInAsync(loginModel.Email, loginModel.Password, isPersistent: true, lockoutOnFailure: false);
-
         if (result.Succeeded)
         {
             NavigationManager.NavigateTo("/");
@@ -55,138 +52,98 @@
 }
 
 <style>
-    /* Layout */
-    .auth-wrapper {
+    /* Layout & Container */
+    .big_container {
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        min-height: 60vh;
-        padding: 2rem 1rem;
+        height: 100vh;
         direction: rtl;
     }
 
-    /* Card */
-    .auth-card {
-        width: 100%;
-        max-width: 360px;
-        background: linear-gradient(160deg, #6ba3a8 0%, #4a7c80 40%, #2e5f63 100%);
-        border-radius: 18px;
-        padding: 2.5rem 2rem 2rem;
+    .container {
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.85rem;
-        box-shadow: 0 8px 32px rgba(46, 95, 99, 0.35);
-    }
-
-    /* Title */
-    .auth-title {
-        color: #fff;
-        font-size: 1.35rem;
-        font-weight: 600;
-        margin: 0 0 0.5rem;
-        text-align: center;
-        letter-spacing: 0.03em;
+        background-image: url("gp images/Frame 2377011.png"); 
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position-y: bottom;
+        border-top-left-radius: 60px;
+        height: 627px;
+        width: 781px;
+        position: relative;
     }
 
     /* Form */
-    .form-group {
-        width: 100%;
-    }
-
-    .form-input {
-        width: 100%;
-        padding: 0.6rem 1rem;
-        border: none;
-        border-radius: 8px;
-        background: rgba(255,255,255,0.82);
-        color: #333;
-        font-size: 0.95rem;
-        text-align: right;
-        outline: none;
-        transition: background 0.2s;
-        box-sizing: border-box;
-    }
-
-        .form-input:focus {
-            background: rgba(255,255,255,0.95);
-        }
-
-        .form-input::placeholder {
-            color: #888;
-            text-align: right;
-        }
-
-    /* Submit Button */
-    .btn-primary {
-        width: 120px;
-        padding: 0.5rem 0;
-        border: none;
-        border-radius: 8px;
-        background: rgba(255,255,255,0.9);
-        color: #2e5f63;
-        font-size: 0.95rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background 0.2s, transform 0.1s;
-        margin-top: 0.25rem;
-    }
-
-        .btn-primary:hover {
-            background: #fff;
-            transform: translateY(-1px);
-        }
-
-    /* Divider */
-    .divider-text {
-        color: rgba(255,255,255,0.75);
-        font-size: 0.85rem;
-        margin: 0;
-    }
-
-    /* Social Icons */
-    .social-icons {
+    .form_container {
         display: flex;
-        gap: 0.75rem;
-        align-items: center;
-    }
-
-    .social-icon {
-        display: flex;
-        align-items: center;
+        flex-direction: column;
         justify-content: center;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.15);
-        transition: background 0.2s, transform 0.15s;
-        text-decoration: none;
+        align-items: center;
+        row-gap: 35px;
+        height: 100%;
+        position: absolute;
+        left: 50%;
+        bottom: 30px;
+        transform: translateX(-50%);
     }
 
-        .social-icon:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
+    /* Inputs */
+    input {
+        width: 400px;
+        height: 50px;
+        border-radius: 30px;
+        border: none;
+        background-color: #F5F5F5;
+        font-size: 16px;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        outline: none;
+        font-family: inherit;
+    }
+
+    ::placeholder {
+        text-align: center;
+        color: #888;
+    }
+
+    /* Button */
+    .register_button {
+        width: 200px;
+        height: 50px;
+        border-radius: 30px;
+        border: none;
+        background-color: white;
+        color: #009999;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.25s ease-in-out;
+    }
+
+        .register_button:hover {
+            background-color: #009999;
+            color: white;
+            border: 1px solid white;
+            transform: scale(1.1);
         }
 
-    /* Forgot Link */
-    .forgot-link {
-        color: rgba(255,255,255,0.85);
-        font-size: 0.85rem;
-        text-decoration: underline;
-        cursor: pointer;
-        margin-top: 0.25rem;
+    /* Links & Redirect */
+    .login-redirect {
+        color: #333;
+        font-size: 15px;
+        margin-top: -15px;
+        text-align: center;
+    }
+
+    .redirect-link {
+        color: #009999;
+        text-decoration: none;
+        font-weight: bold;
         transition: color 0.2s;
     }
 
-        .forgot-link:hover {
-            color: #fff;
+        .redirect-link:hover {
+            color: #007777;
         }
-
-    /* Validation messages */
-    .validation-message {
-        color: #ffe08a;
-        font-size: 0.78rem;
-        margin-top: 3px;
-        text-align: right;
-    }
 </style>

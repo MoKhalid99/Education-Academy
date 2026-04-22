@@ -41,7 +41,7 @@
                         <p class="low_section_buttons_text">عننا</p>
                     </button>
                 </NavLink>
-                <NavLink href="/">
+                <NavLink href="https://www.facebook.com/csc.o6i">
                     <button class="low_section_buttons">
                         <p class="low_section_buttons_text">تواصل معانا</p>
                     </button>
@@ -56,6 +56,11 @@
                         <p class="low_section_buttons_text">كورسات جامعية</p>
                     </button>
                 </NavLink>
+                <NavLink href="/noop">
+                    <button class="low_section_buttons">
+                        <p class="low_section_buttons_text">كورسات خارجية</p>
+                    </button>
+                </NavLink>
             </Authorized>
         </AuthorizeView>
 
@@ -64,7 +69,7 @@
             <AuthorizeView>
                 <Authorized>
                     @* يظهر عند تسجيل الدخول *@
-                    <span class="FullName">مرحباً، @context.User.Identity?.Name</span>
+                    <span class="user_name">مرحباً، @context.User.Identity?.Name</span>
                     <form action="Account/Logout" method="post" style="display:inline">
                         <AntiforgeryToken />
                     </form>
@@ -86,13 +91,7 @@
                         تسجيل خروج
                     </a>
                 </Authorized>
-                <NotAuthorized>
-                    @* إذا لم يكن مسجلاً، يظهر له زر الدخول *@
-                    <NavLink href="/login">
-                        <button class="low_section_buttons_special1">سجل معانا</button>
-                    </NavLink>
-                </NotAuthorized>
-            </AuthorizeView>
+               </AuthorizeView>
         </div>
     </div>
 </div>
@@ -174,17 +173,11 @@
   border: none;
   cursor: pointer;
 }
-    .auth_buttons_container {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-right: auto; /* لدفع الأزرار لليسار في التصميم العربي */
-    }
 
-    .user_name {
+.user_name {
         font-size: 14px;
         color: #4b7983;
         font-weight: bold;
-    }
+  }
 
 </style>
