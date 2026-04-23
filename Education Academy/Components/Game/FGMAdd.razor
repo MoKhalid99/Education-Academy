@@ -1,730 +1,1186 @@
 ﻿@page "/game/fgmadd"
 @using System.Text.Json
-@using EducationAcademy.Models
+@using System.IO
 @using FG1MAdd
 @implements IDisposable
-@inject HttpClient Http
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment Env
 @inject IJSRuntime JS
-@inject NavigationManager Nav
-@*لعبة الفايت و لسه عايزة شغل*@
-<PageTitle>FG1MAdd - Roguelike Coder </PageTitle>
 
 <style>
-    body {
-        background-color: #121212;
-        color: white;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    body, html {
+        margin: 0;
+        padding: 0;
         overflow: hidden;
+        background: #050507;
     }
 
-    .game-arena {
+    .game-container {
+        width: 100vw;
+        height: 100vh;
         position: relative;
-        width: 100%;
-        max-width: 900px;
-        height: 500px;
-        margin: 20px auto;
-        border: 4px solid white;
         overflow: hidden;
-        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        color: white;
+        outline: none;
     }
 
-    .ground {
+    /* شاشة الكود  */
+    .code-overlay {
         position: absolute;
-        bottom: 0;
-        width: 100%;
-        height: 50px;
-        background: #222;
-        border-top: 2px solid #555;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 700px;
+        background: rgba(15, 15, 25, 0.96);
+        padding: 30px;
+        border: 2px solid #00d2ff;
+        border-radius: 20px;
+        z-index: 1000;
+        box-shadow: 0 0 60px rgba(0, 210, 255, 0.3);
+        backdrop-filter: blur(10px);
     }
 
-    .no-select {
-        -webkit-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
+        .code-overlay textarea {
+            width: 100%;
+            height: 180px;
+            background: #0a0a1a;
+            color: #4ecca3;
+            border: 1px solid #333;
+            padding: 15px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            margin: 15px 0;
+            resize: none;
+        }
 
-    /* الأساسيات */
+    /* Stick-man */
     .fighter {
         position: absolute;
-        bottom: 50px;
-        width: 70px;
-        height: 140px;
-        transition: left 0.1s linear;
-        z-index: 10;
+        width: 80px;
+        height: 150px;
+        bottom: 15vh;
+        z-index: 20;
+        transition: opacity 0.3s;
     }
 
-    .enemy-flip {
-        transform: scaleX(-1);
-    }
-
-    .head-logo {
-        width: 50px;
-        height: 50px;
+    .head {
+        width: 32px;
+        height: 32px;
+        border: 3px solid white;
         border-radius: 50%;
         position: absolute;
-        top: -10px;
-        left: 10px;
-        z-index: 20;
-        border: 3px solid white;
-        background: #333;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 14px;
-        overflow: hidden;
-        transform: scaleX(1);
-    }
-
-    .fighter.enemy-flip .head-logo {
-        transform: scaleX(-1);
+        top: 0;
+        left: 24px;
     }
 
     .torso {
-        width: 10px;
+        width: 4px;
         height: 60px;
         background: white;
-        border-radius: 5px;
         position: absolute;
-        top: 40px;
-        left: 30px;
-        transition: transform 0.1s;
+        top: 35px;
+        left: 38px;
+        border-radius: 2px;
     }
 
-    .limb {
-        position: absolute;
+    .arm-l, .arm-r, .leg-l, .leg-r {
+        width: 4px;
+        height: 45px;
         background: white;
-        border-radius: 5px;
-        width: 8px;
+        position: absolute;
         transform-origin: top center;
-        transition: all 0.1s;
+        border-radius: 2px;
     }
 
-    /* الأطراف الافتراضية */
-    .arm-left {
-        height: 45px;
-        top: 45px;
-        left: 31px;
-        transform: rotate(20deg);
+    .arm-l {
+        top: 40px;
+        left: 38px;
+        transform: rotate(35deg);
     }
 
-    .arm-right {
-        height: 45px;
-        top: 45px;
-        left: 31px;
-        transform: rotate(-20deg);
+    .arm-r {
+        top: 40px;
+        left: 38px;
+        transform: rotate(-35deg);
     }
 
-    .leg-left {
-        height: 50px;
-        top: 90px;
-        left: 31px;
+    .leg-l {
+        top: 95px;
+        left: 38px;
         transform: rotate(15deg);
     }
 
-    .leg-right {
-        height: 50px;
-        top: 90px;
-        left: 31px;
+    .leg-r {
+        top: 95px;
+        left: 38px;
         transform: rotate(-15deg);
     }
 
-    /* 1. أنيميشن المشي */
-    @@keyframes walk-leg-l {
+    /* ألوان اللاعب */
+    .player .head, .player .torso,
+    .player .arm-l, .player .arm-r,
+    .player .leg-l, .player .leg-r {
+        background: #00d2ff;
+        border-color: #00d2ff;
+        box-shadow: 0 0 15px #00d2ff;
+    }
+
+    /* ألوان العدو أسود */
+    .enemy .head, .enemy .torso,
+    .enemy .arm-l, .enemy .arm-r,
+    .enemy .leg-l, .enemy .leg-r {
+        background: #111;
+        border-color: #444;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+
+    /* WALK — خطوات واقعية */
+    .walking .leg-l {
+        animation: step-l 0.35s infinite;
+        transform-origin: top center;
+    }
+
+    .walking .leg-r {
+        animation: step-r 0.35s infinite;
+        transform-origin: top center;
+    }
+
+    @@keyframes step-l {
         0% {
-            transform: rotate(25deg);
+            transform: rotate(-40deg) translateY(0);
+        }
+
+        25% {
+            transform: rotate(-40deg) translateY(-4px);
         }
 
         50% {
-            transform: rotate(-25deg);
+            transform: rotate(40deg) translateY(0);
+        }
+
+        75% {
+            transform: rotate(40deg) translateY(-4px);
         }
 
         100% {
-            transform: rotate(25deg);
+            transform: rotate(-40deg) translateY(0);
         }
     }
-    @@keyframes walk-leg-r {
+
+    @@keyframes step-r {
         0% {
-            transform: rotate(-25deg);
+            transform: rotate(40deg) translateY(0);
+        }
+
+        25% {
+            transform: rotate(40deg) translateY(-4px);
         }
 
         50% {
-            transform: rotate(25deg);
+            transform: rotate(-40deg) translateY(0);
+        }
+
+        75% {
+            transform: rotate(-40deg) translateY(-4px);
         }
 
         100% {
-            transform: rotate(-25deg);
+            transform: rotate(40deg) translateY(0);
         }
     }
 
-    .walking .leg-left {
-        animation: walk-leg-l 0.4s infinite;
+    .walking .torso {
+        animation: body-bob 0.35s infinite ease-in-out;
     }
 
-    .walking .leg-right {
-        animation: walk-leg-r 0.4s infinite;
-    }
-
-    .walking .arm-left {
-        animation: walk-leg-l 0.4s infinite reverse;
-    }
-
-    .walking .arm-right {
-        animation: walk-leg-r 0.4s infinite reverse;
-    }
-
-    /* أنيميشن الخمول (Idle) */
-    .idle .arm-left {
-        animation: sway 1s infinite alternate;
-    }
-
-    .idle .arm-right {
-        animation: sway 1s infinite alternate-reverse;
-    }
-    @@keyframes sway {
-        from {
-            transform: rotate(15deg);
-        }
-
-        to {
-            transform: rotate(25deg);
-        }
-    }
-
-    /* 2. أنيميشن التفادي والتدحرج (Sonic Roll) */
-    .dodging {
-        animation: roll-behind 0.4s ease-in-out forwards;
-    }
-    @@keyframes roll-behind {
-        0% {
-            transform: translateY(0) rotate(0deg) scale(1);
+    @@keyframes body-bob {
+        0%, 100% {
+            transform: translateY(0);
         }
 
         50% {
-            transform: translateY(-40px) rotate(360deg) scale(0.6);
-            filter: blur(2px);
-        }
-
-        100% {
-            transform: translateY(0) rotate(720deg) scale(1);
+            transform: translateY(-5px);
         }
     }
 
-    .dodging .limb {
-        opacity: 0;
-    }
-    /* إخفاء الأطراف لتبدو ككرة */
-
-    /* تأثيرات درع و سمّ */
-    .shielded {
-        filter: drop-shadow(0 0 15px cyan);
-        background: rgba(0,255,255,0.2) !important;
-        border-radius: 10px;
+    .walking .arm-l {
+        animation: arm-swing-l 0.35s infinite;
+        transform-origin: top center;
     }
 
-    .poisoned {
-        filter: drop-shadow(0 0 10px lime);
+    .walking .arm-r {
+        animation: arm-swing-r 0.35s infinite;
+        transform-origin: top center;
     }
 
-    /* ضربات اللاعب */
-    .attacking-rhand .arm-right {
-        transform: rotate(-110deg) !important;
-        background: yellow;
-        height: 60px;
+    @@keyframes arm-swing-l {
+        0%, 100% {
+            transform: rotate(20deg);
+        }
+
+        50% {
+            transform: rotate(-20deg);
+        }
     }
 
-    .attacking-lhand .arm-left {
-        transform: rotate(-110deg) !important;
-        background: orange;
-        height: 60px;
-        z-index: 25;
-    }
-
-    .attacking-kick .leg-right {
-        transform: rotate(-90deg) !important;
-        background: orangered;
-        height: 65px;
-        top: 85px;
-    }
-
-    /* ضربات الأعداء */
-    .enemy.attacking-cpp .arm-right {
-        transform: rotate(-140deg) !important;
-        background: red;
-        height: 70px;
-    }
-
-    .enemy.attacking-csharp .arm-right {
-        animation: csharpSlash 0.3s forwards;
-        background: #a64dff;
-        height: 80px;
-    }
-    @@keyframes csharpSlash {
-        0% {
+    @@keyframes arm-swing-r {
+        0%, 100% {
             transform: rotate(-20deg);
         }
 
         50% {
+            transform: rotate(20deg);
+        }
+    }
+
+    /* ATTACK ANIMATIONS */
+    .blue-beam-attack .arm-r {
+        animation: blue-beam-arm 0.4s ease-out forwards;
+        transform-origin: top center;
+    }
+
+    @@keyframes blue-beam-arm {
+        0% {
+            transform: rotate(-35deg);
+        }
+
+        30% {
+            transform: rotate(-130deg) scaleX(1.6);
+        }
+
+        70% {
+            transform: rotate(-130deg) scaleX(1.6);
+        }
+
+        100% {
+            transform: rotate(-35deg);
+        }
+    }
+
+    .logic-fall-attack .arm-l {
+        animation: logic-chop 0.4s ease-in-out forwards;
+        transform-origin: top center;
+    }
+
+    @@keyframes logic-chop {
+        0% {
+            transform: rotate(35deg);
+        }
+
+        40% {
             transform: rotate(-160deg);
         }
 
         100% {
-            transform: rotate(-20deg);
+            transform: rotate(35deg);
         }
     }
 
-    .enemy.attacking-python .arm-right {
-        animation: pyWiggle 0.4s infinite;
-        background: #D89E00;
-        height: 70px;
+    .vortex-attack {
+        animation: vortex-spin-attack 0.6s ease-in-out;
     }
-    @@keyframes pyWiggle {
-        0%, 100% {
-            transform: rotate(-90deg) scaleY(1);
+
+    @@keyframes vortex-spin-attack {
+        0% {
+            transform: rotate(0deg) scaleX(var(--flip,1));
         }
 
         50% {
-            transform: rotate(-110deg) scaleY(1.2);
+            transform: rotate(360deg) scaleX(var(--flip,1));
+        }
+
+        100% {
+            transform: rotate(720deg) scaleX(var(--flip,1));
         }
     }
 
-    .hit-effect {
-        animation: shake 0.3s both;
-        filter: brightness(2) drop-shadow(0 0 10px red);
+    .vortex-attack .arm-l, .vortex-attack .arm-r {
+        animation: vortex-arms 0.6s ease-in-out;
     }
-    @@keyframes shake {
-        10%, 90% {
-            transform: translate3d(-2px, 0, 0);
+
+    @@keyframes vortex-arms {
+        0%, 100% {
+            transform: rotate(35deg);
         }
 
-        20%, 80% {
-            transform: translate3d(4px, 0, 0);
+        50% {
+            transform: rotate(180deg);
         }
     }
 
-    /* أشرطة و UI */
-    .bars-container {
-        width: 250px;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
+    .ladder-fall-attack .leg-r {
+        animation: ladder-kick 0.45s ease-out forwards;
+        transform-origin: top center;
     }
 
-    .hud-bar {
+    @@keyframes ladder-kick {
+        0% {
+            transform: rotate(-15deg);
+        }
+
+        40% {
+            transform: rotate(-100deg) scaleY(1.4);
+        }
+
+        100% {
+            transform: rotate(-15deg);
+        }
+    }
+
+    .ultimate-combo-attack {
+        animation: ultimate-flash 0.8s ease-in-out;
+    }
+
+    @@keyframes ultimate-flash {
+        0%, 100% {
+            filter: brightness(1);
+        }
+
+        25% {
+            filter: brightness(3) saturate(2);
+        }
+
+        50% {
+            filter: brightness(1);
+        }
+
+        75% {
+            filter: brightness(3) saturate(2);
+        }
+    }
+
+    .ultimate-combo-attack .arm-l {
+        animation: combo-arm-l 0.8s ease-in-out;
+        transform-origin: top center;
+    }
+
+    .ultimate-combo-attack .arm-r {
+        animation: combo-arm-r 0.8s ease-in-out;
+        transform-origin: top center;
+    }
+
+    @@keyframes combo-arm-l {
+        0% {
+            transform: rotate(35deg);
+        }
+
+        25% {
+            transform: rotate(-150deg);
+        }
+
+        50% {
+            transform: rotate(35deg);
+        }
+
+        75% {
+            transform: rotate(-150deg);
+        }
+
+        100% {
+            transform: rotate(35deg);
+        }
+    }
+
+    @@keyframes combo-arm-r {
+        0% {
+            transform: rotate(-35deg);
+        }
+
+        25% {
+            transform: rotate(150deg);
+        }
+
+        50% {
+            transform: rotate(-35deg);
+        }
+
+        75% {
+            transform: rotate(150deg);
+        }
+
+        100% {
+            transform: rotate(-35deg);
+        }
+    }
+
+    /* ENEMY SPECIAL ATTACKS */
+
+    .enemy-special-python {
+        animation: python-venom 1.2s ease-in-out;
+    }
+
+    @@keyframes python-venom {
+        0%, 100% {
+            transform: translateY(0) scaleX(var(--flip,1));
+        }
+
+        20% {
+            transform: translateY(-18px) scaleX(var(--flip,1));
+        }
+
+        40% {
+            transform: translateY(8px) scaleX(var(--flip,1));
+        }
+
+        60% {
+            transform: translateY(-12px) scaleX(var(--flip,1));
+        }
+
+        80% {
+            transform: translateY(5px) scaleX(var(--flip,1));
+        }
+    }
+
+    .enemy-special-python .torso {
+        animation: python-torso 1.2s ease-in-out;
+    }
+
+    @@keyframes python-torso {
+        0%, 100% {
+            background: #ff4757;
+            box-shadow: 0 0 15px #ff4757;
+        }
+
+        50% {
+            background: #7dff57;
+            box-shadow: 0 0 40px #7dff57;
+        }
+    }
+
+    /* C# Shield */
+    .enemy-special-cs {
+        animation: cs-shield-pulse 0.8s infinite alternate;
+    }
+
+    @@keyframes cs-shield-pulse {
+        from {
+            filter: drop-shadow(0 0 12px #512bd4) brightness(1);
+        }
+
+        to {
+            filter: drop-shadow(0 0 30px #00d2ff) brightness(1.5);
+        }
+    }
+
+    .enemy-special-cs::before {
+        content: '';
+        position: absolute;
+        inset: -18px -20px;
+        border: 3px solid rgba(81,43,212,0.8);
+        border-radius: 50% 50% 40% 40%;
+        background: rgba(81,43,212,0.15);
+        animation: shield-dome-rotate 1s linear infinite;
+    }
+
+    @@keyframes shield-dome-rotate {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* DODGE & HIT REACTION */
+    .dodging {
+        animation: dodge-sidestep 0.5s ease-out forwards;
+    }
+
+    @@keyframes dodge-sidestep {
+        0% {
+            opacity: 1;
+            filter: blur(0px) scaleX(1);
+            transform: translateX(0) scaleX(1);
+        }
+
+        30% {
+            opacity: 0.15;
+            filter: blur(8px);
+            transform: translateX(60px) scaleX(1);
+        }
+
+        60% {
+            opacity: 0.15;
+            filter: blur(8px);
+            transform: translateX(60px) scaleX(1);
+        }
+
+        100% {
+            opacity: 1;
+            filter: blur(0px);
+            transform: translateX(0) scaleX(1);
+        }
+    }
+
+    .hit-reaction {
+        animation: shake-char 0.22s;
+    }
+
+    @@keyframes shake-char {
+        0%, 100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-10px);
+        }
+
+        75% {
+            transform: translateX(10px);
+        }
+    }
+
+    .face-left {
+        transform: scaleX(1);
+    }
+
+    .face-right {
+        transform: scaleX(-1);
+    }
+
+    /* VISUAL EFFECTS */
+    .blue-beam {
+        position: absolute;
+        height: 12px;
+        background: linear-gradient(90deg, #00d2ff, transparent);
+        box-shadow: 0 0 25px #00d2ff;
+        z-index: 5;
+        animation: beam-flow 0.6s forwards;
+    }
+
+    @@keyframes beam-flow {
+        from {
+            width: 0;
+            opacity: 1;
+        }
+
+        to {
+            width: 100%;
+            opacity: 0;
+        }
+    }
+
+    /* ليزر C++ الأحمر */
+    .red-laser {
+        position: absolute;
+        height: 10px;
+        background: linear-gradient(270deg, #ff0000, #ff0000 80%, transparent);
+        box-shadow: 0 0 20px #ff0000;
+        z-index: 5;
+        top: 78vh;
+        animation: red-laser-fire 0.4s ease-out forwards;
+        transform-origin: right center; /* ينطلق من العدو باتجاه اللاعب */
+    }
+
+    @@keyframes red-laser-fire {
+        0% {
+            transform: scaleX(0);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scaleX(1);
+            opacity: 1;
+        }
+
+        100% {
+            transform: scaleX(1);
+            opacity: 0;
+        }
+    }
+
+    .poison-cloud {
+        position: absolute;
+        bottom: 15vh;
+        width: 100vw;
+        height: 30vh;
+        background: radial-gradient(ellipse at center, rgba(125,255,87,0.2) 0%, transparent 70%);
+        animation: poison-fade 5s forwards;
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    @@keyframes poison-fade {
+        0% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0;
+        }
+    }
+
+    /* HUD */
+    .stats-hud {
+        position: absolute;
+        top: 40px;
         width: 100%;
-        height: 20px;
-        background: #333;
-        border: 2px solid #fff;
+        display: flex;
+        justify-content: space-around;
+        z-index: 100;
+    }
+
+    .hp-container {
+        width: 350px;
+        height: 30px;
+        background: rgba(0,0,0,0.6);
+        border: 2px solid #444;
+        border-radius: 15px;
+        overflow: hidden;
         position: relative;
     }
 
-    .hp-fill, .ep-fill {
+    .hp-bar {
         height: 100%;
-        transition: width 0.3s;
+        transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    .hp-fill {
-        background: #28a745;
-    }
-
-    .ep-fill {
-        background: #0dcaf0;
-    }
-
-    .bar-text {
+    .hp-text {
         position: absolute;
         width: 100%;
         text-align: center;
-        top: -2px;
-        line-height: 20px;
         font-weight: bold;
-        text-shadow: 1px 1px 2px black;
-        font-size: 13px;
+        line-height: 30px;
+        font-size: 0.9rem;
     }
 
-    .menu-card, .upgrade-card {
-        cursor: pointer;
-        transition: 0.3s;
-        padding: 20px;
-        border: 2px solid #444;
-        margin: 10px;
-        border-radius: 10px;
+    .poison-bar {
+        position: absolute;
+        bottom: 2px;
+        left: 0;
+        height: 4px;
+        background: #7dff57;
+        border-radius: 2px;
+        transition: width 1s linear;
+    }
+
+    .ground {
+        position: absolute;
+        bottom: 15vh;
+        width: 100%;
+        height: 5px;
         background: #222;
-        width: 220px;
-        display: inline-block;
     }
 
-        .menu-card:hover, .upgrade-card:hover {
-            background: #333;
-            border-color: gold;
-            transform: scale(1.05);
+    .status-label {
+        position: absolute;
+        top: 90px;
+        width: 100%;
+        text-align: center;
+        font-size: 1.1rem;
+        color: #ffd700;
+        text-shadow: 0 0 10px #ffd700;
+        z-index: 101;
+        min-height: 28px;
+    }
+
+    .enemy-punch .arm-l {
+        animation: enemy-punch-anim 0.3s ease-in-out;
+    }
+
+    @@keyframes enemy-punch-anim {
+        0% {
+            transform: rotate(35deg);
         }
 
-    .input-window {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%,-50%);
-        z-index: 200;
-        background: rgba(0,0,0,0.95);
-        padding: 30px;
-        border-radius: 10px;
+        50% {
+            transform: rotate(-90deg) scaleX(1.5);
+        }
+
+        100% {
+            transform: rotate(35deg);
+        }
+    }
+
+    .bg-cpp {
+        background: linear-gradient(135deg, #001f3f, #00d2ff) !important;
+    }
+
+    .bg-python {
+        background: linear-gradient(135deg, #ffd700, #0000) !important;
+    }
+
+    .bg-cs {
+        background: linear-gradient(135deg, #2b0b3d, #512bd4) !important;
     }
 </style>
 
-<div class="container text-center">
-
+<div class="game-container @GetBackgroundClass()" @onkeydown="HandleKeyDown" @onkeyup="HandleKeyUp" tabindex="0">
     @if (gameState == "MENU")
     {
-        <h1 class="my-5 display-3">ROGUELIKE CODER</h1>
-        <p class="text-muted fs-4">If you die, you lose everything. Choose your target:</p>
-        <div class="d-flex justify-content-center flex-wrap mt-4">
-            @foreach (var lang in allLevels)
-            {
-                <div class="menu-card" @onclick="() => StartRun(lang)">
-                    <h2 style="color: @lang.Color">@lang.Language</h2>
-                    <p>Start Run</p>
-                </div>
-            }
-        </div>
-    }
-    else if (gameState == "PLAYING" || gameState == "COMBO" || gameState == "HEAL")
-    {
-        <div class="game-arena" tabindex="0" @onkeydown="HandleKeyDown" @onkeyup="HandleKeyUp" @ref="gameContainerRef" style="background: linear-gradient(to bottom, @(selectedLang?.Color ?? "#333"), #111);">
-
-            @if (comboBeam.IsActive)
-            {
-                <div class="projectile-beam" style="left: @(comboBeam.X)%; top: @(comboBeam.Y)%"></div>
-            }
-
-            <div class="d-flex justify-content-between p-3 text-white position-absolute w-100" style="z-index: 100;">
-                <div class="bars-container text-start">
-                    <div class="hud-bar"><div class="hp-fill" style="width: @(Math.Max(0, player.HP) / player.MaxHP * 100)%"></div><div class="bar-text">HP: @player.HP / @player.MaxHP</div></div>
-                    <div class="hud-bar"><div class="ep-fill" style="width: @(Math.Max(0, player.EP) / player.MaxEP * 100)%"></div><div class="bar-text">EP: @player.EP / @player.MaxEP</div></div>
-                    @if (player.PoisonStacks > 0)
-                    {
-                        <span class="badge bg-success mt-1">Poison: -@player.PoisonStacks HP/s</span>
-                    }
-                </div>
-
-                <div class="text-center">
-                    <h3 class="mb-0">Stage @currentStageData.Level</h3>
-                    <small>Atk: @player.BaseDamage</small>
-                </div>
-
-                <div class="bars-container text-end">
-                    <div class="hud-bar"><div class="hp-fill bg-danger" style="width: @(Math.Max(0, enemy.HP) / enemy.MaxHP * 100)%"></div><div class="bar-text">@selectedLang?.Language: @enemy.HP / @enemy.MaxHP</div></div>
-                    @if (enemy.IsShielded)
-                    {
-                        <span class="badge bg-info mt-1">SHIELDED (Immune)</span>
-                    }
-                </div>
-            </div>
-
-            <div class="fighter @player.StateClass @player.FlipClass @(player.PoisonStacks > 0 ? "poisoned" : "")" style="left: @(player.X)%">
-                <div class="head-logo text-primary bg-white">YOU</div>
-                <div class="torso"></div><div class="limb arm-left"></div><div class="limb arm-right"></div><div class="limb leg-left"></div><div class="limb leg-right"></div>
-            </div>
-
-            <div class="fighter enemy @enemy.StateClass @enemy.FlipClass @(enemy.IsHit ? "hit-effect" : "") @(enemy.IsShielded ? "shielded" : "")" style="left: @(enemy.X)%">
-                <div class="head-logo" style="background:@selectedLang?.Color; color:white;">@selectedLang?.Language.Substring(0, 1)</div>
-                <div class="torso" style="background: #ffcccc"></div><div class="limb arm-left" style="background: #ffcccc"></div><div class="limb arm-right" style="background: #ffcccc"></div><div class="limb leg-left" style="background: #ffcccc"></div><div class="limb leg-right" style="background: #ffcccc"></div>
-            </div>
-            <div class="ground"></div>
-        </div>
-    }
-    else if (gameState == "STAGE_CLEAR")
-    {
-        <div class="alert alert-success mt-5 p-5">
-            <h1>STAGE CLEARED!</h1>
-            <button class="btn btn-primary mt-3 btn-lg" @onclick="GenerateUpgrades">Continue to Upgrades</button>
-        </div>
-    }
-    else if (gameState == "UPGRADE_SELECT")
-    {
-        <div class="mt-5">
-            <h1 class="text-warning display-4 mb-4">CHOOSE YOUR UPGRADE</h1>
-            <div class="d-flex justify-content-center flex-wrap">
-                @foreach (var upgrade in currentUpgrades)
+        <div class="menu" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;">
+            <h1 style="font-size: 5rem; color: #00d2ff; text-shadow: 0 0 20px #00d2ff;">ROGUELIKE CODER</h1>
+            <div style="display:flex; gap:20px;">
+                @foreach (var level in allLevels)
                 {
-                    <div class="upgrade-card" @onclick="() => SelectUpgrade(upgrade)">
-                        <h1 class="mb-3">@upgrade.Icon</h1>
-                        <h4 class="text-info">@upgrade.Title</h4>
-                        <p class="text-muted">@upgrade.Description</p>
-                    </div>
+                    <button class="lang-btn" style="background:@level.Color; padding:20px 40px; border:none; border-radius:10px; color:white; cursor:pointer; font-size:1.2rem; font-weight:bold;"
+                            @onclick="() => SelectLanguage(level)">
+                        @level.Language
+                    </button>
                 }
             </div>
         </div>
     }
-    else if (gameState == "GAMEOVER" || gameState == "VICTORY")
+    else if (gameState == "GAMEOVER")
     {
-        <div class="alert mt-5 p-5 @(gameState == "VICTORY" ? "alert-warning border-warning" : "alert-danger border-danger")">
-            <h1 class="display-1">@(gameState == "VICTORY" ? "RUN COMPLETE!" : "PERMADEATH!")</h1>
-            <button class="btn btn-dark btn-lg mt-4" @onclick="GoToMenu">Return to Menu</button>
+        <div class="menu" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;">
+            <h1 style="font-size: 6rem; color: #ff4757; text-shadow: 0 0 20px #ff4757; margin-bottom: 20px;">GAME OVER</h1>
+            <button class="lang-btn" style="background:#555; padding:20px 40px; border:none; border-radius:10px; color:white; cursor:pointer; font-size:1.2rem;"
+                    @onclick='() => gameState = "MENU"'>
+                العودة للقائمة الرئيسية
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="arena">
+            @if (activeEffect == "BlueBeam")
+            {
+                <div class="blue-beam" style="left: @(player.X + 5)vw; top: 78vh;"></div>
+            }
+            @if (showRedLaser)
+            {
+                <div class="red-laser" style="left: @(player.X + 5)vw; width: @(enemy.X - player.X)vw;"></div>
+            }
+            @if (showPoisonCloud)
+            {
+                <div class="poison-cloud"></div>
+            }
+
+            <div class="stats-hud">
+                <div style="position:relative;">
+                    <div class="hp-container">
+                        <div class="hp-bar" style="width: @(Math.Max(0, player.HP))%; background: #00d2ff;"></div>
+                        <div class="hp-text">PLAYER HP: @((int)Math.Max(0, player.HP))%</div>
+                    </div>
+                    @if (poisonSecondsLeft > 0)
+                    {
+                        <div class="poison-bar" style="width: @(poisonSecondsLeft * 20)%;"></div>
+                    }
+                </div>
+
+                <div>
+                    <div style="text-align:center; font-size:0.85rem; margin-bottom:4px; color:#aaa;">
+                        @currentLevel.Language — Stage @(currentStageIndex + 1)/5
+                    </div>
+                    <div class="hp-container">
+                        <div class="hp-bar" style="width: @(Math.Max(0, enemy.HP))%; background: #ff4757;"></div>
+                        <div class="hp-text">ENEMY HP: @((int)Math.Max(0, enemy.HP))%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-label">@statusMessage</div>
+
+            @if (showCodeOverlay)
+            {
+                <div class="code-overlay">
+                    <h2 style="color: #00d2ff;">المرحلة @currentStage.Level: @currentStage.MoveName</h2>
+                    <p style="color: #aaa;">@currentStage.Description</p>
+                    <textarea @bind="playerCode" @bind:event="oninput" placeholder="// اكتب الكود البرمجي هنا..."></textarea>
+                    <div style="display:flex; justify-content: space-between;">
+                        <button class="lang-btn" style="background:#4ecca3; width: 80%; border:none; border-radius:5px; cursor:pointer;" @onclick="SubmitCode">تفعيل القدرة (Enter)</button>
+                        <button class="lang-btn" style="background:#555; width: 15%; border:none; border-radius:5px; cursor:pointer;" @onclick="() => showCodeOverlay = false">إغلاق (X)</button>
+                    </div>
+                </div>
+            }
+
+            @if (showTransitionOverlay && nextStageData != null)
+            {
+                <div class="code-overlay" style="text-align: center;">
+                    <h2 style="color: #4ecca3;">أحسنت! تم القضاء على العدو </h2>
+                    <h3 style="color: #00d2ff; margin-top: 20px;">المرحلة القادمة: @nextStageData.MoveName</h3>
+                    <p style="color: #aaa;">تجهّز بالكومبو التالي لتهزمه (اكتب هذا الكود لاحقاً):</p>
+                    <div style="background: #0a0a1a; padding: 15px; border-radius: 10px; color: #ff0055; font-family: monospace; font-size: 1.2rem; margin: 15px 0; border: 1px solid #333;">
+                        @nextStageData.Output
+                    </div>
+                    <button class="lang-btn" style="background:#00d2ff; width: 100%; color:#000; padding: 10px; font-weight: bold; border:none; border-radius:5px; cursor:pointer;" @onclick="StartNextStage">بدء المرحلة (Enter)</button>
+                </div>
+            }
+
+            <div class="ground"></div>
+
+            <div class="fighter player @GetPlayerClasses()" style="left: @(player.X)vw">
+                <div class="head"></div><div class="torso"></div>
+                <div class="arm-l"></div><div class="arm-r"></div>
+                <div class="leg-l"></div><div class="leg-r"></div>
+            </div>
+
+            <div class="fighter enemy @GetEnemyClasses()" style="left: @(enemy.X)vw">
+                <div class="head"></div><div class="torso"></div>
+                <div class="arm-l"></div><div class="arm-r"></div>
+                <div class="leg-l"></div><div class="leg-r"></div>
+            </div>
         </div>
     }
 </div>
 
 @code {
-    private string gameState = "MENU";
-    private ElementReference gameContainerRef;
-    private List<LevelData> allLevels = new();
-    private LevelData? selectedLang;
+    // STATE 
+    string gameState = "MENU";
+    List<LevelData> allLevels = new();
+    LevelData currentLevel = null!;
+    StageData currentStage = null!;
+    int currentStageIndex = 0;
 
-    private Fighter player = new() { HP = 100, MaxHP = 100, EP = 100, MaxEP = 100, BaseDamage = 3, X = 10 };
-    private Fighter enemy = new() { X = 80 };
-    private StageData currentStageData = new();
-    private List<UpgradeOption> currentUpgrades = new();
-    private Projectile comboBeam = new();
+    string playerCode = "";
+    bool showCodeOverlay = false;
+    bool showTransitionOverlay = false;
+    StageData? nextStageData = null;
 
-    private int currentStageIndex = 0;
-    private System.Threading.Timer? gameTimer;
+    string activeEffect = "";
+    string statusMessage = "";
+    Fighter player = new() { X = 15, HP = 100 };
+    Fighter enemy = new() { X = 80, HP = 100 };
 
-    // مؤقتات الذكاء الاصطناعي والتأثيرات
-    private int specialAttackTimer = 0;
-    private int poisonTickTimer = 0;
+    bool isWalking = false;
+    bool enemyIsWalking = false;
+    int walkDir = 0;
+    DateTime lastWalkStep = DateTime.MinValue;
+    const double StepSize = 1.8;
+    const int StepMs = 90;
+
+    string playerAttackClass = "";
+    string enemyAttackClass = "";
+    string enemySpecialClass = "";
+    bool isDodging = false;
+    bool playerHit = false;
+    bool enemyHit = false;
+    string playerFlip = "face-left";
+    string enemyFlip = "face-right";
+
+    bool showPoisonCloud = false;
+    bool showRedLaser = false;
+    int poisonSecondsLeft = 0;
+
+    System.Threading.Timer? poisonTimer;
+    System.Threading.Timer? gameLoop;
+
+    // توقيت الهجمات
+    DateTime lastEnemySpecial = DateTime.Now.AddSeconds(-20);
+    DateTime lastEnemyPunch = DateTime.Now; 
+
+    string GetBackgroundClass() => currentLevel?.Language switch
+    {
+        "C++" => "bg-cpp",
+        "Python" => "bg-python",
+        "C#" => "bg-cs",
+        _ => ""
+    };
 
     protected override async Task OnInitializedAsync()
     {
-        try
+        var filePath = Path.Combine(Env.WebRootPath, "data", "levels.json");
+        if (File.Exists(filePath))
         {
-            // إضافة خيارات لجعل القراءة غير حساسة لحالة الأحرف
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            allLevels = await Http.GetFromJsonAsync<List<LevelData>>($"{Nav.BaseUri}data/levels.json", options) ?? new();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading levels: {ex.Message}");
+            var json = await File.ReadAllTextAsync(filePath);
+            allLevels = JsonSerializer.Deserialize<List<LevelData>>(json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
         }
     }
 
-   protected override async Task OnAfterRenderAsync(bool firstRender)
-{
-    if (firstRender)
+    string GetPlayerClasses()
     {
-        // هذا الكود سيعمل فقط مرة واحدة عند تحميل الصفحة لأول مرة في المتصفح
-        try 
-        {
-            await JS.InvokeVoidAsync("playAudio", "op.mp3");
-        }
-        catch (Exception ex) 
-        {
-            Console.WriteLine("Audio error: " + ex.Message);
-        }
+        var parts = new List<string> { playerFlip };
+        if (isDodging) parts.Add("dodging");
+        if (isWalking) parts.Add("walking");
+        if (playerAttackClass != "") parts.Add(playerAttackClass);
+        if (playerHit) parts.Add("hit-reaction");
+        return string.Join(" ", parts);
     }
-}
 
-    private async Task StartRun(LevelData lang)
+    string GetEnemyClasses()
     {
-        selectedLang = lang;
+        var parts = new List<string> { enemyFlip };
+        if (enemyIsWalking) parts.Add("walking");
+        if (enemyAttackClass != "") parts.Add(enemyAttackClass);
+        if (enemySpecialClass != "") parts.Add(enemySpecialClass);
+        if (enemyHit) parts.Add("hit-reaction");
+        return string.Join(" ", parts);
+    }
+
+    async void SelectLanguage(LevelData lang)
+    {
+        currentLevel = lang;
         currentStageIndex = 0;
-        player = new Fighter { HP = 100, MaxHP = 100, EP = 100, MaxEP = 100, BaseDamage = 3, X = 10, PoisonStacks = 0 };
-
-        // تشغيل موسيقى المرحلة الخاصة باللغة
-        await JS.InvokeVoidAsync("playAudio", $"{lang.StyleSuffix}.mp3");
+        player.HP = 100;
         LoadStage();
+        gameState = "GAME";
+
+        var file = lang.Language switch
+        {
+            "C++" => "cpp.mp3",
+            "Python" => "py.mp3",
+            "C#" => "cs.mp3",
+            _ => ""
+        };
+        if (file != "") await JS.InvokeVoidAsync("playAudio", file);
+
+        gameLoop?.Dispose();
+        gameLoop = new System.Threading.Timer(OnGameTick, null, 0, 50);
+        StateHasChanged();
     }
 
-    private void LoadStage()
+    void LoadStage()
     {
-        if (selectedLang == null || currentStageIndex >= selectedLang.Stages.Count) { gameState = "VICTORY"; return; }
-
-        currentStageData = selectedLang.Stages[currentStageIndex];
-        player.X = 10; player.StateClass = "idle";
-        enemy = new Fighter { MaxHP = currentStageData.Hp, HP = currentStageData.Hp, X = 80, StateClass = "idle", IsShielded = false };
-        specialAttackTimer = 0; // تصفير مؤقت الضربة الخاصة للمرحلة الجديدة
-
-        gameState = "PLAYING";
-        gameTimer = new System.Threading.Timer(GameLoop, null, 0, 16);
-        FocusGame();
+        currentStage = currentLevel.Stages[currentStageIndex];
+        enemy.HP = currentStage.EnemyHP;
+        player.X = 15;
+        enemy.X = 80;
+        lastEnemySpecial = DateTime.Now.AddSeconds(-18);
+        showTransitionOverlay = false;
+        showCodeOverlay = false;
     }
 
-    // --- حلقة اللعبة الأساسية (Game Loop) 60 إطار في الثانية ---
-    private void GameLoop(object? state)
+    // GAME LOOP
+    void OnGameTick(object? state)
     {
-        if (gameState != "PLAYING") return;
+        
+        if (showCodeOverlay || showTransitionOverlay || gameState != "GAME") return;
+        
 
-        // تحديث اتجاه الوجوه (Flip Dynamics)
-        player.FlipClass = player.X > enemy.X ? "enemy-flip" : "";
-        enemy.FlipClass = enemy.X < player.X ? "enemy-flip" : "";
-
-        // تحرك العدو التلقائي (الاقتراب من اللاعب)
-        if (Math.Abs(enemy.X - player.X) > 10 && !enemy.IsHit && enemy.StateClass == "idle")
+        if (player.HP <= 0)
         {
-            enemy.X += enemy.X > player.X ? -0.15 : 0.15;
-            enemy.StateClass = "walking";
-        }
-        else if (enemy.StateClass == "walking") enemy.StateClass = "idle";
-
-        // هجوم العدو العادي (عشوائي عند الاقتراب)
-        if (Math.Abs(enemy.X - player.X) < 15 && enemy.StateClass == "idle" && !enemy.IsHit && new Random().Next(100) < 2)
-            EnemyAttack();
-
-        // نظام الضربة الخاصة للذكاء الاصطناعي (كل 15 ثانية)
-        specialAttackTimer += 16;
-        if (specialAttackTimer >= 15000)
-        {
-            ExecuteEnemySpecial();
-            specialAttackTimer = 0;
+            InvokeAsync(() => { gameState = "GAMEOVER"; StateHasChanged(); });
+            return;
         }
 
-        // نظام سم البايثون (ينقص الصحة كل ثانية بناءً على عدد الـ Stacks)
-        if (player.PoisonStacks > 0)
+        playerFlip = (player.X < enemy.X) ? "face-left" : "face-right";
+        enemyFlip = (enemy.X < player.X) ? "face-left" : "face-right";
+
+        // حركة اللاعب
+        if (walkDir != 0 && !isDodging)
         {
-            poisonTickTimer += 16;
-            if (poisonTickTimer >= 1000)
+            if ((DateTime.Now - lastWalkStep).TotalMilliseconds >= StepMs)
             {
-                player.HP -= player.PoisonStacks;
-                poisonTickTimer = 0;
+                lastWalkStep = DateTime.Now;
+                double nx = player.X + walkDir * StepSize;
+                if (nx >= 2 && nx <= 90) player.X = nx;
             }
         }
 
-        // فحص الموت
-        if (player.HP <= 0) { player.HP = 0; gameState = "GAMEOVER"; gameTimer?.Dispose(); }
+        double dist = Math.Abs(player.X - enemy.X);
+        double previousEnemyX = enemy.X;
+        if (dist <= 8)
+        {
+            if ((DateTime.Now - lastEnemyPunch).TotalMilliseconds > 1500)
+            {
+                lastEnemyPunch = DateTime.Now;
+                _ = EnemyNormalAttack();
+            }
+        }
+
+        if (dist > 6 && !enemy.IsShielded && !showRedLaser)
+        {
+            double enemySpeed = 0.4;
+            if (enemy.X < player.X) enemy.X += enemySpeed;
+            else enemy.X -= enemySpeed;
+        }
+
+        enemyIsWalking = (enemy.X != previousEnemyX);
+
+        if ((DateTime.Now - lastEnemySpecial).TotalSeconds > 7)
+        {
+            lastEnemySpecial = DateTime.Now;
+            InvokeAsync(EnemySpecialMove);
+        }
 
         InvokeAsync(StateHasChanged);
     }
 
-    // --- هجمات الذكاء الاصطناعي ---
-    private void EnemyAttack()
+    // ACTIONS
+    async Task EnemyNormalAttack()
     {
-        enemy.StateClass = $"attacking-{selectedLang?.StyleSuffix ?? "generic"}";
-        Task.Delay(150).ContinueWith(_ => { if (Math.Abs(enemy.X - player.X) < 16 && !player.IsBlocking) player.HP -= 5; });
-        Task.Delay(400).ContinueWith(_ => { enemy.StateClass = "idle"; InvokeAsync(StateHasChanged); });
+        enemyAttackClass = "enemy-punch";
+        await InvokeAsync(StateHasChanged);
+
+        await Task.Delay(150);
+
+        if (Math.Abs(player.X - enemy.X) < 9 && !isDodging)
+        {
+            player.HP -= 5;
+            playerHit = true;
+            await InvokeAsync(StateHasChanged);
+            await Task.Delay(200);
+            playerHit = false;
+        }
+
+        await Task.Delay(150);
+        enemyAttackClass = "";
+        await InvokeAsync(StateHasChanged);
     }
 
-    // تنفيذ الضربة الخاصة بناءً على لغة البرمجة (المتطلب 3)
-    private void ExecuteEnemySpecial()
+    async Task PlayerAttack()
     {
-        if (selectedLang?.Language == "Python")
+        if (playerAttackClass != "" || isDodging) return;
+        playerAttackClass = GetAttackClass(currentStage.MoveName);
+        int dur = currentStage.MoveName == "Ultimate Combo" ? 800 : 450;
+        await Task.Delay(dur / 2);
+
+        if (Math.Abs(player.X - enemy.X) < 7)
         {
-            // بايثون: ضربة سامة تتراكم
-            player.PoisonStacks += 1;
-            enemy.StateClass = "attacking-python";
-            Task.Delay(500).ContinueWith(_ => { enemy.StateClass = "idle"; });
-        }
-        else if (selectedLang?.Language == "C++")
-        {
-            // سي++: 5 ضربات متتالية لا يمكن صدها
-            Task.Run(async () =>
+            double dmg = currentStage.MoveName == "Ultimate Combo" ? 6 : 3;
+            if (!enemy.IsShielded)
             {
-                for (int i = 0; i < 5; i++)
-                {
-                    enemy.StateClass = "attacking-cpp";
-                    await InvokeAsync(StateHasChanged);
-                    await Task.Delay(150);
-
-                    if (Math.Abs(enemy.X - player.X) < 20) player.HP -= 3; // Unblockable range check
-
-                    enemy.StateClass = "idle";
-                    await InvokeAsync(StateHasChanged);
-                    await Task.Delay(100);
-                }
-            });
-        }
-        else if (selectedLang?.Language == "C#")
-        {
-            // سي شارب: درع مناعة لمدة 5 ثواني
-            enemy.IsShielded = true;
-            Task.Delay(5000).ContinueWith(_ => { enemy.IsShielded = false; });
-        }
-    }
-
-    // --- مدخلات لوحة المفاتيح والتحكم ---
-    private void HandleKeyDown(KeyboardEventArgs e)
-    {
-        if (gameState != "PLAYING" || player.StateClass == "dodging") return;
-
-        // الحركة (المتطلب 1)
-        if (e.Key == "ArrowLeft") { player.X = Math.Max(0, player.X - 3); player.StateClass = "walking"; }
-        if (e.Key == "ArrowRight") { player.X = Math.Min(100, player.X + 3); player.StateClass = "walking"; }
-
-        // التفادي (المتطلب 2: تدحرج خلف العدو)
-        if (e.Key == " ")
-        {
-            player.IsBlocking = true;
-            player.StateClass = "dodging";
-            // القفز خلف العدو
-            player.X = player.X < enemy.X ? enemy.X + 15 : enemy.X - 15;
-
-            Task.Delay(400).ContinueWith(_ =>
-            {
-                player.StateClass = "idle";
-                player.IsBlocking = false;
-            });
-        }
-        if (e.Key.ToLower() == "z") PlayerAttackSequence();
-    }
-
-    private void HandleKeyUp(KeyboardEventArgs e)
-    {
-        if (e.Key == "ArrowLeft" || e.Key == "ArrowRight") player.StateClass = "idle";
-    }
-
-    private void PlayerAttackSequence()
-    {
-        if (player.StateClass != "idle" && player.StateClass != "walking") return;
-
-        player.StateClass = player.AttackIndex switch { 0 => "attacking-rhand", 1 => "attacking-lhand", 2 => "attacking-kick", _ => "attacking-rhand" };
-        player.AttackIndex = (player.AttackIndex + 1) % 3;
-
-        if (Math.Abs(player.X - enemy.X) < 16)
-        {
-            // تفادي العدو الذكي للضربة (فرصة 20%)
-            if (new Random().Next(100) < 20 && enemy.StateClass == "idle")
-            {
-                enemy.StateClass = "dodging";
-                enemy.X = enemy.X < player.X ? player.X + 15 : player.X - 15;
-                Task.Delay(400).ContinueWith(_ => { enemy.StateClass = "idle"; });
+                enemy.HP -= dmg;
+                enemyHit = true;
+                await Task.Delay(220);
+                enemyHit = false;
+                CheckEnemyDeath();
             }
             else
             {
-                ApplyDamageToEnemy(player.BaseDamage);
-                player.EP = Math.Min(player.MaxEP, player.EP + 10);
+                await SetStatus("Shield blocked the attack!");
             }
         }
-        Task.Delay(250).ContinueWith(_ => { if (player.StateClass.Contains("attack")) player.StateClass = "idle"; InvokeAsync(StateHasChanged); });
+
+        await Task.Delay(dur / 2);
+        playerAttackClass = "";
     }
 
-    private void ApplyDamageToEnemy(double dmg)
+    void HandleKeyDown(KeyboardEventArgs e)
     {
-        // درع السي شارب يمنع الضرر
-        if (enemy.IsShielded) return;
-
-        enemy.HP -= dmg;
-        enemy.IsHit = true;
-        Task.Delay(300).ContinueWith(_ => { enemy.IsHit = false; InvokeAsync(StateHasChanged); });
-
-        if (enemy.HP <= 0) { gameState = "STAGE_CLEAR"; gameTimer?.Dispose(); }
-    }
-
-    // --- الترقيات ---
-    private void GenerateUpgrades()
-    {
-        var pool = new List<UpgradeOption>
+        if (showTransitionOverlay)
         {
-            new UpgradeOption { Title = "Max HP", Description = "+20 HP", Icon = "❤️", ApplyUpgrade = () => { player.MaxHP += 20; player.HP += 20; } },
-            new UpgradeOption { Title = "Max EP", Description = "+30 EP", Icon = "⚡", ApplyUpgrade = () => { player.MaxEP += 30; player.EP += 30; } },
-            new UpgradeOption { Title = "Damage Up", Description = "+2 Base Damage", Icon = "⚔️", ApplyUpgrade = () => player.BaseDamage += 2 },
-            new UpgradeOption { Title = "Antidote", Description = "Remove Poison", Icon = "🧪", ApplyUpgrade = () => player.PoisonStacks = 0 }
-        };
-        currentUpgrades = pool.OrderBy(x => new Random().Next()).Take(3).ToList();
-        gameState = "UPGRADE_SELECT";
+            if (e.Key == "Enter") StartNextStage();
+            return;
+        }
+        if (showCodeOverlay)
+        {
+            if (e.Key == "Enter") SubmitCode();
+            return;
+        }
+        if (e.Key == "ArrowRight") { walkDir = 1; isWalking = true; }
+        if (e.Key == "ArrowLeft") { walkDir = -1; isWalking = true; }
+        if (e.Key == "ArrowUp" || e.Key == "ArrowDown") { walkDir = 0; isWalking = false; }
+        if (e.Key.ToLower() == "z") _ = PlayerAttack();
+        if (e.Key.ToLower() == "x") { showCodeOverlay = !showCodeOverlay; walkDir = 0; isWalking = false; }
+        if (e.Code == "Space") _ = DodgeAction();
     }
 
-    private void SelectUpgrade(UpgradeOption upgrade)
+    void HandleKeyUp(KeyboardEventArgs e) { if (e.Key == "ArrowRight" || e.Key == "ArrowLeft") { walkDir = 0; isWalking = false; } }
+
+    string GetAttackClass(string moveName) => moveName switch
     {
-        upgrade.ApplyUpgrade();
-        currentStageIndex++;
-        LoadStage();
-    }
+        "Blue Beam" => "blue-beam-attack",
+        "Logic Fall" => "logic-fall-attack",
+        "Vortex" => "vortex-attack",
+        "Ladder Fall" => "ladder-fall-attack",
+        "Ultimate Combo" => "ultimate-combo-attack",
+        _ => "blue-beam-attack"
+    };
 
-    private async Task GoToMenu()
+    async Task EnemySpecialMove()
     {
-        gameState = "MENU";
-        await JS.InvokeVoidAsync("playAudio", "op.mp3"); // العودة لموسيقى القائمة
+        if (currentLevel.Language == "Python")
+        {
+            enemySpecialClass = "enemy-special-python";
+            showPoisonCloud = true;
+            await SetStatus("Python Venom! 2 HP/sec for 5 seconds!");
+            poisonSecondsLeft = 5;
+            await Task.Delay(1200);
+            enemySpecialClass = "";
+            poisonTimer?.Dispose();
+            poisonTimer = new System.Threading.Timer(async _ =>
+            {
+                if (showCodeOverlay || showTransitionOverlay || gameState != "GAME") return;
+                if (poisonSecondsLeft <= 0)
+                {
+                    poisonTimer?.Dispose();
+                    showPoisonCloud = false;
+                    await InvokeAsync(StateHasChanged);
+                    return;
+                }
+                if (!isDodging) player.HP -= 2;
+                poisonSecondsLeft--;
+                await InvokeAsync(StateHasChanged);
+            }, null, 1000, 1000);
+        }
+        else if (currentLevel.Language == "C++")
+        {
+            await SetStatus("C++ Laser Beam!");
+            showRedLaser = true;
+            await Task.Delay(200);
+            if (!isDodging)
+            {
+                player.HP -= 15;
+                playerHit = true;
+                await InvokeAsync(StateHasChanged);
+                await Task.Delay(200);
+                playerHit = false;
+            }
+            else { await SetStatus(" Dodged Laser!"); }
+            await Task.Delay(200);
+            showRedLaser = false;
+            await InvokeAsync(StateHasChanged);
+        }
+        else if (currentLevel.Language == "C#")
+        {
+            enemy.IsShielded = true;
+            enemySpecialClass = "enemy-special-cs";
+            await SetStatus(" C# Shield active for 5 seconds!");
+            await Task.Delay(5000);
+            enemy.IsShielded = false;
+            enemySpecialClass = "";
+            await SetStatus("Shield expired.");
+        }
     }
 
-    private void FocusGame() => Task.Delay(100).ContinueWith(_ => InvokeAsync(() => JS.InvokeVoidAsync("HTMLElement.prototype.focus.call", gameContainerRef)));
-    public void Dispose() => gameTimer?.Dispose();
+    async Task DodgeAction()
+    {
+        if (isDodging) return;
+        isDodging = true; isWalking = false;
+        await Task.Delay(500);
+        isDodging = false;
+    }
+
+    async void SubmitCode()
+    {
+        if (playerCode.Trim() == currentStage.Output)
+        {
+            activeEffect = "BlueBeam";
+            double dmg = currentStage.Level == 5 ? 60 : 35;
+            if (enemy.IsShielded) { dmg *= 0.3; await SetStatus(" Shield reduced code damage!"); }
+            enemy.HP -= dmg;
+            showCodeOverlay = false; playerCode = "";
+            await Task.Delay(1000);
+            activeEffect = "";
+            CheckEnemyDeath();
+        }
+        else
+        {
+            player.HP -= 15; playerHit = true;
+            await Task.Delay(300); playerHit = false;
+            await SetStatus("Wrong answer! -15 HP");
+        }
+        StateHasChanged();
+    }
+
+    void CheckEnemyDeath()
+    {
+        if (enemy.HP <= 0)
+        {
+            if (currentStageIndex + 1 < currentLevel.Stages.Count)
+            {
+                nextStageData = currentLevel.Stages[currentStageIndex + 1];
+                showTransitionOverlay = true;
+            }
+            else { _ = JS.InvokeVoidAsync("stopAudio"); gameState = "MENU"; }
+        }
+    }
+
+    void StartNextStage() { currentStageIndex++; LoadStage(); }
+
+    async Task SetStatus(string msg)
+    {
+        statusMessage = msg;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(2500);
+        if (statusMessage == msg) statusMessage = "";
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        gameLoop?.Dispose();
+        poisonTimer?.Dispose();
+    }
 }

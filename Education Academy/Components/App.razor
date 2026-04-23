@@ -35,6 +35,21 @@
         };
     </script>
     <script>
+    window.bgAudio = new Audio();
+    window.bgAudio.loop = true;
+
+    window.playAudio = (fileName) => {
+        window.bgAudio.pause();
+        window.bgAudio.src = "audio/" + fileName;
+        window.bgAudio.play().catch(e => console.log("Audio play blocked:", e));
+    };
+
+    window.stopAudio = () => {
+        window.bgAudio.pause();
+        window.bgAudio.currentTime = 0;
+    };
+</script>
+    <script>
         window.addEventListener("keydown", function(e) {
             // منع تحرك الصفحة فقط عند ضغط الأسهم أو المسافة، وبشرط ألا يكون اللاعب يكتب في مربع نص
             if(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(e.code) > -1) {

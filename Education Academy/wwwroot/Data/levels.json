@@ -1,0 +1,140 @@
+﻿[
+  {
+    "language": "C++",
+    "color": "#004482",
+    "stages": [
+      {
+        "level": 1,
+        "enemyHP": 30,
+        "code": "int x = 3 + 20; cout << x;",
+        "output": "int x = 3 + 20;",
+        "description": "اكتب كود لجمع 3 + 20",
+        "moveName": "Blue Beam"
+      },
+      {
+        "level": 2,
+        "enemyHP": 60,
+        "code": "int d = 3; if(d == 3) cout << \"true\";",
+        "output": "true",
+        "description": " int d = 3; if(d == 3) cout << \"true\"; من هذا الكود ما هو الاوتبوت ",
+        "moveName": "Logic Fall"
+      },
+      {
+        "level": 3,
+        "enemyHP": 90,
+        "code": "for(int i=0; i<10; i++) cout << \"winner\";",
+        "output": "for(int i=0; i<10; i++) cout << \"winner\";",
+        "description": "أنشئ لوب بسيطة تطبع كلمة winner 10 مرات .",
+        "moveName": "Vortex"
+      },
+      {
+        "level": 4,
+        "enemyHP": 120,
+        "code": "int a[]={20}; cout << a[0];",
+        "output": "int a[]={20}; cout << a[0];",
+        "description": "قم بتعريف مصفوفة تحتوي الرقم 20 واطبع العنصر الأول.",
+        "moveName": "Ladder Fall"
+      },
+      {
+        "level": 5,
+        "enemyHP": 150,
+        "code": "int x=3; if(x==3) for(int i=0; i<1; i++) cout << \"final\";",
+        "output": "int x=3; if(x==3) for(int i=0; i<1; i++) cout << \"final\";",
+        "description": "تحدي الدمج النهائي: اجمع بين الشرط والتكرار.",
+        "moveName": "Ultimate Combo"
+      }
+    ]
+  },
+  {
+    "language": "C#",
+    "color": "#512bd4",
+    "stages": [
+      {
+        "level": 1,
+        "enemyHP": 30,
+        "code": "int x = 3 + 20; Console.Write(x);",
+        "output": "int x = 3 + 20; Console.Write(x);",
+        "description": "اجمع 3 + 20 في C# واطبع النتيجة.",
+        "moveName": "Blue Beam"
+      },
+      {
+        "level": 2,
+        "enemyHP": 60,
+        "code": "int d = 3; if(d == 3) Console.Write(\"true\");",
+        "output": "true",
+        "description": "int d = 3; if(d == 3) Console.Write(\"true\"); ما هي طباعة ",
+        "moveName": "Logic Fall"
+      },
+      {
+        "level": 3,
+        "enemyHP": 90,
+        "code": "for(int i=0; i<1; i++) Console.Write(\"winner\");",
+        "output": "for(int i=0; i<1; i++) Console.Write(\"winner\");",
+        "description": "أنشئ لوب بسيطة تطبع كلمة vortex مره .",
+        "moveName": "winner"
+      },
+      {
+        "level": 4,
+        "enemyHP": 120,
+        "code": "int[] a = {20}; Console.Write(a[0]);",
+        "output": "20",
+        "description": "int[] a = {20}; Console.Write(a[0]); اطبع القيمة المخزنة في أول عنصر بالمصفوفة.",
+        "moveName": "Ladder Fall"
+      },
+      {
+        "level": 5,
+        "enemyHP": 150,
+        "code": "if(3 == 3) Console.Write(\"final\");",
+        "output": "final",
+        "description": "ما هي طباعة if(3 == 3) Console.Write(\"final\");",
+        "moveName": "Ultimate Combo"
+      }
+    ]
+  },
+  {
+    "language": "Python",
+    "color": "#D89E00",
+    "stages": [
+      {
+        "level": 1,
+        "enemyHP": 30,
+        "code": "x = 3 + 20",
+        "output": "x = 3 + 20",
+        "description": "اجمع 3 و 20 في بايثون واطبع النتيجة.",
+        "moveName": "Blue Beam"
+      },
+      {
+        "level": 2,
+        "enemyHP": 60,
+        "code": "d = 3 if d == 3: print('true', end='')",
+        "output": "d = 3 if d == 3: print('true', end='')",
+        "description": "تحقق من الشرط واطبع true.",
+        "moveName": "Logic Fall"
+      },
+      {
+        "level": 3,
+        "enemyHP": 90,
+        "code": "for i in range(1): print('winner', end='')",
+        "output": "vortex",
+        "description": "winner اكتب ال لووب تطبع ",
+        "moveName": "winner"
+      },
+      {
+        "level": 4,
+        "enemyHP": 120,
+        "code": "a = [20] print(a[0], end='')",
+        "output": "20",
+        "description": "a = [20] print(a[0], end='') ما هى الطباعة في تلك المصفوفة .",
+        "moveName": "Ladder Fall"
+      },
+      {
+        "level": 5,
+        "enemyHP": 150,
+        "code": "print('final')",
+        "output": "print('final')",
+        "description": "اطبع final .",
+        "moveName": "Ultimate Combo"
+      }
+    ]
+  }
+]
