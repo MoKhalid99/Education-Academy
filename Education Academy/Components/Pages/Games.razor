@@ -15,80 +15,83 @@
     </div>
 
     <div class="games-grid">
-        @* اللعبة الأولى: تتطلب 200 *@
+        @* الصف الأول *@
         @renderGameCard("المتاهة", "اهلا بك في المغارة العجيبة، اجمع الكنز للعودة للمنزل", 200, "fas fa-code", "/game/codecombat")
-
-        @* اللعبة الثانية: تتطلب 300 *@
         @renderGameCard("FG", "لعبة قتالية حيث الأعداء هم أكواد برمجية خاطئة", 300, "fas fa-plus-circle", "/game/fgmadd")
-
-        @* اللعبة الثالثة: تتطلب 400 *@
         @renderGameCard("تصليح الطرق", "لعبة سيارات حيث مهمتك تفادي الأعداء وتصليح الأخطاء", 400, "fas fa-car-side", "/game/roadrad")
+
+        @* الصف الثاني*@
+        @renderGameCard("بداية المبرمج", "احذر و لا تجعل الكره تسقط", 30, "fas fa-ball", "https://scratch.mit.edu/projects/10128515/editor/")
+        @renderGameCard("تحرك في الفضاء", "اصلح حركات لتجمع نقاط اكثر", 60, "fas fa-star", "https://scratch.mit.edu/projects/394877180/editor/")
+        @renderGameCard("بينج بونج", "تعلم كيف تصنع الاعاب لتتالق", 100, "fas fa-lightbulb", "https://scratch.mit.edu/projects/935757174/editor/")
     </div>
 </div>
 
 @code {
-    private int userXP = 0; // سنستخدم الـ XP الآن
+    private int userXP = 0; 
     private bool isAdmin = false;
     private bool isLoaded = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync() 
     {
         var authState = await AuthProvider.GetAuthenticationStateAsync();
-        var userPrincipal = authState.User;
+    var userPrincipal = authState.User; 
 
-        if (userPrincipal.Identity != null && userPrincipal.Identity.IsAuthenticated)
+        if (userPrincipal.Identity != null && userPrincipal.Identity.IsAuthenticated) 
         {
-            isAdmin = userPrincipal.IsInRole("Admin");
-            var userId = userPrincipal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            isAdmin = userPrincipal.IsInRole("Admin"); 
+    var userId = userPrincipal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value; 
 
-            if (!string.IsNullOrEmpty(userId))
+            if (!string.IsNullOrEmpty(userId)) 
             {
-                // جلب نقاط الـ XP الحقيقية من قاعدة البيانات مباشرة عبر الخدمة
                 userXP = await ProgressionService.GetUserXPAsync(userId);
-            }
+}
         }
-        isLoaded = true;
+        isLoaded = true; 
     }
 
-    private bool IsGameLocked(int requiredXP)
-    {
-        // الأدمن تفتح له كل الألعاب
-        if (isAdmin) return false;
-
-        //  إذا كانت نقاط الطالب أقل من النقاط المطلوبة، تظل اللعبة مغلقة
-        return userXP < requiredXP;
+    private bool IsGameLocked(int requiredXP) 
+{
+    if (isAdmin) return false; 
+        return userXP < requiredXP; 
     }
 
-    private RenderFragment renderGameCard(string title, string description, int requiredXP, string iconClass, string url)
-    {
-        bool isLocked = IsGameLocked(requiredXP);
-
+private RenderFragment renderGameCard(string title, string description, int requiredXP, string iconClass, string url) 
+{
+    bool isLocked = IsGameLocked(requiredXP); 
         return __builder =>
         {
             <div class="game-card @(isLocked ? "locked" : "unlocked")" @onclick="() => NavigateToGame(url, isLocked)">
                 <div class="card-content">
                     @if (isLocked)
-                    {
-                        <div class="lock-badge">🔒 مطلوب @requiredXP XP لفتح اللعبة</div>
-                    }
-                    <div class="icon-box">
-                        <i class="@iconClass"></i>
-                    </div>
-                    <h3>@title</h3>
-                    <p>@description</p>
-                    <div class="level-badge">@(requiredXP) XP</div>
-                </div>
-            </div>
-        };
-    }
-
-    private void NavigateToGame(string url, bool isLocked)
-    {
-        if (!isLocked)
         {
-            Nav.NavigateTo(url);
+        <div class="lock-badge">🔒 مطلوب @requiredXP XP</div> 
         }
+        <div class="icon-box">
+            <i class="@iconClass"></i>
+        </div>
+        <h3>@title</h3> 
+        <p>@description</p> 
+        <div class="level-badge">@(requiredXP) XP</div> 
+    </div>
+</div>
+        };
+}
+
+private void NavigateToGame(string url, bool isLocked) 
+{
+    if (!isLocked) 
+        {
+        if (url.StartsWith("http"))
+        {
+            Nav.NavigateTo(url, forceLoad: true);
+        }
+        else
+        {
+            Nav.NavigateTo(url); 
+            }
     }
+}
 }
 
 <style>
@@ -101,88 +104,72 @@
 
     .games-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 30px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0px 30px;
         margin-top: 40px;
     }
 
     .game-card {
-        transition: transform 0.3s ease, filter 0.3s ease;
-        position: relative;
+        transition: transform 0.3s ease;
+         position: relative;
     }
 
     .card-content {
         background: white;
-        border-radius: 20px;
+        border-radius: 0px; 
         padding: 40px 20px;
         text-align: center;
-        border: 2px solid transparent;
+        border: 1px solid #e2e8f0;
         cursor: pointer;
+        height: 100%;
     }
 
     .game-card.unlocked:hover {
-        transform: translateY(-10px);
+        transform: scale(1.02); 
+        z-index: 10;
     }
-
-        .game-card.unlocked:hover .card-content {
-            border-color: #4b7983;
-        }
 
     .game-card.locked {
         filter: grayscale(0.8);
-        cursor: not-allowed;
+         cursor: not-allowed;
     }
 
     .level-badge {
         position: absolute;
-        top: 20px;
-        right: 20px;
-        background: #4b7983;
+         top: 10px;
+         right: 10px;
+         background: #4b7983;
+         color: white;
+         padding: 2px 10px;
+         border-radius: 20px;
+         font-size: 0.7rem;
+        }
+
+    .lock-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #ef4444;
         color: white;
-        padding: 5px 15px;
-        border-radius: 50px;
-        font-size: 0.8rem;
+        padding: 2px 8px;
+        border-radius: 5px;
+        font-size: 0.7rem;
     }
 
     .icon-box {
-        font-size: 3rem;
-        margin-bottom: 20px;
+        font-size: 2.5rem;
+        margin-bottom: 15px;
         color: #4b7983;
-    }
-
-    .game-icon {
-        color: #4b7983;
-    }
-
-    .lock-icon {
-        color: #94a3b8;
-    }
-
-    .status-btn {
-        margin-top: 20px;
-        padding: 10px 30px;
-        border-radius: 10px;
-        font-weight: bold;
-        display: inline-block;
-    }
-
-    .play-btn {
-        background: #4b7983;
-        color: white;
-    }
-
-    .locked-btn {
-        background: #e2e8f0;
-        color: #64748b;
     }
 
     h3 {
         color: #1e293b;
-        margin-bottom: 10px;
+         font-size: 1.2rem;
+        margin-bottom: 8px;
     }
 
     p {
         color: #64748b;
-        font-size: 0.9rem;
+         font-size: 0.85rem;
     }
 </style>
