@@ -977,15 +977,11 @@
                 StateHasChanged();
             }
         }
-    }
-       // دالة الصوت
-    private async Task ManageMusic(int id) { try { string track = id == 15 ? "audio/The boss ost.mp3" : "audio/ost.mpeg"; await JS.InvokeVoidAsync("gameAudio.play", track, true); } catch { } }
-
-    // دالة حساب نسبة صحة العدو لشريط الصحة
-    private int GetHpPercent(Enemy e) => (int)((double)e.Health / e.MaxHealth * 100);
     public void Dispose()
     {
         // استدعاء دالة stop التي قمت بتعريفها في App.razor
         JS.InvokeVoidAsync("gameAudio.stop");
     }
- }
+                   
+}
+ 

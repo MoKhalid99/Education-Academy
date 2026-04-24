@@ -159,10 +159,11 @@
     private bool IsLevelLocked(int levelId)
     {
         if (isAdmin) return false;
-        if (levelId <= 1) return false;
+        if (levelId <= 0) return false;
 
         // منطق فتح الأقفال بناءً على الـ XP (تأكد أن القيم متوافقة مع AcademyDbContext)
-        if (levelId == 2 && userXP >= 100) return false;
+        if (levelId == 1 && userXP >= 100) return false;
+        if (levelId == 2 && userXP >= 200) return false;
         if (levelId == 3 && userXP >= 200) return false;
         if (levelId == 4 && userXP >= 300) return false;
 
