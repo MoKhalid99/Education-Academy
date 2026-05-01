@@ -1,0 +1,158 @@
+﻿@page "/materials/{LevelId:int}"
+@using EducationAcademy.Models
+@inject NavigationManager Nav
+
+<div class="materials-page-container">
+    <div class="header">
+        <button class="btn-back" @onclick="GoBack">رجوع</button>
+        <h2>المواد التعليمية - المستوى @LevelId</h2>
+    </div>
+
+    <div class="materials-grid">
+        @foreach (var material in Materials)
+        {
+            <div class="material-card" @onclick="() => OpenFile(material)">
+                <div class="card-preview">
+                    @if (material.EncryptedFilePath.EndsWith(".mp4"))
+                    {
+                        <svg class="preview-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    }
+                    else
+                    {
+                        <svg class="preview-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    }
+                </div>
+
+                <div class="card-info">
+                    <span class="material-title">@material.Title</span>
+                    <span class="material-type">@(material.EncryptedFilePath.EndsWith(".mp4") ? "فيديو" : "ملف PDF")</span>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .materials-page-container {
+        padding: 40px;
+        background-color: #dfdfdf; 
+        min-height: 100vh;
+        direction: rtl;
+        font-family: Arial, sans-serif;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .btn-back {
+        background-color: #4b7983;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    /* تصميم الشبكة (Grid) */
+    .materials-grid {
+        display: grid;
+        /* إنشاء أعمدة تتجاوب مع الشاشة */
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    /* تصميم الكارت (Card) */
+    .material-card {
+        background-color: white;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        cursor: pointer;
+        transition: transform 0.2s;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .material-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+    /* المربع الرمادي الخاص بالصورة/الأيقونة */
+    .card-preview {
+        background-color: #eeeeee;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #cccccc;
+    }
+
+    .preview-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    /* الجزء الأبيض السفلي */
+    .card-info {
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .material-title {
+        font-size: 14px;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .material-type {
+        font-size: 12px;
+        color: #111;
+        font-weight: bold;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public int LevelId { get; set; }
+
+    // قائمة المواد
+    private List<Material> Materials { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        // استدعاء البيانات من قاعدة البيانات
+        if (LevelId == 0)
+        {
+            Materials = new List<Material>
+            {
+                new Material { Id = 1, Title = "الدرس الأول - فيديو الشرح", EncryptedFilePath = "materials/level0/Vd01.mp4", LevelId = 0 },
+                new Material { Id = 2, Title = "ملف الشرح 1", EncryptedFilePath = "materials/level0/PDF01.pdf", LevelId = 0 },
+                new Material { Id = 3, Title = "ملف الشرح 2", EncryptedFilePath = "materials/level0/PDF02.pdf", LevelId = 0 },
+                new Material { Id = 4, Title = "ملف الشرح 3", EncryptedFilePath = "materials/level0/PDF03.pdf", LevelId = 0 }
+            };
+        }
+        else
+        {
+            // يمكنك هنا وضع كود لجلب بيانات المستويات الأخرى
+            Materials = new List<Material>();
+        }
+    }
+
+    private void GoBack()
+    {
+        Nav.NavigateTo($"/level-details/{LevelId}");
+    }
+
+    private void OpenFile(Material material)
+    {
+        
+        Nav.NavigateTo($"/{material.EncryptedFilePath}", true);
+    }
+}
