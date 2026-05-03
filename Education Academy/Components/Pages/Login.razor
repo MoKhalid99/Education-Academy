@@ -6,6 +6,8 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject NavigationManager NavigationManager
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
 <PageTitle>تسجيل الدخول - Education Academy</PageTitle>
 
 <div class="big_container">
@@ -24,9 +26,46 @@
 
                 <button type="submit" class="register_button">سجل الدخول</button>
 
-                <div class="login-redirect">
-                    ليس لديك حساب؟
-                    <a href="/register" class="redirect-link">أنشئ حساباً الآن</a>
+                <div class="social-login-container">
+                    <form action="account/ExternalLogin" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="returnUrl" value="/" />
+                        <button type="submit" name="provider" value="Google" class="social-btn google-btn">
+                            <i class="fab fa-google-plus-g"></i>
+                        </button>
+                    </form>
+                    <form action="account/ExternalLogin" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="returnUrl" value="/" />
+                        <button type="submit" name="provider" value="Facebook" class="social-btn facebook-btn">
+                            <i class="fab fa-facebook-f"></i>
+                        </button>
+                    </form>
+                    <form action="account/ExternalLogin" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="returnUrl" value="/" />
+                        <button type="submit" name="provider" value="Twitter" class="social-btn twitter-btn">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                    </form>
+                    <form action="account/ExternalLogin" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="returnUrl" value="/" />
+                        <button type="submit" name="provider" value="LinkedIn" class="social-btn linkedin-btn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="links-wrapper">
+                    <div class="white-box">
+                        <a href="/forgot-password" class="redirect-link">نسيت كلمة المرور؟</a>
+                    </div>
+
+                    <div class="white-box">
+                        <span>ليس لديك حساب؟</span>
+                        <a href="/register" class="redirect-link">أنشئ حساباً الآن</a>
+                    </div>
                 </div>
             </form>
         </div>
@@ -64,7 +103,7 @@
 
     .container {
         display: flex;
-        background-image: url("gp images/Frame 2377011.png"); 
+        background-image: url("gp images/Frame 2377011.png");
         background-repeat: no-repeat;
         background-size: cover;
         background-position-y: bottom;
@@ -80,7 +119,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        row-gap: 35px;
+        row-gap: 25px;
         height: 100%;
         position: absolute;
         left: 50%;
@@ -128,22 +167,97 @@
             transform: scale(1.1);
         }
 
+    /* تنسيق الأيقونات الاجتماعية  */
+    .social-login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 30px;
+        margin-top: -5px;
+    }
+
+    .social-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .social-btn:hover {
+            transform: scale(1.15);
+        }
+
+    .google-btn {
+        color: #EA4335;
+        font-size: 38px;
+    }
+
+    .facebook-btn i {
+        background-color: #3B5998;
+        color: white;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .twitter-btn {
+        color: #1DA1F2;
+        font-size: 40px;
+    }
+
+    .linkedin-btn {
+        color: #0077B5;
+        font-size: 40px;
+    }
+
+
     /* Links & Redirect */
     .login-redirect {
         color: #333;
         font-size: 15px;
-        margin-top: -15px;
+        margin-top: -5px;
         text-align: center;
     }
 
+    .links-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px; /* المسافة بين المستطيلين */
+        margin-top: 10px;
+    }
+
+    /* المستطيل الأبيض خلف الكلام */
+    .white-box {
+        background-color: rgba(255, 255, 255, 0.85); 
+        padding: 8px 25px;
+        border-radius: 25px;
+        box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+        font-size: 14px;
+        color: #333;
+        display: flex;
+        gap: 5px;
+        align-items: center;
+    }
+
+    /* تنسيق الروابط داخل المستطيل */
     .redirect-link {
         color: #009999;
         text-decoration: none;
         font-weight: bold;
-        transition: color 0.2s;
+        transition: color 0.2s, transform 0.2s;
     }
 
         .redirect-link:hover {
             color: #007777;
+            text-decoration: underline;
         }
 </style>

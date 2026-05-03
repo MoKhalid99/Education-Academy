@@ -7,6 +7,8 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject NavigationManager NavigationManager
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
 <PageTitle>إنشاء حساب - Education Academy</PageTitle>
 
 <div class="big_container">
@@ -32,8 +34,40 @@
                     <div class="validation-message">@errorMessage</div>
                 }
 
+                <div class="social-login-container">
+                    <form action="account/ExternalLogin" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="returnUrl" value="/" />
+                        <button type="submit" name="provider" value="Google" class="social-btn google-btn">
+                            <i class="fab fa-google-plus-g"></i>
+                        </button>
+                    </form>
+                    <form action="account/ExternalLogin" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="returnUrl" value="/" />
+                        <button type="submit" name="provider" value="Facebook" class="social-btn facebook-btn">
+                            <i class="fab fa-facebook-f"></i>
+                        </button>
+                    </form>
+                    <form action="account/ExternalLogin" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="returnUrl" value="/" />
+                        <button type="submit" name="provider" value="Twitter" class="social-btn twitter-btn">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                    </form>
+                    <form action="account/ExternalLogin" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="returnUrl" value="/" />
+                        <button type="submit" name="provider" value="LinkedIn" class="social-btn linkedin-btn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </button>
+                    </form>
+                </div>
+
                 <div class="login-redirect">
-                    لديك حساب بالفعل؟ <a href="/login" class="redirect-link">سجل دخولك</a>
+                    لديك حساب بالفعل؟
+                    <a href="/login" class="redirect-link">سجل دخولك</a>
                 </div>
             </form>
         </div>
@@ -44,7 +78,6 @@
     private RegisterModel registerModel = new();
     private string? errorMessage;
 
-    // بيانات التي تم إدخالها في الفورم
     private async Task HandleRegister()
     {
         var user = new ApplicationUser
@@ -53,11 +86,9 @@
             Email = registerModel.Email,
             FullName = registerModel.FullName,
             PhoneNumber = registerModel.Phone,
-            // لاي طالب حديث
             XP = 0,
             CurrentLevel = 1
         };
-
         var result = await UserManager.CreateAsync(user, registerModel.Password);
 
         if (result.Succeeded)
@@ -79,12 +110,11 @@
         justify-content: center;
         align-items: center;
         height: 100vh;
-        direction: rtl; /* لضبط اتجاه الصفحة باللغة العربية */
+        direction: rtl;
     }
 
     .container {
         display: flex;
-        /* مسار الصورة   */
         background-image: url("gp images/Frame 2377011.png");
         background-repeat: no-repeat;
         background-size: cover;
@@ -92,7 +122,7 @@
         border-top-left-radius: 60px;
         height: 627px;
         width: 781px;
-        position: relative; 
+        position: relative;
     }
 
     .form_container {
@@ -100,7 +130,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        row-gap: 25px; /* تم تقليل المسافة قليلاً لاستيعاب خانة الهاتف */
+        row-gap: 20px;
         height: 100%;
         position: absolute;
         left: 50%;
@@ -141,7 +171,7 @@
         font-weight: bold;
         cursor: pointer;
         transition: 0.25s ease-in-out;
-        margin-top: 10px;
+        margin-top: 5px;
     }
 
         .register_button:hover {
@@ -150,6 +180,56 @@
             border: 1px solid white;
             transform: scale(1.1);
         }
+
+    /* تنسيق الأيقونات الاجتماعية */
+    .social-login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 30px;
+    }
+
+    .social-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.2s ease-in-out;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .social-btn:hover {
+            transform: scale(1.15);
+        }
+
+    .google-btn {
+        color: #EA4335;
+        font-size: 38px;
+    }
+
+    .facebook-btn i {
+        background-color: #3B5998;
+        color: white;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .twitter-btn {
+        color: #1DA1F2;
+        font-size: 40px;
+    }
+
+    .linkedin-btn {
+        color: #0077B5;
+        font-size: 40px;
+    }
 
     /* رسائل الخطأ والتوجيه */
     .validation-message {
@@ -164,7 +244,7 @@
     .login-redirect {
         color: #333;
         font-size: 0.9rem;
-        margin-top: 10px;
+        margin-top: 5px;
         text-align: center;
         background-color: rgba(255, 255, 255, 0.7);
         padding: 5px 15px;

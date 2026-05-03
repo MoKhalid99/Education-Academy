@@ -22,11 +22,10 @@ builder.Services.AddScoped<IProgressionService, ProgressionService>();
 
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 
-// إضافة دعم الـ Controllers لخدمة الـ API
+// إضافة دعم الـ Controllers لخدمة الـ API  للتسجيل الخارجي
 builder.Services.AddControllers();
 
 builder.Services.AddMudServices();
-builder.Services.AddScoped<EncryptionService>();
 builder.Services.AddCascadingAuthenticationState();
 
 // ربط قاعدة البيانات 
@@ -45,10 +44,34 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
 .AddEntityFrameworkStores<AcademyDbContext>()
 .AddDefaultTokenProviders();
 
+// إعداد تسجيل الدخول الخارجي (Google , facebook , twiter )
 builder.Services.AddAuthentication(options => {
 	options.DefaultScheme = IdentityConstants.ApplicationScheme;
 	options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+})
+.AddGoogle(options =>
+{
+	options.ClientId = builder.Configuration["Authentication:Google:ClientId"]
+		?? throw new InvalidOperationException("لم يتم العثور على Google ClientId");
+	options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]
+		?? throw new InvalidOperationException("لم يتم العثور على Google ClientSecret");
+})
+.AddFacebook(options =>
+{
+	options.AppId = builder.Configuration["Authentication:Facebook:AppId"]
+		?? throw new InvalidOperationException("لم يتم العثور على Facebook AppId");
+	options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"]
+		?? throw new InvalidOperationException("لم يتم العثور على Facebook AppSecret");
+})
+.AddTwitter(options =>
+{
+	options.ConsumerKey = builder.Configuration["Authentication:Twitter:ConsumerKey"]
+		?? throw new InvalidOperationException("لم يتم العثور على Twitter ConsumerKey");
+	options.ConsumerSecret = builder.Configuration["Authentication:Twitter:ConsumerSecret"]
+		?? throw new InvalidOperationException("لم يتم العثور على Twitter ConsumerSecret");
+
 });
+
 
 // اضافة خدمات التخزين المحلي
 builder.Services.AddBlazoredLocalStorage();
@@ -77,10 +100,13 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // هام جداً للسماح بقراءة مجلد wwwroot
+app.UseStaticFiles();
 app.UseAntiforgery();
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 
 app.MapRazorComponents<App>()
 	.AddInteractiveServerRenderMode();
