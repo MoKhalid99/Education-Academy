@@ -570,7 +570,7 @@
                     IsCollision(bullets[j].X, bullets[j].Y, 6, 20, obj.X, obj.Y, obj.Width, obj.Height))
                 {
                     CreateExplosion(obj.X, obj.Y);
-                    _ = JSRuntime.InvokeVoidAsync("playAudio", "assets/df.mp3");
+                    _ = JSRuntime.InvokeVoidAsync("playAudio", "/df.mp3");
 
                     // النقاط تُحتسب فقط عند تدمير الأعداء وليس السيارات المسالمة
                     if (obj.Type == GameObjectType.Enemy)
@@ -613,7 +613,7 @@
     private void HandlePlayerHit()
     {
         CreateExplosion(playerX, playerY);
-        _ = JSRuntime.InvokeVoidAsync("playAudio", "assets/bad.mp3");
+        _ = JSRuntime.InvokeVoidAsync("playAudio", "/bad.mp3");
         lives--;
         invulnerableUntil = DateTime.Now.AddSeconds(2);
         if (lives <= 0) { if (!hasUsedRescue) TriggerRescueMode(); else isGameOver = true; }
