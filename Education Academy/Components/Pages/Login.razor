@@ -48,13 +48,17 @@
                             <i class="fab fa-twitter"></i>
                         </button>
                     </form>
-                    <form action="account/ExternalLogin" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="returnUrl" value="/" />
-                        <button type="submit" name="provider" value="LinkedIn" class="social-btn linkedin-btn">
-                            <i class="fab fa-linkedin-in"></i>
-                        </button>
-                    </form>
+                    @* زر LinkedIn مع شريط قريباً *@
+                    <div class="coming-soon-wrapper">
+                        <form action="/Error?type=comingsoon" method="get">
+                            <input type="hidden" name="returnUrl" value="/" />
+                            <button type="submit" name="provider" value="LinkedIn" class="social-btn linkedin-btn">
+                                <i class="fab fa-linkedin-in"></i>
+                            </button>
+                        </form>
+                        @* قريبا *@
+                        <div class="ribbon">قريباً</div>
+                    </div>
                 </div>
 
                 <div class="links-wrapper">
@@ -213,9 +217,44 @@
         font-size: 40px;
     }
 
+    /* قريبا */
+    .coming-soon-wrapper {
+        position: relative;
+        display: inline-block;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+
+    /*linkdin تنسيق الزر  */
     .linkedin-btn {
         color: #0077B5;
         font-size: 40px;
+        padding: 10px 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* تصميم الشريط البرتقالي */
+    .ribbon {
+        position: absolute;
+        top: 12px;
+        right: -25px; /* تحريكه للزاوية */
+        background-color: #ff9800;
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        padding: 2px 30px;
+        transform: rotate(45deg); /* تدوير الشريط */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .linkedin-btn {
+        opacity: 0.7;
+        filter: grayscale(0.5);
     }
 
 

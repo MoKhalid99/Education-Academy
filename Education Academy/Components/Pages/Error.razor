@@ -1,32 +1,121 @@
 ﻿@page "/Error"
 @using System.Diagnostics
+@inject NavigationManager NavManager
 
-<PageTitle>Error</PageTitle>
+<PageTitle>Error - @(IsComingSoon ? "قريباً" : "خطأ")</PageTitle>
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="error-container">
+    <div class="error-content">
+        @if (IsComingSoon)
+        {
+            <svg class="error-icon" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <h1 class="error-heading">هذه الصفحة ليست موجودة بعد</h1>
+            <p class="error-subtext">نحن نعمل حالياً على تطوير هذه الميزة، ستكون متاحة لكم في وقت قريب جداً.</p>
+        }
+        else
+        {
+            <svg class="error-icon" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            <h1 class="error-heading">عذراً، حدث خطأ غير متوقع</h1>
+            <p class="error-subtext">نواجه بعض الصعوبات التقنية حالياً. يرجى المحاولة مرة أخرى لاحقاً.</p>
+        }
 
-@if (ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@RequestId</code>
-    </p>
-}
+        @if (!IsComingSoon && ShowRequestId)
+        {
+            <div class="debug-box">
+                <span>رقم تتبع الخطأ:</span>
+                <code>@RequestId</code>
+            </div>
+        }
+        
+        <a href="/" class="back-home-btn">العودة للرئيسية</a>
+    </div>
+</div>
 
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+<style>
+    .error-container {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #ffffff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        text-align: center;
+        padding: 20px;
+    }
 
-@code{
+    .error-content {
+        max-width: 450px;
+    }
+
+    .error-icon {
+        color: #48666D;
+        margin-bottom: 25px;
+    }
+
+    .error-heading {
+        font-size: 1.8rem;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-weight: 700;
+    }
+
+    .error-subtext {
+        font-size: 1.1rem;
+        color: #7f8c8d;
+        line-height: 1.6;
+        margin-bottom: 30px;
+    }
+
+    .debug-box {
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: #95a5a6;
+        border: 1px solid #eee;
+        margin-bottom: 30px;
+    }
+
+        .debug-box code {
+            display: block;
+            color: #48666D;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+    .back-home-btn {
+        display: inline-block;
+        padding: 12px 25px;
+        background-color: #4b7983;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background 0.3s ease;
+    }
+
+        .back-home-btn:hover {
+            background-color: #48666D;
+            color: white;
+        }
+</style>
+
+@code {
     [CascadingParameter]
     private HttpContext? HttpContext { get; set; }
+
+    [SupplyParameterFromQuery(Name = "type")]
+    public string? ErrorType { get; set; }
+
+    // التحقق المباشر من الكلمة
+    private bool IsComingSoon => ErrorType?.Equals("comingsoon", StringComparison.OrdinalIgnoreCase) == true;
 
     private string? RequestId { get; set; }
     private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
