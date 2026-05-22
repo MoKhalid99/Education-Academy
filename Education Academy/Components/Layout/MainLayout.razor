@@ -3,13 +3,17 @@
 @implements IDisposable
 
 <LoadingOverlay IsVisible="isPageLoading" />
+<div class="page @(isDarkMode ? "dark-theme" : "")">
+    @* نمرر حالة المود والحدث للـ Header *@
+    <Header IsDarkMode="isDarkMode" OnToggleDarkMode="ToggleDarkMode" />
+    <div class="page-wrapper">
 
-<div class="page-wrapper">
-    <Header />
+    
+        @Body
 
-@Body
-
-    <Footer />
+    
+        <Footer  />
+    </div>
 </div>
 
 @code
@@ -29,7 +33,6 @@
         StateHasChanged();
 
         // محاكاة وقت التحميل
-        //يمكن تعديل الوقت
         await Task.Delay(3000);
 
         // إخفاء الشاشة بعد انتهاء التنقل
@@ -42,5 +45,383 @@
         // إلغاء الاشتراك عند إغلاق التطبيق لتجنب تسريب الذاكرة
         Navigation.LocationChanged -= HandleLocationChanged;
     }
+
+    private bool isDarkMode = false;
+
+    private void ToggleDarkMode()
+    {
+        isDarkMode = !isDarkMode;
+    }
     
 }
+<style>
+    /* المتغيرات الأساسية - Light Mode */
+    :root {
+        /* الخلفيات */
+        --bg-body:            #ffffff;
+        --bg-card:            #f5f5f5;
+        --bg-input:           #d4d4d4;
+        --bg-input-focus:     #ffffff;
+        --bg-overlay:         rgba(255,255,255,0.9);
+
+        /* الألوان الرئيسية */
+        --btn-main:           #4b7983;
+        --btn-main-hover:     #3a6370;
+        --btn-text:           #ffffff;
+        --accent:             #8dc9d4;
+
+        /* النصوص */
+        --text-color:         #111111;
+        --text-muted:         #444444;
+        --text-on-dark:       #ffffff;
+
+        /* الهيدر */
+        --nav-bg:             #ffffff;
+        --nav-border:         #eeeeee;
+        --nav-shadow:         rgba(0,0,0,0.1);
+
+        /* الفوتر */
+        --footer-bg:          linear-gradient(to right, #4c6d74 0%, #8dc9d4 100%);
+        --footer-text:        #111111;
+        --footer-link:        #1a1a1a;
+        --footer-wave-fill:   #ffffff;
+        --footer-divider:     rgba(255,255,255,0.45);
+        --footer-icon:        #1a1a1a;
+        --footer-icon-bg:     rgba(0,0,0,0.12);
+
+        /* الحدود */
+        --border-color:       #dddddd;
+        --divider-color:      #e0e0e0;
+
+        /* الحالات */
+        --hover-bg:           rgba(0,0,0,0.05);
+        --focus-ring:         rgba(75,121,131,0.4);
+
+        /* النجوم */
+        --star-empty:         #e0e0e0;
+        --star-fill:          orange;
+
+
+
+        /* انتقالات */
+        --transition-speed:   0.35s;
+    }
+
+    /* المتغيرات - Dark Mode */
+    .dark-theme {
+        /* main */
+        --bg-body:            #0f1923;
+        --bg-card:            #172130;
+        --bg-input:           #1e2d3d;
+        --bg-input-focus:     #243547;
+        --bg-overlay:         rgba(15,25,35,0.95);
+
+        /* الألوان الرئيسية */
+        --btn-main:           #2a4a5a;
+        --btn-main-hover:     #0d1720;
+        --btn-text:           #ffffff;
+        --accent:             #ffffff;
+
+        /* النصوص */
+        --text-color:         #b0c8d0;
+        --text-muted:         #6a8a94;
+        --text-on-dark:       #cccccc;
+
+        /* الهيدر */
+        --nav-bg:             #0d1720;
+        --nav-border:         #1e3040;
+        --nav-shadow:         rgba(0,0,0,0.6);
+
+        /* الفوتر */
+        --footer-bg:          linear-gradient(to right, #4c6d74 0%, #8dc9d4 100%);
+        --footer-text:        #111111;
+        --footer-link:        #1a1a1a;
+        --footer-wave-fill:   #0f1923;
+        --footer-divider:     rgba(255,255,255,0.45);
+        --footer-icon:        #1a1a1a;
+        --footer-icon-bg:     rgba(0,0,0,0.12);
+
+        /* الحدود*/
+        --border-color:       #1e3a4a;
+        --divider-color:      #1a3040;
+
+        /* الحالات */
+        --hover-bg:           rgba(123,45,62,0.08);
+        --focus-ring:         rgba(123,45,62,0.4);
+
+        /* النجوم */
+        --star-empty:         #3a2a2e;
+        --star-fill:          #ffb347;
+
+
+        --transition-speed:   0.35s;
+    }
+
+    /* تطبيق المتغيرات على الصفحة الكاملة */
+    .page {
+        background-color: var(--bg-body);
+        color: var(--text-color);
+        min-height: 100vh;
+        transition:
+            background-color var(--transition-speed) ease,
+            color            var(--transition-speed) ease;
+    }
+
+    /* عكس الألوان في الدارك مود*/
+    .dark-theme * {
+        color: inherit;
+        border-color: var(--border-color);
+        transition:
+            background-color var(--transition-speed) ease,
+            color            var(--transition-speed) ease,
+            border-color     var(--transition-speed) ease;
+    }
+
+    /* الخلفيات البيضاء */
+    .dark-theme .bg-white,
+    .dark-theme [style*="background-color: white"],
+    .dark-theme [style*="background-color: #fff"],
+    .dark-theme [style*="background-color: #ffffff"] {
+        background-color: var(--bg-card) !important;
+    }
+
+    /* الكروت والـ containers */
+    .dark-theme .card,
+    .dark-theme .box,
+    .dark-theme .panel,
+    .dark-theme .container,
+    .dark-theme .wrapper {
+        background-color: var(--bg-card);
+        border-color: var(--border-color);
+    }
+
+    /* الـ inputs والـ textareas والـ selects */
+    .dark-theme input,
+    .dark-theme textarea,
+    .dark-theme select {
+        background-color: var(--bg-input) !important;
+        color: var(--text-color) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    .dark-theme input:focus,
+    .dark-theme textarea:focus,
+    .dark-theme select:focus {
+        background-color: var(--bg-input-focus) !important;
+        outline-color: var(--focus-ring);
+        box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+
+
+    /* جميع النصوص داخل الفوتر */
+    .dark-theme footer *,
+    .dark-theme .footer *,
+    .dark-theme [class*="footer"] * {
+        color: var(--footer-text) !important;
+    }
+
+    /* روابط الفوتر */
+    .dark-theme footer a,
+    .dark-theme .footer a,
+    .dark-theme [class*="footer"] a {
+        color: var(--footer-link) !important;
+        opacity: 1 !important;
+        text-decoration: none;
+        transition: color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .dark-theme footer a:hover,
+    .dark-theme .footer a:hover,
+    .dark-theme [class*="footer"] a:hover {
+        color: var(--footer-text) !important;
+        text-shadow: 0 0 8px rgba(255,255,255,0.3);
+    }
+
+    /* فواصل الفوتر */
+    .dark-theme footer hr,
+    .dark-theme footer .divider,
+    .dark-theme .footer hr,
+    .dark-theme .footer .divider {
+        border-color: var(--footer-divider) !important;
+        opacity: 1;
+    }
+
+    /* خلفية الـ wave في الفوتر */
+    .dark-theme footer .wave path,
+    .dark-theme footer [class*="wave"] path,
+    .dark-theme .footer .wave path,
+    .dark-theme .footer [class*="wave"] path {
+        fill: var(--footer-wave-fill) !important;
+    }
+
+    /* الأيقونات المخصصة */
+
+    /*أيقونات واضحة بلون لبني بسيط */
+    .dark-theme .fa-volleyball-ball,
+    .dark-theme .fa-volleyball,
+    .dark-theme .fas.fa-volleyball-ball,
+    .dark-theme i[class*="fa-volleyball"],
+    .dark-theme .fa-star,
+    .dark-theme .fas.fa-star,
+    .dark-theme i[class*="fa-star"],
+    .dark-theme .fa-lightbulb,
+    .dark-theme .fas.fa-lightbulb,
+    .dark-theme i[class*="fa-lightbulb"],
+    .dark-theme .fa-code,
+    .dark-theme .fas.fa-code,
+    .dark-theme i[class*="fa-code"],
+    .dark-theme .fa-plus-circle,
+    .dark-theme .fas.fa-plus-circle,
+    .dark-theme i[class*="fa-plus-circle"],
+    .dark-theme .fa-car-side,
+    .dark-theme .fas.fa-car-side,
+    .dark-theme i[class*="fa-car-side"] {
+        color: #8dc9d4 !important;
+        filter: none !important;
+        opacity: 1 !important;
+        text-shadow: 0 0 8px rgba(141,201,212,0.4);
+    }
+
+    /* SVG - أيقونة play (polygon points="5 3 19 12 5 21 5 3") */
+    .dark-theme svg polygon[points="5 3 19 12 5 21 5 3"],
+    .dark-theme svg polygon[points="5 3 19 12 5 21"] {
+        fill: var(--footer-icon) !important;
+        stroke: var(--footer-icon) !important;
+        filter: none !important;
+        opacity: 1 !important;
+    }
+
+    /* SVG - أيقونة file-text (path المخصص للملف) */
+    .dark-theme svg path[d*="M14 2H6"],
+    .dark-theme svg polyline[points*="14 2 14 8"],
+    .dark-theme svg line[x1="16"][y1="13"],
+    .dark-theme svg line[x1="16"][y1="17"],
+    .dark-theme svg polyline[points*="10 9"] {
+        stroke: var(--footer-icon) !important;
+        fill: none !important;
+        filter: none !important;
+        opacity: 1 !important;
+    }
+
+    /* الجداول*/
+    .dark-theme table {
+        background-color: var(--bg-card);
+        color: var(--text-color);
+    }
+
+    .dark-theme th {
+        background-color: var(--bg-body);
+        color: var(--text-color);
+        border-color: var(--border-color);
+    }
+
+    .dark-theme td {
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .dark-theme tr:nth-child(even) {
+        background-color: rgba(90,180,194,0.04);
+    }
+
+    /* الروابط*/
+    .dark-theme a:not(.low_section_buttons_special):not(.low_section_buttons_special2):not(.low_section_buttons_special3) {
+        color: var(--accent);
+    }
+
+    .dark-theme a:hover:not(.low_section_buttons_special):not(.low_section_buttons_special2):not(.low_section_buttons_special3) {
+        color: var(--btn-main);
+    }
+
+    /* الفواصل*/
+    .dark-theme hr,
+    .dark-theme .divider {
+        border-color: var(--divider-color);
+    }
+
+    /* الـ modals والـ dialogs */
+    .dark-theme .modal,
+    .dark-theme .dialog,
+    .dark-theme .popup {
+        background-color: var(--bg-card);
+        color: var(--text-color);
+        border-color: var(--border-color);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    /* الـ badges والـ tags */
+    .dark-theme .badge,
+    .dark-theme .tag,
+    .dark-theme .chip {
+        background-color: var(--bg-input);
+        color: var(--text-color);
+    }
+
+    /* الـ alerts */
+    .dark-theme .alert-info    { background-color: #0e2a38; border-color: #1a4a5a; color: #7ec8d8; }
+    .dark-theme .alert-success { background-color: #0e2a1e; border-color: #1a4a2e; color: #7ec898; }
+    .dark-theme .alert-warning { background-color: #2a1e0e; border-color: #4a3a1a; color: #d4a86a; }
+    .dark-theme .alert-danger  { background-color: #2a0e0e; border-color: #4a1a1a; color: #d47a7a; }
+
+    /* الـ scrollbar في الدارك مود */
+    .dark-theme ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    .dark-theme ::-webkit-scrollbar-track {
+        background: var(--bg-body);
+    }
+    .dark-theme ::-webkit-scrollbar-thumb {
+        background: #2a4a5a;
+        border-radius: 4px;
+        border: 2px solid var(--bg-body);
+    }
+    .dark-theme ::-webkit-scrollbar-thumb:hover {
+        background: var(--accent);
+    }
+
+    /* placeholder */
+    .dark-theme ::placeholder {
+        color: var(--text-muted) !important;
+        opacity: 0.8;
+    }
+
+    /* العناصر رسومية في الدارك مود*/
+    .dark-theme [style*="background-color: #8dc9d4"],
+    .dark-theme [style*="background-color: #4b7983"],
+    .dark-theme [style*="background-color: #4c6d74"] {
+        background-color: var(--bg-card) !important;
+        border: 1px solid var(--border-color);
+    }
+
+    .dark-theme .teal-section,
+    .dark-theme .accent-section,
+    .dark-theme [class*="teal-bg"],
+    .dark-theme [class*="accent-bg"] {
+        background: linear-gradient(135deg, #0d2b33 0%, #1a4050 100%) !important;
+        color: var(--text-color) !important;
+    }
+
+    /* الأزرار في الدارك مود */
+    .dark-theme .btn-primary,
+    .dark-theme button[class*="btn-main"],
+    .dark-theme [class*="main-btn"] {
+        background-color: var(--btn-main) !important;
+        color: var(--btn-text) !important;
+        transition: background-color 0.25s ease;
+    }
+
+    .dark-theme .btn-primary:hover,
+    .dark-theme button[class*="btn-main"]:hover,
+    .dark-theme [class*="main-btn"]:hover {
+        background-color: var(--btn-main-hover) !important;
+    }
+
+    /* الكروت في الدارك مود */
+    .dark-theme .card,
+    .dark-theme .course-card,
+    .dark-theme [class*="-card"] {
+        background-color: var(--bg-card) !important;
+        border-color: var(--border-color) !important;
+    }
+</style>

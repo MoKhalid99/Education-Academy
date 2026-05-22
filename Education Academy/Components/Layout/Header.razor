@@ -2,6 +2,8 @@
 @using System.Security.Claims
 @inject EducationAcademy.Services.IProgressionService ProgressionService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
 
 <div class="head_section_container">
     <div class="top_head_section">
@@ -9,20 +11,31 @@
             <img class="open_book_pic" src="gp images/Book open.png" />
             <p class="education_academy">Education Academy</p>
         </div>
+        
+        <div class="container_for_notes_title">
+        </div>
+
         <div class="container_for_notes_title">
             <div class="search_div">
-                <button class="search_menu">
+                @* زر القائمة هنا ليقوم بفتح وإغلاق القائمة السفلى *@
+                <button class="search_menu" @onclick="ToggleMenu">
                     <img src="gp images/search menu.png" alt="" class="search_menu_photo" />
                 </button>
-                <input id="search" type="text" placeholder="ابحث هنا" class="search_here" />
-                <button class="search_menu">
+                
+                @* البحث وضبط حدث الضغط على Enter *@
+                <input id="search" type="text" placeholder="ابحث هنا" class="search_here" 
+                       @bind="searchQuery" @onkeyup="HandleSearchKeyUp" />
+                
+                @* عند الضغط على العدسة يتم الانتقال للبحث *@
+                <button class="search_menu" @onclick="ExecuteSearch">
                     <img src="gp images/search lens.png" alt="" class="search_lens" />
                 </button>
             </div>
         </div>
     </div>
 
-    <div class="low_head_section">
+    @* ديناميكي للتحكم بالظهور والاختفاء *@
+    <div class="low_head_section @(isMenuOpen ? "show" : "hide")">
         @* الرابط الرئيسي متاح للجميع *@
         <NavLink href="/" Match="NavLinkMatch.All">
             <button class="low_section_buttons">
@@ -67,7 +80,7 @@
             </Authorized>
         </AuthorizeView>
 
-        @* قسم أزرار تسجيل الدخول والخروج *@
+        @* قسم أزرار تسجيل الدخول والخروج والوضع المظلم *@
         <div class="auth_buttons_container">
             <AuthorizeView>
                 <Authorized>
@@ -83,11 +96,35 @@
                         </div>
                     </div>
 
+                    @* زر تبديل الوضع المظلم *@
+                    <button class="theme-toggle-btn" @onclick="OnToggleDarkMode">
+                        @if (IsDarkMode)
+                        {
+                            <i class="fa-solid fa-sun"></i> @* أيقونة الشمس *@
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-moon"></i> @* أيقونة القمر *@
+                        }
+                    </button>
+
                     <a href="account/logout" class="low_section_buttons_special3" style="text-decoration: none;">
                         تسجيل خروج
                     </a>
                 </Authorized>
                 <NotAuthorized>
+                    @* زر تبديل الوضع المظلم يظهر أيضاً للمستخدمين غير المسجلين بجوار أزرار الدخول *@
+                    <button class="theme-toggle-btn" @onclick="OnToggleDarkMode">
+                        @if (IsDarkMode)
+                        {
+                            <i class="fa-solid fa-sun"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-solid fa-moon"></i>
+                        }
+                    </button>
+
                     @* يظهر فقط إذا لم يسجل الدخول *@
                     <NavLink href="/register">
                         <button class="low_section_buttons_special">سجل معانا</button>
@@ -102,9 +139,13 @@
 </div>
 
 @code {
+    [Parameter] public bool IsDarkMode { get; set; }
+    [Parameter] public EventCallback OnToggleDarkMode { get; set; }
     private int userXP = 0;
-    // الامتحان بيعطي 30 نقطة
-    private int xpPerTest = 30; 
+    private int xpPerTest = 30;
+    // متغيرات البحث والقائمة الجديدة
+    private string searchQuery = string.Empty;
+    private bool isMenuOpen = true; // القائمة مفتوحة تلقائياً
 
     protected override async Task OnInitializedAsync()
     {
@@ -122,14 +163,36 @@
         }
     }
 
+    // دالة فتح وإغلاق القائمة
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
+    }
+
+    // دالة تنفيذ البحث والتوجيه في المتصفح
+    private void ExecuteSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            // سيقوم بالانتقال إلى صفحة البحث وتمرير النص المكتوب
+            Navigation.NavigateTo($"/search?query={Uri.EscapeDataString(searchQuery)}");
+        }
+    }
+
+    // دالة لفحص إذا ضغط المستخدم على Enter أثناء الكتابة
+    private void HandleSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            ExecuteSearch();
+        }
+    }
+
     private string GetStarClass(int starIndex)
     {
         // حساب عدد الأثلاث بناءً على مقدار النقاط
-        int totalThirds = userXP / xpPerTest;
-        
-        //  (كل نجمة تأخذ 3 أثلاث)
+        int totalThirds = userXP / xpPerTest; //  (كل نجمة تأخذ 3 أثلاث)
         int thirdsForThisStar = totalThirds - (starIndex * 3);
-
         if (thirdsForThisStar >= 3) return "full";
         if (thirdsForThisStar == 2) return "two-thirds";
         if (thirdsForThisStar == 1) return "one-third";
@@ -138,149 +201,224 @@
 }
 
 <style>
-  .head_section_container {
-      display: flex;
-      flex-direction: column;
-      position: sticky;
-      top: 0;
-      background-color: white;
-      z-index: 1000;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
+    .head_section_container {
+        display: flex;
+        flex-direction: column;
+        position: sticky;
+        top: 0;
+        background-color: var(--nav-bg);
+        color: var(--text-color);
+        z-index: 1000;
+        box-shadow: 0 2px 5px var(--nav-shadow);
+        transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
 
-  .top_head_section {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 45px;
-  }
+    .top_head_section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 45px;
+    }
 
-  .container_for_notes_title {
-      display: flex;
-      align-items: center;
-  }
+    .container_for_notes_title {
+        display: flex;
+        align-items: center;
+    }
 
-  .education_academy {
-      font-family: 'roboto', sans-serif;
-      font-weight: bold;
-      font-size: 20px;
-      margin-left: 20px;
-  }
+    .education_academy {
+        font-family: 'roboto', sans-serif;
+        font-weight: bold;
+        font-size: 20px;
+        margin-left: 20px;
+        color: var(--text-color);
+        transition: color 0.3s ease;
+    }
 
-  .open_book_pic {
-      height: 50px;
-  }
+    .open_book_pic {
+        height: 50px;
+    }
 
-  .search_div {
-      background-color: rgb(212, 212, 212);
-      display: flex;
-      align-items: center;
-      border-radius: 20px;
-  }
+    /* شريط البحث*/
+    .search_div {
+        background-color: var(--bg-input);
+        display: flex;
+        align-items: center;
+        border-radius: 20px;
+        transition: background-color 0.3s ease;
+    }
 
-  .search_here {
-      border-radius: 20px;
-      height: 35px;
-      padding: 0 15px;
-      font-size: 16px;
-      border: none;
-      background-color: lightgray;
-  }
+    .search_here {
+        border-radius: 20px;
+        height: 35px;
+        padding: 0 15px;
+        font-size: 16px;
+        border: none;
+        background-color: transparent;
+        color: var(--text-color);
+        transition: color 0.3s ease;
+    }
 
-  .low_head_section {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      padding: 15px 0;
-      border-top: 1px solid #eee;
-  }
+    .search_here::placeholder {
+        color: var(--text-muted);
+    }
 
-  .low_section_buttons {
-      border: none;
-      background-color: transparent;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: bold;
-      transition: color 0.2s;
-  }
+    /* القسم السفلي */
+    .low_head_section {
+        display: flex;
+        justify-content: center;
+        align-items: center; 
+        gap: 20px;
+        padding: 15px 0;
+        border-top: 1px solid var(--nav-border);
+        background-color: var(--nav-bg);
+        color: var(--text-color);
+        /* Slide Dynamic */
+        overflow: hidden;
+        max-height: 150px;
+        opacity: 1;
+        transition: max-height 0.4s ease-in-out,
+                    padding 0.4s ease-in-out,
+                    opacity 0.3s ease-in-out,
+                    background-color 0.3s ease,
+                    border-color 0.3s ease;
+    }
 
-  .low_section_buttons:hover { color: orange; }
+    /* يتحرك لأعلى ويختفي */
+    .low_head_section.hide {
+        max-height: 0;
+        padding: 0;
+        opacity: 0;
+        border-top: 1px solid transparent;
+        pointer-events: none;
+    }
 
-  .low_section_buttons_special {
-      background-color: #4b7983;
-      color: white;
-      padding: 5px 20px;
-      border-radius: 7px;
-      border: none;
-      cursor: pointer;
-  }
-  
-  .low_section_buttons_special2 {
-      background-color: #4b7983;
-      color: white;
-      padding: 5px 20px;
-      border-radius: 7px;
-      border: none;
-      cursor: pointer;
-      margin-right: 10px;
-  }
+    /* أزرار التنقل */
+    .low_section_buttons {
+        border: none;
+        background-color: transparent;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        color: var(--text-color);
+        transition: color 0.2s ease;
+    }
 
+    .low_section_buttons_text {
+        color: var(--text-color);
+        margin: 0;
+        transition: color 0.2s ease;
+    }
+
+    .low_section_buttons:hover,
+    .low_section_buttons:hover .low_section_buttons_text {
+        color: orange;
+    }
+
+    /* أزرار تسجيل الدخول / الخروج */
+    .low_section_buttons_special,
+    .low_section_buttons_special2,
     .low_section_buttons_special3 {
-        background-color: #4b7983;
-        color: white;
+        background-color: var(--btn-main) !important;
+        color: var(--btn-text) !important;
         padding: 5px 20px;
         border-radius: 7px;
         border: none;
         cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .low_section_buttons_special2 {
         margin-right: 10px;
     }
 
-  .auth_buttons_container {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-  }
+    .low_section_buttons_special3 {
+        margin-right: 10px;
+        text-decoration: none;
+        display: inline-block;
+    }
 
-  .user-profile-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-  }
+    .low_section_buttons_special:hover,
+    .low_section_buttons_special2:hover,
+    .low_section_buttons_special3:hover {
+        background-color: var(--btn-main-hover) !important;
+        transform: translateY(-1px);
+    }
 
-  .user_name {
-      font-size: 16px;
-      color: #4b7983;
-      font-weight: bold;
-      margin: 0;
-  }
+    /* Auth container */
+    .auth_buttons_container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
 
-  /* تنسيقات النجوم */
-  .stars-container {
-      display: inline-flex;
-      direction: ltr; /* لجعل التعبئة من اليسار لليمين  */
-      gap: 3px;
-  }
+    .user-profile-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-  .star {
-      position: relative;
-      font-size: 22px;
-      color: #e0e0e0; /* لون النجمة الفارغة */
-      display: inline-block;
-  }
+    /* اسم المستخدم */
+    .user_name {
+        font-size: 16px;
+        color: var(--btn-main);
+        font-weight: bold;
+        margin: 0;
+        transition: color 0.3s ease;
+    }
 
-  .star::after {
-      content: '★';
-      position: absolute;
-      left: 0;
-      top: 0;
-      color: orange; /* لون النجمة الممتلئة */
-      overflow: hidden;
-      width: 0;
-      transition: width 0.3s ease;
-  }
+    /* النجوم */
+    .stars-container {
+        display: inline-flex;
+        direction: ltr;
+        gap: 3px;
+    }
 
-  .star.one-third::after { width: 33.33%; }
-  .star.two-thirds::after { width: 66.66%; }
-  .star.full::after { width: 100%; }
+    .star {
+        position: relative;
+        font-size: 22px;
+        color: var(--star-empty);
+        display: inline-block;
+        transition: color 0.3s ease;
+    }
 
+    .star::after {
+        content: '★';
+        position: absolute;
+        left: 0;
+        top: 0;
+        color: var(--star-fill);
+        overflow: hidden;
+        width: 0;
+        transition: width 0.3s ease;
+    }
+
+    .star.one-third::after  { width: 33.33%; }
+    .star.two-thirds::after { width: 66.66%; }
+    .star.full::after       { width: 100%; }
+
+    /* زر تبديل المود  */
+    .theme-toggle-btn {
+        background: none;
+        border: 2px solid var(--btn-main);
+        color: var(--btn-main);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        margin: 0 5px; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        transition: background-color 0.3s ease,
+                    color 0.3s ease,
+                    border-color 0.3s ease,
+                    transform 0.3s ease;
+    }
+
+    .theme-toggle-btn:hover {
+        background-color: var(--btn-main);
+        color: #ffffff;
+        transform: rotate(20deg);
+    }
 </style>
