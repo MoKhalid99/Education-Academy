@@ -6,14 +6,14 @@
 <div class="page @(isDarkMode ? "dark-theme" : "")">
     @* نمرر حالة المود والحدث للـ Header *@
     <Header IsDarkMode="isDarkMode" OnToggleDarkMode="ToggleDarkMode" />
-    <div class="page-wrapper">
+<div class="page-wrapper">
+    
+
+@Body
 
     
-        @Body
-
-    
-        <Footer  />
-    </div>
+        <Footer IsDarkMode="isDarkMode" />
+</div>
 </div>
 
 @code
@@ -33,6 +33,7 @@
         StateHasChanged();
 
         // محاكاة وقت التحميل
+        //يمكن تعديل الوقت
         await Task.Delay(3000);
 
         // إخفاء الشاشة بعد انتهاء التنقل
@@ -55,7 +56,7 @@
     
 }
 <style>
-    /* المتغيرات الأساسية - Light Mode */
+    /* Light Mode */
     :root {
         /* الخلفيات */
         --bg-body:            #ffffff;
@@ -107,9 +108,9 @@
         --transition-speed:   0.35s;
     }
 
-    /* المتغيرات - Dark Mode */
+    /* Dark Mode */
     .dark-theme {
-        /* main */
+        /* الخلفيات */
         --bg-body:            #0f1923;
         --bg-card:            #172130;
         --bg-input:           #1e2d3d;
@@ -117,10 +118,10 @@
         --bg-overlay:         rgba(15,25,35,0.95);
 
         /* الألوان الرئيسية */
-        --btn-main:           #2a4a5a;
-        --btn-main-hover:     #0d1720;
+        --btn-main:           #1e3040;
+        --btn-main-hover:     #6a8a94;
         --btn-text:           #ffffff;
-        --accent:             #ffffff;
+        --accent:             #8dc9d4;
 
         /* النصوص */
         --text-color:         #b0c8d0;
@@ -141,7 +142,7 @@
         --footer-icon:        #1a1a1a;
         --footer-icon-bg:     rgba(0,0,0,0.12);
 
-        /* الحدود*/
+        /* الحدود */
         --border-color:       #1e3a4a;
         --divider-color:      #1a3040;
 
@@ -167,7 +168,7 @@
             color            var(--transition-speed) ease;
     }
 
-    /* عكس الألوان في الدارك مود*/
+    /* عكس الألوان في الدارك مود */
     .dark-theme * {
         color: inherit;
         border-color: var(--border-color);
@@ -237,6 +238,13 @@
         text-shadow: 0 0 8px rgba(255,255,255,0.3);
     }
 
+    /* صور الفوتر - بدون أي فلتر */
+    .dark-theme footer img,
+    .dark-theme .footer img,
+    .dark-theme [class*="footer"] img {
+        filter: none !important;
+    }
+
     /* فواصل الفوتر */
     .dark-theme footer hr,
     .dark-theme footer .divider,
@@ -246,17 +254,9 @@
         opacity: 1;
     }
 
-    /* خلفية الـ wave في الفوتر */
-    .dark-theme footer .wave path,
-    .dark-theme footer [class*="wave"] path,
-    .dark-theme .footer .wave path,
-    .dark-theme .footer [class*="wave"] path {
-        fill: var(--footer-wave-fill) !important;
-    }
+    /* الأيقونات المخصصة في الدارك مود */
 
-    /* الأيقونات المخصصة */
-
-    /*أيقونات واضحة بلون لبني بسيط */
+    /* أيقونات واضحة */
     .dark-theme .fa-volleyball-ball,
     .dark-theme .fa-volleyball,
     .dark-theme .fas.fa-volleyball-ball,
@@ -282,7 +282,7 @@
         text-shadow: 0 0 8px rgba(141,201,212,0.4);
     }
 
-    /* SVG - أيقونة play (polygon points="5 3 19 12 5 21 5 3") */
+    /* SVG - أيقونة play */
     .dark-theme svg polygon[points="5 3 19 12 5 21 5 3"],
     .dark-theme svg polygon[points="5 3 19 12 5 21"] {
         fill: var(--footer-icon) !important;
@@ -291,7 +291,7 @@
         opacity: 1 !important;
     }
 
-    /* SVG - أيقونة file-text (path المخصص للملف) */
+    /* SVG - أيقونة file-text */
     .dark-theme svg path[d*="M14 2H6"],
     .dark-theme svg polyline[points*="14 2 14 8"],
     .dark-theme svg line[x1="16"][y1="13"],
@@ -303,7 +303,7 @@
         opacity: 1 !important;
     }
 
-    /* الجداول*/
+    /* الجداول */
     .dark-theme table {
         background-color: var(--bg-card);
         color: var(--text-color);
@@ -324,7 +324,7 @@
         background-color: rgba(90,180,194,0.04);
     }
 
-    /* الروابط*/
+    /* الروابط */
     .dark-theme a:not(.low_section_buttons_special):not(.low_section_buttons_special2):not(.low_section_buttons_special3) {
         color: var(--accent);
     }
@@ -333,7 +333,7 @@
         color: var(--btn-main);
     }
 
-    /* الفواصل*/
+    /*الفواصل*/
     .dark-theme hr,
     .dark-theme .divider {
         border-color: var(--divider-color);
@@ -357,13 +357,13 @@
         color: var(--text-color);
     }
 
-    /* الـ alerts */
+    /* alerts */
     .dark-theme .alert-info    { background-color: #0e2a38; border-color: #1a4a5a; color: #7ec8d8; }
     .dark-theme .alert-success { background-color: #0e2a1e; border-color: #1a4a2e; color: #7ec898; }
     .dark-theme .alert-warning { background-color: #2a1e0e; border-color: #4a3a1a; color: #d4a86a; }
     .dark-theme .alert-danger  { background-color: #2a0e0e; border-color: #4a1a1a; color: #d47a7a; }
 
-    /* الـ scrollbar في الدارك مود */
+    /* scrollbar */
     .dark-theme ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -386,7 +386,7 @@
         opacity: 0.8;
     }
 
-    /* العناصر رسومية في الدارك مود*/
+    /* العناصر الرسمية */
     .dark-theme [style*="background-color: #8dc9d4"],
     .dark-theme [style*="background-color: #4b7983"],
     .dark-theme [style*="background-color: #4c6d74"] {
@@ -394,6 +394,7 @@
         border: 1px solid var(--border-color);
     }
 
+    /* الـ sections ذات الخلفية التيل */
     .dark-theme .teal-section,
     .dark-theme .accent-section,
     .dark-theme [class*="teal-bg"],
@@ -402,7 +403,7 @@
         color: var(--text-color) !important;
     }
 
-    /* الأزرار في الدارك مود */
+    /*الأزرار في الدارك مود */
     .dark-theme .btn-primary,
     .dark-theme button[class*="btn-main"],
     .dark-theme [class*="main-btn"] {
@@ -423,5 +424,66 @@
     .dark-theme [class*="-card"] {
         background-color: var(--bg-card) !important;
         border-color: var(--border-color) !important;
+    }
+
+    /* صفحة Games - خلفيات الكروت والحاويات في الدارك مود */
+    .dark-theme .games-zone-container {
+        background: var(--bg-body) !important;
+    }
+
+    .dark-theme .game-card,
+    .dark-theme .game-card.unlocked,
+    .dark-theme .game-card.locked {
+        background: var(--bg-card) !important;
+        background-color: var(--bg-card) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    .dark-theme .card-content {
+        background: var(--bg-card) !important;
+        background-color: var(--bg-card) !important;
+    }
+
+    .dark-theme .icon-box {
+        background: var(--bg-input) !important;
+        background-color: var(--bg-input) !important;
+    }
+
+    /* صفحة LevelMaterials - خلفيات الكروت في الدارك مود */
+    .dark-theme .materials-page-container {
+        background: var(--bg-body) !important;
+        background-color: var(--bg-body) !important;
+    }
+
+    .dark-theme .material-card {
+        background: var(--bg-card) !important;
+        background-color: var(--bg-card) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    .dark-theme .card-preview {
+        background: var(--bg-input) !important;
+        background-color: var(--bg-input) !important;
+    }
+
+    .dark-theme .card-info {
+        background: var(--bg-card) !important;
+        background-color: var(--bg-card) !important;
+    }
+
+    /* تجاوز الخلفيات البيضاء المكتوبة inline في الصفحتين */
+    .dark-theme .games-zone-container [style*="background: white"],
+    .dark-theme .games-zone-container [style*="background-color: white"],
+    .dark-theme .games-zone-container [style*="background: #fff"],
+    .dark-theme .games-zone-container [style*="background: #f8fafc"],
+    .dark-theme .games-zone-container [style*="background-color: #eeeeee"],
+    .dark-theme .games-zone-container [style*="background-color: #dfdfdf"],
+    .dark-theme .materials-page-container [style*="background: white"],
+    .dark-theme .materials-page-container [style*="background-color: white"],
+    .dark-theme .materials-page-container [style*="background: #fff"],
+    .dark-theme .materials-page-container [style*="background: #f8fafc"],
+    .dark-theme .materials-page-container [style*="background-color: #eeeeee"] {
+        background: var(--bg-card) !important;
+        background-color: var(--bg-card) !important;
     }
 </style>
