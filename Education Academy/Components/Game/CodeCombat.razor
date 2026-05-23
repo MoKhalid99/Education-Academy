@@ -6,6 +6,33 @@
 @*لعبة المتاهة المكتبسة من كود كومبت*@
 <div class="game-view">
 
+    @*  نظام Tutorial *@
+    @if (ShowTutorial && CurrentTutorialStep < TutorialSteps.Count)
+    {
+        <div class="tutorial-overlay">
+            <div class="tutorial-box">
+                <div class="tutorial-step-indicator">
+                    @for (int i = 0; i < TutorialSteps.Count; i++)
+                    {
+                        <div class="tutorial-dot @(i == CurrentTutorialStep ? "active" : i < CurrentTutorialStep ? "done" : "")"></div>
+                    }
+                </div>
+                <div class="tutorial-icon">@TutorialSteps[CurrentTutorialStep].Icon</div>
+                <h3 class="tutorial-title">@TutorialSteps[CurrentTutorialStep].Title</h3>
+                <p class="tutorial-text">@TutorialSteps[CurrentTutorialStep].Text</p>
+                @if (TutorialSteps[CurrentTutorialStep].CodeExample != null)
+                {
+                    <div class="tutorial-code">
+                        <code>@TutorialSteps[CurrentTutorialStep].CodeExample</code>
+                    </div>
+                }
+                <button class="tutorial-ok-btn" @onclick="NextTutorialStep">
+                    @(CurrentTutorialStep == TutorialSteps.Count - 1 ? "🚀 ابدأ اللعبة!" : "OK ✔")
+                </button>
+            </div>
+        </div>
+    }
+
     <div class="level-progress">
         @foreach (var level in AllLevels)
         {
@@ -52,7 +79,7 @@
             <div class="game-logs">
                 @foreach (var log in GameLogs.AsEnumerable().Reverse().Take(1))
                 {
-                    <div class="@(log.Contains("❌") ? "log-error" : "")">> @log</div>
+                    <div class="@(log.Contains("❌") ? "log-error" : "")"> @log</div>
                 }
             </div>
         </div>
@@ -146,7 +173,7 @@
         margin-top: 10px;
         font-family: 'Consolas', monospace;
         font-size: 0.85rem;
-        color: #ffffff; /* جعل الخط باللون الأبيض */
+        color: #ffffff;
         height: 40px;
         overflow: hidden;
         direction: rtl;
@@ -154,11 +181,11 @@
     }
 
         .game-logs div {
-            color: #ffffff !important; /* التأكيد على اللون الأبيض لجميع الرسائل */
+            color: #ffffff !important;
         }
 
     .log-error {
-        color: #ff5555 !important; /* إبقاء الخطأ باللون الأحمر للتنبيه */
+        color: #ff5555 !important;
         font-weight: bold;
     }
 
@@ -169,7 +196,7 @@
         justify-content: center;
         align-items: center;
         position: relative;
-        direction: ltr; /* هام جداً: يمنع الانعكاس! */
+        direction: ltr;
     }
 
     /* الشبكة (Grid) وتصميم الخلفية */
@@ -576,9 +603,194 @@
             opacity: 0;
         }
     }
+
+    /* ===== أنماط Tutorial ===== */
+    .tutorial-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        z-index: 10000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        direction: rtl;
+        backdrop-filter: blur(4px);
+    }
+
+    .tutorial-box {
+        background: linear-gradient(135deg, #1565c0, #0d47a1);
+        border: 3px solid #42a5f5;
+        border-radius: 20px;
+        padding: 40px 35px 30px;
+        max-width: 480px;
+        width: 90%;
+        text-align: center;
+        color: white;
+        box-shadow: 0 0 60px rgba(33, 150, 243, 0.6), 0 20px 60px rgba(0,0,0,0.8);
+        animation: tutorial-appear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+    }
+
+    @@keyframes tutorial-appear {
+        from {
+            opacity: 0;
+            transform: scale(0.7) translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .tutorial-step-indicator {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .tutorial-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.3);
+        transition: all 0.3s;
+    }
+
+        .tutorial-dot.active {
+            background: #ffca28;
+            transform: scale(1.4);
+            box-shadow: 0 0 8px #ffca28;
+        }
+
+        .tutorial-dot.done {
+            background: #4caf50;
+        }
+
+    .tutorial-icon {
+        font-size: 3.5rem;
+        margin-bottom: 12px;
+        display: block;
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+    }
+
+    .tutorial-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin: 0 0 14px;
+        color: #ffca28;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .tutorial-text {
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: #e3f2fd;
+        margin-bottom: 18px;
+    }
+
+    .tutorial-code {
+        background: rgba(0,0,0,0.4);
+        border: 1px solid #42a5f5;
+        border-radius: 8px;
+        padding: 10px 16px;
+        margin-bottom: 20px;
+        direction: ltr;
+        text-align: left;
+    }
+
+        .tutorial-code code {
+            color: #9cdcfe;
+            font-family: 'Consolas', monospace;
+            font-size: 0.95rem;
+            white-space: pre-line;
+        }
+
+    .tutorial-ok-btn {
+        background: linear-gradient(135deg, #ffca28, #ff9f00);
+        color: #000;
+        border: none;
+        padding: 14px 40px;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 15px rgba(255, 202, 40, 0.5);
+        letter-spacing: 0.5px;
+    }
+
+        .tutorial-ok-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 202, 40, 0.7);
+        }
+
+        .tutorial-ok-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
 </style>
 
 @code {
+    // Tutorial
+    private class TutorialStep
+    {
+        public string Icon { get; set; } = "";
+        public string Title { get; set; } = "";
+        public string Text { get; set; } = "";
+        public string? CodeExample { get; set; }
+    }
+    //تم استخدام ذكاء اصطباحي هنا
+    // قائمة خطوات الشرح
+    private List<TutorialStep> TutorialSteps = new()
+    {
+        new TutorialStep
+        {
+            Icon = "🎮",
+            Title = "مرحباً بك في CodeCombat!",
+            Text = "ستتعلم البرمجة الحقيقية بلغة C# وأنت تقود بطلك في مغامرة ملحمية!\nكل حركة أو هجوم تكتبه كـ كود برمجي حقيقي."
+        },
+        new TutorialStep
+        {
+            Icon = "🗺️",
+            Title = "الهدف من اللعبة",
+            Text = "قُد بطلك للوصول إلى الصندوق الذهبي 📦 في كل مرحلة.\nتجنب الجدران والعوائق، وتغلب على الأعداء في طريقك!",
+        },
+        new TutorialStep
+        {
+            Icon = "💻",
+            Title = "كيف تتحكم بالبطل؟",
+            Text = "اكتب أوامر C# في محرر الكود على اليمين.\nالرقم بين القوسين يحدد عدد الخطوات أو قوة الضربة.",
+            CodeExample = "Hero.MoveRight(3);  // تحرك 3 خطوات يميناً\nHero.MoveUp(2);     // تحرك 2 خطوات لأعلى"
+        },
+        new TutorialStep
+        {
+            Icon = "⚔️",
+            Title = "الهجوم على الأعداء",
+            Text = "إذا كان هناك وحش في طريقك، استخدم أمر الهجوم لتدميره قبل التحرك!\nالسلايم 🟢 والتنين 🐉 يهاجمانك إذا اقتربت.",
+            CodeExample = "Hero.AttackRight(1);  // هجوم ناري لليمين\nHero.AttackDown(1);   // هجوم ناري للأسفل"
+        },
+        new TutorialStep
+        {
+            Icon = "📜",
+            Title = "قواعد الكود المهمة",
+            Text = "⚠️ كل سطر يجب أن ينتهي بـ ( ; )\n⚠️ الكلمات حساسة للحروف الكبيرة والصغيرة\n⚠️ يمكنك كتابة عدة أوامر متتالية، تُنفَّذ بالترتيب!",
+            CodeExample = "Hero.MoveRight(2);\nHero.AttackRight(1);\nHero.MoveRight(1);"
+        },
+        new TutorialStep
+        {
+            Icon = "🏆",
+            Title = "تقدمك يُحفظ تلقائياً!",
+            Text = "كل مرحلة تكملها تفتح لك المرحلة التالية 🔓\nتقدمك محفوظ خصيصاً لحسابك — لا أحد يرى تقدمك غيرك.\nحظاً موفقاً أيها المحارب البرمجي! 🌟"
+        }
+    };
+
+    private bool ShowTutorial = false;
+    private int CurrentTutorialStep = 0;
+
     // تعريف المتغيرات الأساسية للعبة
     private List<GameLevel> AllLevels = LevelRepository.GetLevels();
     private GameLevel? CurrentLevel;
@@ -598,6 +810,9 @@
     private bool IsHeroPoisoned;
     private bool IsHeroBurned;
 
+    // مفتاح التخزين الخاص بالمستخدم (يضمن حفظ تقدم كل مستخدم بشكل منفصل)
+    private string _userProgressKey = "MaxUnlockedLevel";
+
     // كلاس مساعد لنار
     private class Projectile
     {
@@ -607,22 +822,65 @@
         public int EndY { get; set; }
     }
 
+    // ===== الانتقال للخطوة التالية في Tutorial =====
+    private void NextTutorialStep()
+    {
+        if (CurrentTutorialStep < TutorialSteps.Count - 1)
+        {
+            CurrentTutorialStep++;
+            StateHasChanged();
+        }
+        else
+        {
+            ShowTutorial = false;
+            StateHasChanged();
+        }
+    }
+
     // تُستدعى عند بدء تشغيل الصفحة لجلب مستوى التقدم المحفوظ
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            var saved = await LocalStorage.GetItemAsync<int>("MaxUnlockedLevel");
+            // بناء مفتاح التخزين الخاص بالمستخدم
+            // نحاول قراءة userId من LocalStorage أو نُنشئ معرفاً جديداً
+            var userId = await LocalStorage.GetItemAsync<string>("gameUserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                userId = Guid.NewGuid().ToString("N")[..12]; // معرف قصير فريد
+                await LocalStorage.SetItemAsync("gameUserId", userId);
+            }
+            _userProgressKey = $"MaxUnlockedLevel_{userId}";
+
+            var saved = await LocalStorage.GetItemAsync<int>(_userProgressKey);
             MaxUnlockedLevel = saved == 0 ? 1 : saved;
+
+            // إظهار Tutorial فقط في المرحلة الأولى وإذا لم يسبق للمستخدم رؤيتها
+            var tutorialDone = await LocalStorage.GetItemAsync<bool>($"tutorialDone_{userId}");
+            if (!tutorialDone && MaxUnlockedLevel == 1)
+            {
+                ShowTutorial = true;
+                CurrentTutorialStep = 0;
+            }
+
             await LoadLevel(1);
             StateHasChanged();
+        }
+    }
+
+    // حفظ حالة إتمام Tutorial للمستخدم
+    private async Task MarkTutorialDone()
+    {
+        var userId = await LocalStorage.GetItemAsync<string>("gameUserId");
+        if (!string.IsNullOrEmpty(userId))
+        {
+            await LocalStorage.SetItemAsync($"tutorialDone_{userId}", true);
         }
     }
 
     // دالة تحميل المرحلة إغلاق المراحل
     private async Task LoadLevel(int id)
     {
-        // التحقق الفعلي من أن المرحلة مفتوحة
         if (id > MaxUnlockedLevel)
         {
             GameLogs.Add($"> 🔒 عذراً، يجب تخطي المرحلة {id - 1} أولاً لفتح هذه المرحلة.");
@@ -705,7 +963,12 @@
                 if (CurrentLevel.Id == MaxUnlockedLevel && MaxUnlockedLevel < AllLevels.Count)
                 {
                     MaxUnlockedLevel++;
-                    await LocalStorage.SetItemAsync("MaxUnlockedLevel", MaxUnlockedLevel);
+                    await LocalStorage.SetItemAsync(_userProgressKey, MaxUnlockedLevel);
+                }
+                // إذا أكمل المستخدم المرحلة الأولى، احفظ أن Tutorial انتهى
+                if (CurrentLevel.Id == 1)
+                {
+                    await MarkTutorialDone();
                 }
                 break;
             }
@@ -723,7 +986,7 @@
         }
     }
 
-    // محلل أكواد C# 
+    // محلل أكواد C#
     private async Task<bool> ParseAndExecuteCSharp(string rawCmd)
     {
         var cleanCmd = rawCmd.ToLower().Replace(" ", "");
@@ -825,10 +1088,9 @@
         else if (cmd.Contains("up")) ty--;
         else if (cmd.Contains("down")) ty++;
 
-        // تشغيل أنيميشن كرة النار
         ActiveFireball = new Projectile { StartX = PlayerPos.X, StartY = PlayerPos.Y, EndX = tx, EndY = ty };
         StateHasChanged();
-        await Task.Delay(300); // وقت انطلاق كرة النار
+        await Task.Delay(300);
         ActiveFireball = null;
 
         var target = CurrentLevel?.Enemies.FirstOrDefault(e => e.X == tx && e.Y == ty && e.IsAlive);
@@ -847,8 +1109,8 @@
     {
         if (x < 0 || x >= 6 || y < 0 || y >= 6) return false;
         if (CurrentLevel!.Obstacles.Any(o => o.X == x && o.Y == y)) return false;
-        if (CurrentLevel.Enemies.Any(e => e != currentEnemy && e.IsAlive && e.X == x && e.Y == y)) return false; // منع التداخل بين الأعداء
-        if (PlayerPos.X == x && PlayerPos.Y == y) return false; // لا يقفز فوق اللاعب
+        if (CurrentLevel.Enemies.Any(e => e != currentEnemy && e.IsAlive && e.X == x && e.Y == y)) return false;
+        if (PlayerPos.X == x && PlayerPos.Y == y) return false;
         return true;
     }
 
@@ -862,7 +1124,6 @@
     {
         try
         {
-            //  
             string track = id == 15 ? "audio/The boss ost.mp3" : "audio/ost.mpeg";
             await JS.InvokeVoidAsync("gameAudio.play", track, true);
         }
@@ -873,27 +1134,22 @@
     }
 
     // ذكاء الأعداء المحسن
-    // يتحرك خطوتين في كل دور ليكون أسرع وأكثر خطورة
     private async Task ProcessEnemyAI()
     {
         foreach (var enemy in CurrentLevel!.Enemies.Where(e => e.IsAlive))
         {
-            // عدد الخطوات التي سيتحركها العدو في الدور الواحد
             int enemySpeed = 2;
 
             for (int i = 0; i < enemySpeed; i++)
             {
-                // فحص المسافة بين العدو واللاعب
                 int dist = Math.Abs(enemy.X - PlayerPos.X) + Math.Abs(enemy.Y - PlayerPos.Y);
 
-                // إذا أصبح اللاعب بجوار العدو، يهاجمه ويتوقف عن الحركة في هذا الدور
                 if (dist == 1)
                 {
                     await HandleEnemyAttack(enemy);
                     break;
                 }
 
-                // خطوة واحدة في كل تكرار
                 int nextX = enemy.X;
                 int nextY = enemy.Y;
 
@@ -922,7 +1178,7 @@
                 }
 
                 StateHasChanged();
-                await Task.Delay(150); // تأخير بسيط جداً ليرى اللاعب خطوات العدو 
+                await Task.Delay(150);
             }
         }
     }
@@ -943,45 +1199,40 @@
             await Task.Delay(800);
             await LoadLevel(CurrentLevel.Id);
         }
-            // يختار المسار الأقصر غير المسدود
+        else
+        {
+            int nextX = enemy.X;
+            int nextY = enemy.Y;
+
+            if (enemy.X < PlayerPos.X) nextX++;
+            else if (enemy.X > PlayerPos.X) nextX--;
+
+            bool isBlockedX = CurrentLevel.Obstacles.Any(o => o.X == nextX && o.Y == enemy.Y) ||
+                              CurrentLevel.Enemies.Any(e => e.IsAlive && e != enemy && e.X == nextX && e.Y == enemy.Y);
+
+            if (!isBlockedX && nextX != enemy.X)
+            {
+                enemy.X = nextX;
+            }
             else
             {
-                int nextX = enemy.X;
-                int nextY = enemy.Y;
+                if (enemy.Y < PlayerPos.Y) nextY++;
+                else if (enemy.Y > PlayerPos.Y) nextY--;
 
-                // محاولة التحرك على محور X أولاً
-                if (enemy.X < PlayerPos.X) nextX++;
-                else if (enemy.X > PlayerPos.X) nextX--;
+                bool isBlockedY = CurrentLevel.Obstacles.Any(o => o.X == enemy.X && o.Y == nextY) ||
+                                  CurrentLevel.Enemies.Any(e => e.IsAlive && e != enemy && e.X == enemy.X && e.Y == nextY);
 
-                // التأكد من أن المربع الجديد ليس عائقاً وليس عدواً آخر
-                bool isBlockedX = CurrentLevel.Obstacles.Any(o => o.X == nextX && o.Y == enemy.Y) ||
-                                  CurrentLevel.Enemies.Any(e => e.IsAlive && e != enemy && e.X == nextX && e.Y == enemy.Y);
-
-                if (!isBlockedX && nextX != enemy.X)
+                if (!isBlockedY && nextY != enemy.Y)
                 {
-                    enemy.X = nextX;
+                    enemy.Y = nextY;
                 }
-                else // إذا كان محور X مسدوداً، جرب محور Y
-                {
-                    if (enemy.Y < PlayerPos.Y) nextY++;
-                    else if (enemy.Y > PlayerPos.Y) nextY--;
-
-                    bool isBlockedY = CurrentLevel.Obstacles.Any(o => o.X == enemy.X && o.Y == nextY) ||
-                                      CurrentLevel.Enemies.Any(e => e.IsAlive && e != enemy && e.X == enemy.X && e.Y == nextY);
-
-                    if (!isBlockedY && nextY != enemy.Y)
-                    {
-                        enemy.Y = nextY;
-                    }
-                }
-                StateHasChanged();
             }
+            StateHasChanged();
         }
+    }
+
     public void Dispose()
     {
-        // استدعاء دالة stop التي قمت بتعريفها في App.razor
         JS.InvokeVoidAsync("gameAudio.stop");
     }
-                   
 }
- 
