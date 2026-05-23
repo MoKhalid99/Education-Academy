@@ -6,7 +6,7 @@
 @*لعبة المتاهة المكتبسة من كود كومبت*@
 <div class="game-view">
 
-    @*  نظام Tutorial *@
+    @* نظام Tutorial *@
     @if (ShowTutorial && CurrentTutorialStep < TutorialSteps.Count)
     {
         <div class="tutorial-overlay">
@@ -42,6 +42,9 @@
                 @(level.Id > MaxUnlockedLevel ? "🔒" : level.Id.ToString())
             </div>
         }
+        <button class="tutorial-open-btn" @onclick="OpenTutorial" title="عرض الشرح">
+            ❓
+        </button>
     </div>
 
     <div class="code-panel-overlay">
@@ -505,6 +508,28 @@
             cursor: default;
         }
 
+    .tutorial-open-btn {
+        width: 35px;
+        height: 35px;
+        background: #1565c0;
+        color: white;
+        border: 2px solid #42a5f5;
+        border-radius: 50%;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.2s;
+        box-shadow: 0 0 10px rgba(66, 165, 245, 0.5);
+    }
+
+        .tutorial-open-btn:hover {
+            background: #1976d2;
+            transform: scale(1.15);
+            box-shadow: 0 0 18px rgba(66, 165, 245, 0.8);
+        }
+
     .hero-hp-bar, .enemy-hp-bar {
         width: 80%;
         height: 5px;
@@ -735,7 +760,7 @@
 </style>
 
 @code {
-    // Tutorial
+    // كلاس Tutorial 
     private class TutorialStep
     {
         public string Icon { get; set; } = "";
@@ -743,7 +768,8 @@
         public string Text { get; set; } = "";
         public string? CodeExample { get; set; }
     }
-    //تم استخدام ذكاء اصطباحي هنا
+
+    // تم الاستعانة بالذكاء الاصطباحي في تلك الجزئية
     // قائمة خطوات الشرح
     private List<TutorialStep> TutorialSteps = new()
     {
@@ -822,8 +848,16 @@
         public int EndY { get; set; }
     }
 
-    // ===== الانتقال للخطوة التالية في Tutorial =====
-    private void NextTutorialStep()
+    // فتح Tutorial يدوياً في أي وقت 
+    private void OpenTutorial()
+    {
+        CurrentTutorialStep = 0;
+        ShowTutorial = true;
+        StateHasChanged();
+    }
+
+    //الانتقال للخطوة التالية في Tutorial
+        private void NextTutorialStep()
     {
         if (CurrentTutorialStep < TutorialSteps.Count - 1)
         {
