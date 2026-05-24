@@ -18,7 +18,7 @@
                 <Authorized>
                     @* إذا كان مسجل دخول يذهب للوحة التحكم *@
                     <button class="sign_in_button" @onclick='() => NavigationManager.NavigateTo("/courses")'>
-                        <p>ابدأ التعلم الآن</p>
+                         ابدأ التعلم الآن
                     </button>
                 </Authorized>
                 <NotAuthorized>
@@ -49,19 +49,28 @@
         text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }
 
+    .info_container_button{
+        display:flex;
+        justify-content:space-between;
+    }
     .sign_in_button {
         background-color: #4b7983;
         color: white;
-        padding: 15px 40px;
         border: none;
+        padding-left: 20px;
+        padding-bottom: 15px;
+        padding-top: 10px;
+        padding-left: 20px;
         border-radius: 10px;
         font-size: 20px;
         cursor: pointer;
         transition: 0.3s;
+        margin-left:20px;
     }
 
         .sign_in_button:hover {
             background-color: #335961;
+            transform:scale(1.2);
         }
 
     .lower_section {

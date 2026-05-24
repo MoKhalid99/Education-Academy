@@ -63,6 +63,11 @@
         --bg-card:            #f5f5f5;
         --bg-input:           #d4d4d4;
         --bg-input-focus:     #ffffff;
+        /* النصوص */
+        --text-color:         #111111;
+        --text-muted:         #444444;
+        --text-on-dark:       #ffffff;
+
         --bg-overlay:         rgba(255,255,255,0.9);
 
         /* الألوان الرئيسية */
@@ -70,11 +75,6 @@
         --btn-main-hover:     #3a6370;
         --btn-text:           #ffffff;
         --accent:             #8dc9d4;
-
-        /* النصوص */
-        --text-color:         #111111;
-        --text-muted:         #444444;
-        --text-on-dark:       #ffffff;
 
         /* الهيدر */
         --nav-bg:             #ffffff;
@@ -141,6 +141,7 @@
         --footer-divider:     rgba(255,255,255,0.45);
         --footer-icon:        #1a1a1a;
         --footer-icon-bg:     rgba(0,0,0,0.12);
+        --footer-icon-hover:  darkorange;
 
         /* الحدود */
         --border-color:       #1e3a4a;
@@ -185,6 +186,8 @@
     .dark-theme [style*="background-color: #ffffff"] {
         background-color: var(--bg-card) !important;
     }
+
+
 
     /* الكروت والـ containers */
     .dark-theme .card,
@@ -234,8 +237,8 @@
     .dark-theme footer a:hover,
     .dark-theme .footer a:hover,
     .dark-theme [class*="footer"] a:hover {
-        color: var(--footer-text) !important;
-        text-shadow: 0 0 8px rgba(255,255,255,0.3);
+        color: darkorange !important;
+        text-shadow: 0 0 8px rgba(255,140,0,0.4);
     }
 
     /* صور الفوتر - بدون أي فلتر */
@@ -471,6 +474,28 @@
         background-color: var(--bg-card) !important;
     }
 
+    /* About كروت */
+    .dark-theme .lower_container {
+        background-color: var(--bg-card) !important;
+    }
+
+    .dark-theme .lower_text_container {
+        background-color: var(--bg-card) !important;
+        border-color: var(--border-color) !important;
+        box-shadow: 0 0 14px rgba(0,0,0,0.4) !important;
+        color: var(--text-color) !important;
+    }
+
+    .dark-theme .lower_text_container:hover {
+        background-color: var(--bg-input) !important;
+        border-color: var(--accent) !important;
+        box-shadow: 0 4px 20px rgba(141,201,212,0.18) !important;
+    }
+
+    .dark-theme .lower_text {
+        color: var(--text-color) !important;
+    }
+
     /* تجاوز الخلفيات البيضاء المكتوبة inline في الصفحتين */
     .dark-theme .games-zone-container [style*="background: white"],
     .dark-theme .games-zone-container [style*="background-color: white"],
@@ -485,5 +510,50 @@
     .dark-theme .materials-page-container [style*="background-color: #eeeeee"] {
         background: var(--bg-card) !important;
         background-color: var(--bg-card) !important;
+    }
+    /* Courses كروت */
+    .dark-theme .courses_buttons {
+        background: var(--bg-card) !important;
+        border-color: var(--border-color) !important;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.4) !important;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+    }
+
+    .dark-theme .courses_buttons:hover {
+        transform: translateY(-10px) scale(1.05) !important;
+        box-shadow: 0 8px 24px rgba(141,201,212,0.2) !important;
+        border-color: var(--accent) !important;
+    }
+
+    .dark-theme .courses_titles {
+        color: var(--text-color) !important;
+        border-top-color: var(--border-color) !important;
+    }
+
+    .dark-theme .anchor_container.level-locked .courses_buttons {
+        background: var(--bg-input) !important;
+        opacity: 0.55 !important;
+    }
+    /* الهيدر - حركة أزرار */
+    .dark-theme .low_section_buttons {
+        transition: color 0.2s ease !important;
+    }
+
+    .dark-theme .low_section_buttons:hover,
+    .dark-theme .low_section_buttons:hover .low_section_buttons_text {
+        color: orange !important;
+    }
+
+    .dark-theme .low_section_buttons_special,
+    .dark-theme .low_section_buttons_special2,
+    .dark-theme .low_section_buttons_special3 {
+        transition: background-color 0.3s ease, transform 0.2s ease !important;
+    }
+
+    .dark-theme .low_section_buttons_special:hover,
+    .dark-theme .low_section_buttons_special2:hover,
+    .dark-theme .low_section_buttons_special3:hover {
+        background-color: var(--btn-main-hover) !important;
+        transform: translateY(-2px) !important;
     }
 </style>
