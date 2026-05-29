@@ -49,6 +49,9 @@ namespace EducationAcademy.Models
 		[JsonPropertyName("correctAnswer")]
 		[Required]
 		public string CorrectAnswer { get; set; } = string.Empty;
+
+		[JsonPropertyName("explanation")]
+		public string? Explanation { get; set; }
 	}
 	// تتبع إكمال المستخدم للاختبارات
 	public class UserQuizCompletion

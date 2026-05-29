@@ -10,6 +10,7 @@
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthStateProvider
 @*اتعدلت جامد بس محدش يلعب في اي حاجة *@
+
 <div class="test-wrapper">
     @if (currentQuiz == null)
     {
@@ -73,20 +74,60 @@
                 <div class="options-list">
                     @foreach (var option in currentQuiz.Questions[currentQuestionIndex].Options)
                     {
-                        <button class="option-item @(selectedOption == option ? "selected" : "")"
+                        var isCorrect = option == currentQuiz.Questions[currentQuestionIndex].CorrectAnswer;
+                        var isSelected = selectedOption == option;
+                        var optionClass = "option-item";
+                        if (!isAnswerRevealed)
+                        {
+                            optionClass += isSelected ? " selected" : "";
+                        }
+                        else
+                        {
+                            if (isCorrect) optionClass += " correct";
+                            else if (isSelected && !isCorrect) optionClass += " wrong";
+                        }
+
+                        <button class="@optionClass"
+                                disabled="@isAnswerRevealed"
                                 @onclick="() => SelectOption(option)">
                             <span class="option-indicator"></span>
                             @option
+                            @if (isAnswerRevealed && isCorrect)
+                            {
+                                <span class="answer-icon">✓</span>
+                            }
+                            else if (isAnswerRevealed && isSelected && !isCorrect)
+                            {
+                                <span class="answer-icon">✗</span>
+                            }
                         </button>
                     }
                 </div>
 
+                @if (isAnswerRevealed && !string.IsNullOrEmpty(currentQuiz.Questions[currentQuestionIndex].Explanation))
+                {
+                    <div class="explanation-box">
+                        <span class="explanation-icon">💡</span>
+                        @currentQuiz.Questions[currentQuestionIndex].Explanation
+                    </div>
+                }
+
                 <div class="action-container">
-                    <button class="btn-action"
-                            disabled="@string.IsNullOrEmpty(selectedOption)"
-                            @onclick="NextQuestion">
-                        @(IsLastQuestion ? "تسليم" : "التالي")
-                    </button>
+                    @if (!isAnswerRevealed)
+                    {
+                        <button class="btn-action"
+                                disabled="@string.IsNullOrEmpty(selectedOption)"
+                                @onclick="RevealAnswer">
+                            تحقق
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn-action"
+                                @onclick="NextQuestion">
+                            @(IsLastQuestion ? "تسليم" : "التالي")
+                        </button>
+                    }
                 </div>
             </div>
         </div>
@@ -253,6 +294,67 @@
             color: #fff;
         }
 
+        .option-item.correct {
+            border-color: #00e676;
+            background: rgba(0, 230, 118, 0.15);
+            color: #fff;
+        }
+
+        .option-item.wrong {
+            border-color: #ff4c4c;
+            background: rgba(255, 76, 76, 0.15);
+            color: #fff;
+        }
+
+        .option-item:disabled {
+            cursor: default;
+        }
+
+    .answer-icon {
+        margin-right: auto;
+        margin-left: 8px;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .option-item.correct .answer-icon {
+        color: #00e676;
+    }
+
+    .option-item.wrong .answer-icon {
+        color: #ff4c4c;
+    }
+
+    .option-item.correct .option-indicator {
+        border-color: #00e676;
+        background: #00e676;
+        box-shadow: 0 0 8px #00e676;
+    }
+
+    .option-item.wrong .option-indicator {
+        border-color: #ff4c4c;
+        background: #ff4c4c;
+        box-shadow: 0 0 8px #ff4c4c;
+    }
+
+    .explanation-box {
+        margin-top: 20px;
+        background: rgba(0, 255, 204, 0.07);
+        border: 1px solid #00ffcc44;
+        border-radius: 10px;
+        padding: 14px 18px;
+        color: #b0f0e0;
+        font-size: 1rem;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .explanation-icon {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
     .option-indicator {
         width: 16px;
         height: 16px;
@@ -336,6 +438,7 @@
     private int correctAnswersCount = 0;
     private bool isFinished = false;
     private int score = 0;
+    private bool isAnswerRevealed = false;
 
     private bool IsLastQuestion => currentQuiz != null && currentQuestionIndex == currentQuiz.Questions.Count - 1;
 
@@ -411,7 +514,13 @@
 
     private void SelectOption(string option)
     {
-        selectedOption = option;
+        if (!isAnswerRevealed)
+            selectedOption = option;
+    }
+
+    private void RevealAnswer()
+    {
+        isAnswerRevealed = true;
     }
 
     private async Task NextQuestion()
@@ -425,6 +534,7 @@
         {
             currentQuestionIndex++;
             selectedOption = "";
+            isAnswerRevealed = false;
         }
         else
         {
@@ -451,7 +561,7 @@
                     //  إضافة نقاط الـ XP للطالب
                     await ProgressionService.UpdateXPAsync(userId, currentQuiz.XPValue);
 
-                    // تسجيل أن الطالب اجتاز هذا الاختبار 
+                    // تسجيل أن الطالب اجتاز هذا الاختبار
                     var progress = new UserProgress
                     {
                         UserId = userId,
@@ -461,7 +571,7 @@
                     };
                     await ProgressionService.SaveQuizAttemptAsync(progress);
 
-                    // محاولة فتح المستوى التالي 
+                    // محاولة فتح المستوى التالي
                     await ProgressionService.UnlockNextLevelAsync(userId, Level);
 
                     Console.WriteLine($"[Success] XP updated and progress saved for user {userId}");
