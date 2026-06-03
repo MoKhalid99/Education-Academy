@@ -1,0 +1,292 @@
+﻿@page "/AI"
+@using System.Text.Json
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="logo">AI</div>
+        <button class="btn-text" style="margin-top: 20px;" @onclick="NewChat">[ محادثة جديدة ]</button>
+        
+        <div style="margin-top: auto;">
+            <p style="font-size: 0.8rem; opacity: 0.6;">Saif_bot v1.0</p>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <div class="logo">Saif_bot</div>
+        </div>
+
+        <div class="welcome-area">
+            @if (chatMessages.Count == 0)
+            {
+                <div class="bot-name">Saif_bot</div>
+                <p>كيف يمكنني مساعدتك اليوم؟</p>
+
+                <div class="suggestion-grid">
+                    <div class="sug-item" @onclick='() => userInput = "اشرح لي لغة ال C#"'>[ اشرح لي لغة ال C# ]</div>
+                    <div class="sug-item" @onclick='() => userInput = "اكتب لي ملخصاً لهذه المحاضرة"'>[ اكتب لي ملخصاً لهذه المحاضرة ]</div>
+                </div>
+            }
+            else
+            {
+                <div class="chat-box">
+                    @foreach (var msg in chatMessages)
+                    {
+                        <div class="message">
+                            <span class="@(msg.IsUser ? "user-tag" : "bot-tag")">
+                                @(msg.IsUser ? "أنت:" : "Saif_bot:")
+                            </span>
+                            <p>@msg.Content</p>
+                        </div>
+                    }
+                    @if (isTyping)
+                    {
+                        <p style="font-style: italic; opacity: 0.5;">Saif_bot يفكر...</p>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="input-wrapper">
+            <input type="text" class="text-input" placeholder="اكتب سؤالك هنا..." 
+                   @bind="userInput" @onkeyup="HandleKeyUp" />
+            <button class="btn-text" @onclick="SendMessage" disabled="@isTyping">[ إرسال ]</button>
+        </div>
+        
+        <p style="font-size: 0.7rem; opacity: 0.5; margin-top: 10px;">
+            نظام AI قد يخطئ، تحقق من المعلومات المهمة.
+        </p>
+    </div>
+</div>
+
+@code {
+    private string userInput = "";
+    private bool isDarkMode = false;
+    private bool isTyping = false;
+    private List<Message> chatMessages = new();
+
+    // إعدادات الـ API 
+    private const string ApiUrl = "https://api./chat";
+    private const string ApiKey = "KEY";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var theme = await JS.InvokeAsync<string>("localStorage.getItem", "theme");
+            isDarkMode = theme == "dark";
+            await ApplyTheme();
+        }
+    }
+
+    private async Task ToggleTheme()
+    {
+        isDarkMode = !isDarkMode;
+        await JS.InvokeVoidAsync("localStorage.setItem", "theme", isDarkMode ? "dark" : "light");
+        await ApplyTheme();
+    }
+
+    private async Task ApplyTheme()
+    {
+        await JS.InvokeVoidAsync("document.documentElement.setAttribute", "data-theme", isDarkMode ? "dark" : "light");
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") 
+        {
+            await SendMessage();
+        }
+    }
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(userInput) || isTyping) return;
+
+        var userRequest = userInput;
+        chatMessages.Add(new Message { Content = userRequest, IsUser = true });
+        userInput = "";
+        isTyping = true;
+
+        try
+        {
+            // الربط الفعلي مع الـ API
+            var response = await CallAiApi(userRequest);
+            chatMessages.Add(new Message { Content = response, IsUser = false });
+        }
+        catch (Exception ex)
+        {
+            chatMessages.Add(new Message { Content = "عذراً، حدث خطأ في الاتصال بـ Saif_bot: " + ex.Message, IsUser = false });
+        }
+        finally
+        {
+            isTyping = false;
+        }
+    }
+
+    private async Task<string> CallAiApi(string prompt)
+    {
+        // محاكاة للرد API الفعلية بعد
+        await Task.Delay(1500); 
+        return "هذا رد من Saif_bot عبر الـ API. لقد استلمت رسالتك: " + prompt;
+    }
+
+    private void NewChat()
+    {
+        chatMessages.Clear();
+        userInput = "";
+    }
+
+    public class Message 
+    { 
+        public string Content { get; set; } = ""; 
+        public bool IsUser { get; set; } 
+    }
+}
+
+<style>
+:root {
+    --bg: #ffffff;
+    --text: #1f1f1f;
+    --sidebar: #f8f9fa;
+    --border: #e0e0e0;
+    --accent: #000000;
+    --input-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+[data-theme="dark"] {
+    --bg: #0e0e0e;
+    --text: #eeeeee;
+    --sidebar: #171717;
+    --border: #2d2d2d;
+    --accent: #ffffff;
+    --input-shadow: 0 1px 10px rgba(0,0,0,0.5);
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    margin: 0;
+    transition: all 0.2s ease;
+}
+
+.layout {
+    display: flex;
+    height: 100vh;
+    direction: rtl;
+}
+
+.sidebar {
+    width: 240px;
+    background: var(--sidebar);
+    border-left: 1px solid var(--border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    align-items: center;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+}
+
+.logo {
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+}
+
+.btn-text {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.btn-text:hover {
+    background: var(--text);
+    color: var(--bg);
+}
+
+.welcome-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+}
+
+.bot-name {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.chat-box {
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 20px;
+    overflow-y: auto;
+}
+
+.message {
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.user-tag { font-weight: bold; color: #555; }
+.bot-tag { font-weight: bold; color: var(--accent); }
+
+.input-wrapper {
+    width: 100%;
+    max-width: 800px;
+    border: 1px solid var(--border);
+    padding: 15px;
+    display: flex;
+    gap: 10px;
+    box-shadow: var(--input-shadow);
+}
+
+.text-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    outline: none;
+    font-size: 1rem;
+}
+
+.suggestion-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.sug-item {
+    border: 1px solid var(--border);
+    padding: 15px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.sug-item:hover { border-color: var(--text); }
+</style>
