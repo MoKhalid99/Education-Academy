@@ -1,5 +1,8 @@
 ﻿using Blazored.LocalStorage;
+using ChatbotModule.Controllers;
+using ChatbotModule.Extensions;
 using Education_Academy.Components;
+using EducationAcademy.Data;
 using EducationAcademy.Models;
 using EducationAcademy.Services;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -22,24 +25,42 @@ builder.Services.AddScoped<IProgressionService, ProgressionService>();
 
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 
-// إضافة دعم الـ Controllers لخدمة الـ API  للتسجيل الخارجي
+// إضافة دعم الـ Controllers لخدمة الـ API للتسجيل الخارجي
 builder.Services.AddControllers();
 
 builder.Services.AddMudServices();
 builder.Services.AddCascadingAuthenticationState();
 
-// ربط قاعدة البيانات 
+// جلب نص الاتصال الموحد من ملف appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// تسجيل قاعدة البيانات الأساسية للأكاديمية (والتي تحتوي الآن على جداول الشات بوت مدمجة)
 builder.Services.AddDbContext<AcademyDbContext>(options =>
 	options.UseSqlServer(connectionString));
 
-// إعداد Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+// تهيئة موديول الشات بوت وتمرير نص الاتصال لتجاوز خطأ الـ Design-Time
+builder.Services.AddChatbotModule(options =>
+{
+	options.ConnectionString = connectionString;
+	options.OpenAiApiKey = builder.Configuration["Chatbot:OpenAiApiKey"];
+	options.GeminiApiKey = builder.Configuration["Chatbot:GeminiApiKey"];
+
+	options.SystemPrompt = "You are EDo, an advanced text-only AI assistant built for Education Academy. You must always refer to yourself as Saif_bot. Answer accurately, concisely, and directly in Arabic unless the user speaks in another language. Do not use any icons, markdown symbols for icons, or emojis in your responses; provide text-only formatting.";
+
+	options.MaxHistoryCount = 10; // عدد الرسائل السابقة التي يتذكرها في سياق المحادثة
+	options.MaxTokens = 1000;
+});
+builder.Services.AddControllers()
+	.AddApplicationPart(typeof(ChatbotController).Assembly);
+
+// إعداد نظام الـ Identity ليعمل مع كونتكس الأكاديمية الموحد
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
 	options.Password.RequireDigit = false;
-	options.Password.RequiredLength = 8;
+	options.Password.RequiredLength = 4;
 	options.Password.RequireNonAlphanumeric = false;
 	options.Password.RequireUppercase = false;
-	options.User.RequireUniqueEmail = true;
+	options.Password.RequireLowercase = false;
 })
 .AddEntityFrameworkStores<AcademyDbContext>()
 .AddDefaultTokenProviders();
@@ -71,8 +92,6 @@ builder.Services.AddAuthentication(options => {
 		?? throw new InvalidOperationException("لم يتم العثور على Twitter ConsumerSecret");
 
 });
-
-
 // اضافة خدمات التخزين المحلي
 builder.Services.AddBlazoredLocalStorage();
 
@@ -83,16 +102,13 @@ builder.Services.AddScoped(sp => new HttpClient
 	BaseAddress = new Uri(frontendUrl)
 });
 
+
+builder.Services.AddHttpClient();
+builder.Services.AddBlazoredLocalStorage();
+
 var app = builder.Build();
 
-// تهيئة بيانات الأدمن 
-using (var scope = app.Services.CreateScope())
-{
-	var services = scope.ServiceProvider;
-	await SeedData.InitializeAsync(services);
-}
-
-// تشفير Middleware
+// تهيئة خط الأنابيب (HTTP request pipeline)
 if (!app.Environment.IsDevelopment())
 {
 	app.UseExceptionHandler("/Error", createScopeForErrors: true);
@@ -141,13 +157,13 @@ app.MapPost("/account/register", async (
 	var result = await userManager.CreateAsync(user, password);
 	if (result.Succeeded)
 	{
-		await signInManager.SignInAsync(user, isPersistent: true);
+		await signInManager.SignInAsync(user, isPersistent: false);
 		return Results.Redirect("/");
 	}
-	return Results.Redirect($"/register?error={result.Errors.First().Description}");
+	return Results.Redirect("/register?error=failed");
 });
 
-app.MapGet("/account/logout", async (SignInManager<ApplicationUser> signInManager) =>
+app.MapPost("/account/logout", async (SignInManager<ApplicationUser> signInManager) =>
 {
 	await signInManager.SignOutAsync();
 	return Results.Redirect("/");

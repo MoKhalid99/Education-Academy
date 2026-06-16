@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EducationAcademy.Data;
+using Microsoft.AspNetCore.Mvc;
 //لو هنشغل عليه هعمله
 [ApiController]
 [Route("api/mobile")]

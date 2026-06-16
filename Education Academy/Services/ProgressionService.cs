@@ -1,4 +1,5 @@
 ﻿using EducationAcademy.Models;
+using EducationAcademy.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace EducationAcademy.Services

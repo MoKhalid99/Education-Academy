@@ -1,10 +1,28 @@
 ﻿@page "/logout"
-@inject NavigationManager Nav
+
+<PageTitle>تسجيل الخروج</PageTitle>
+
+<div class="d-flex justify-content-center align-items-center" style="height: 50vh;">
+    <div class="text-center">
+        <h3>جاري تسجيل الخروج...</h3>
+        <p>يرجى الانتظار لحظة.</p>
+
+        <form id="logoutForm" action="account/logout" method="post">
+            <button type="submit" class="btn btn-danger">اضغط هنا إذا لم يتم تحويلك تلقائياً</button>
+        </form>
+    </div>
+</div>
 
 @code {
-    //تأكيد تسجيل الخروج
-    protected override void OnInitialized()
+    @inject IJSRuntime JS
+
+    // تشغيل الفورم تلقائياً أول ما الصفحة تفتح
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Nav.NavigateTo("account/logout", forceLoad: true);
+        if (firstRender)
+        {
+            // سكريبت بسيط جافاسكريبت عشان يعمل Submit للفورم تلقائي
+            await JS.InvokeVoidAsync("eval", "document.getElementById('logoutForm').submit()");
+        }
     }
 }

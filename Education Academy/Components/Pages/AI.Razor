@@ -1,292 +1,1026 @@
 ﻿@page "/AI"
-@using System.Text.Json
-@inject HttpClient Http
+@using ChatbotModule.Models
+@using ChatbotModule.Services
+@using ChatbotModule.AI
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using EducationAcademy.Data
+@inject IChatbotService ChatbotService
+@inject AcademyDbContext DbContext
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject IConfiguration Configuration
 
-<div class="layout">
-    <div class="sidebar">
-        <div class="logo">AI</div>
-        <button class="btn-text" style="margin-top: 20px;" @onclick="NewChat">[ محادثة جديدة ]</button>
-        
-        <div style="margin-top: auto;">
-            <p style="font-size: 0.8rem; opacity: 0.6;">Saif_bot v1.0</p>
-        </div>
-    </div>
+<div class="edo-page @(isDarkMode ? "dark-theme" : "light-theme")">
 
-    <div class="main">
-        <div class="header">
-            <div class="logo">Saif_bot</div>
-        </div>
+    @* لشريط الجانبي *@
+    <aside class="edo-sidebar @(sidebarOpen ? "" : "collapsed")">
 
-        <div class="welcome-area">
-            @if (chatMessages.Count == 0)
-            {
-                <div class="bot-name">Saif_bot</div>
-                <p>كيف يمكنني مساعدتك اليوم؟</p>
-
-                <div class="suggestion-grid">
-                    <div class="sug-item" @onclick='() => userInput = "اشرح لي لغة ال C#"'>[ اشرح لي لغة ال C# ]</div>
-                    <div class="sug-item" @onclick='() => userInput = "اكتب لي ملخصاً لهذه المحاضرة"'>[ اكتب لي ملخصاً لهذه المحاضرة ]</div>
+        <div class="edo-sidebar-top">
+            <div class="edo-logo">
+                <div class="edo-logo-mark">
+                    <svg viewBox="0 0 40 40" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+                        <path class="edo-logo-diamond" d="M20,2 C20,12 22,14 32,20 C22,26 20,28 20,38 C20,28 18,26 8,20 C18,14 20,12 20,2" opacity="0.97"/>
+                        <rect x="9" y="17" width="9" height="6" rx="3" fill="none" class="edo-logo-glasses" stroke-width="1.1"/>
+                        <rect x="22" y="17" width="9" height="6" rx="3" fill="none" class="edo-logo-glasses" stroke-width="1.1"/>
+                        <line x1="18" y1="20" x2="22" y2="20" class="edo-logo-glasses" stroke-width="1.3"/>
+                        <line x1="7"  y1="20" x2="9"  y2="20" class="edo-logo-glasses" stroke-width="1.1"/>
+                        <line x1="31" y1="20" x2="33" y2="20" class="edo-logo-glasses" stroke-width="1.1"/>
+                    </svg>
                 </div>
-            }
-            else
-            {
-                <div class="chat-box">
-                    @foreach (var msg in chatMessages)
+                <span class="edo-logo-text">EDo </span>
+            </div>
+            <button class="edo-sidebar-toggle" @onclick="ToggleSidebar" title="إغلاق/فتح القائمة">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" fill="currentColor"/></svg>
+            </button>
+        </div>
+
+        <button class="edo-new-chat-btn" @onclick="CreateNewSession" disabled="@isGenerating">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/></svg>
+            <span>محادثة جديدة</span>
+        </button>
+
+        <div class="edo-history-list">
+            <div class="edo-history-group">
+                <div class="edo-history-label">المحادثات الأخيرة</div>
+                @if (sessions == null)
+                {
+                    <div class="edo-history-item loading">جاري التحميل...</div>
+                }
+                else if (!sessions.Any())
+                {
+                    <div class="edo-history-item empty">لا توجد محادثات سابقة</div>
+                }
+                else
+                {
+                    @foreach (var session in sessions)
                     {
-                        <div class="message">
-                            <span class="@(msg.IsUser ? "user-tag" : "bot-tag")">
-                                @(msg.IsUser ? "أنت:" : "Saif_bot:")
-                            </span>
-                            <p>@msg.Content</p>
+                        <div class="edo-history-item @(session.SessionID == currentSessionId ? "active" : "")" 
+                             @onclick="() => SelectSession(session.SessionID)">
+                            <svg viewBox="0 0 24 24" width="14" height="14"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="currentColor"/></svg>
+                            <span class="edo-history-title">@(string.IsNullOrWhiteSpace(session.Title) ? "محادثة غير معنونة" : session.Title)</span>
                         </div>
                     }
-                    @if (isTyping)
-                    {
-                        <p style="font-style: italic; opacity: 0.5;">Saif_bot يفكر...</p>
-                    }
-                </div>
-            }
+                }
+            </div>
         </div>
 
-        <div class="input-wrapper">
-            <input type="text" class="text-input" placeholder="اكتب سؤالك هنا..." 
-                   @bind="userInput" @onkeyup="HandleKeyUp" />
-            <button class="btn-text" @onclick="SendMessage" disabled="@isTyping">[ إرسال ]</button>
+        <div class="edo-sidebar-footer">
+            <div class="edo-user-profile">
+                <div class="edo-avatar">@userInitial</div>
+                <div class="edo-user-info">
+                    <div class="edo-user-name">@userName</div>
+                    <div class="edo-user-status">متصل حالياً</div>
+                </div>
+            </div>
         </div>
-        
-        <p style="font-size: 0.7rem; opacity: 0.5; margin-top: 10px;">
-            نظام AI قد يخطئ، تحقق من المعلومات المهمة.
-        </p>
-    </div>
+    </aside>
+
+    @*منطقة المحتوى الأساسية *@
+    <main class="edo-main-content">
+        @if (currentSessionId == 0)
+        {
+            @* شاشة الترحيب *@
+            <div class="edo-welcome-container">
+                <div class="edo-welcome-icon">
+                    <svg viewBox="0 0 40 40" width="72" height="72" xmlns="http://www.w3.org/2000/svg">
+                        <path class="edo-logo-diamond" d="M20,2 C20,12 22,14 32,20 C22,26 20,28 20,38 C20,28 18,26 8,20 C18,14 20,12 20,2"/>
+                        <rect x="9" y="17" width="9" height="6" rx="3" fill="none" class="edo-logo-glasses" stroke-width="1.1"/>
+                        <rect x="22" y="17" width="9" height="6" rx="3" fill="none" class="edo-logo-glasses" stroke-width="1.1"/>
+                        <line x1="18" y1="20" x2="22" y2="20" class="edo-logo-glasses" stroke-width="1.3"/>
+                        <line x1="7"  y1="20" x2="9"  y2="20" class="edo-logo-glasses" stroke-width="1.1"/>
+                        <line x1="31" y1="20" x2="33" y2="20" class="edo-logo-glasses" stroke-width="1.1"/>
+                    </svg>
+                </div>
+                <h1>مرحباً، <span class="edo-welcome-name">@userName</span> </h1>
+                <p class="edo-welcome-sub">كيف يمكنني مساعدتك اليوم؟</p>
+
+                @* مكان الكتابة *@
+                <div class="edo-welcome-input-wrap">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="edo-error-message">
+                            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/></svg>
+                            <span>@errorMessage</span>
+                        </div>
+                    }
+                    <div class="edo-input-area-container">
+                        <div class="edo-input-box-row">
+                            <textarea class="edo-textarea"
+                                      placeholder="اسألني عن أي شيء برمجياً..."
+                                      @bind="userInput"
+                                      @bind:event="oninput"
+                                      @onkeydown="HandleKeyDown"
+                                      disabled="@isGenerating"
+                                      rows="1"></textarea>
+                            <button class="edo-send-btn" @onclick="SendMessageFromWelcome" disabled="@(isGenerating || string.IsNullOrWhiteSpace(userInput))">
+                                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/></svg>
+                            </button>
+                        </div>
+                        <div class="edo-input-footer">
+                            <div class="edo-attach-btns"></div>
+                            <div class="edo-hint"> شات بوت مخصص للاسئلة البرمجية و المشاكل التقنية</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            @* واجهة المحادثة المستمرة *@
+            <header class="edo-chat-header">
+                <div class="edo-header-title">
+                    <h2>@(sessions?.FirstOrDefault(s => s.SessionID == currentSessionId)?.Title ?? "محادثة نشطة")</h2>
+                </div>
+            </header>
+
+            <div class="edo-messages-container" @ref="messagesContainer">
+                @if (messages != null)
+                {
+                    @foreach (var message in messages)
+                    {
+                        <div class="edo-message-wrapper @(message.Role == "user" ? "user-style" : "bot-style")">
+                            <div class="edo-message-avatar">
+                                @if (message.Role == "user")
+                                {
+                                    @userInitial
+                                }
+                                else
+                                {
+                                    <svg viewBox="0 0 40 40" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                                        <path class="edo-logo-diamond" d="M20,2 C20,12 22,14 32,20 C22,26 20,28 20,38 C20,28 18,26 8,20 C18,14 20,12 20,2"/>
+                                        <rect x="9" y="17" width="9" height="6" rx="3" fill="none" class="edo-logo-glasses" stroke-width="1.2"/>
+                                        <rect x="22" y="17" width="9" height="6" rx="3" fill="none" class="edo-logo-glasses" stroke-width="1.2"/>
+                                        <line x1="18" y1="20" x2="22" y2="20" class="edo-logo-glasses" stroke-width="1.3"/>
+                                        <line x1="7"  y1="20" x2="9"  y2="20" class="edo-logo-glasses" stroke-width="1.1"/>
+                                        <line x1="31" y1="20" x2="33" y2="20" class="edo-logo-glasses" stroke-width="1.1"/>
+                                    </svg>
+                                }
+                            </div>
+                            <div class="edo-message-bubble">
+                                <div class="edo-message-sender">@(message.Role == "user" ? userName : "EDo")</div>
+                                <div class="edo-message-text">@message.Content</div>
+                                <div class="edo-message-time">@message.CreatedAt.ToLocalTime().ToString("t")</div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (isGenerating)
+                    {
+                        <div class="edo-message-wrapper bot-style">
+                            <div class="edo-message-avatar">
+                                <svg viewBox="0 0 40 40" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                                    <path class="edo-logo-diamond" d="M20,2 C20,12 22,14 32,20 C22,26 20,28 20,38 C20,28 18,26 8,20 C18,14 20,12 20,2"/>
+                                    <rect x="9" y="17" width="9" height="6" rx="3" fill="none" class="edo-logo-glasses" stroke-width="1.2"/>
+                                    <rect x="22" y="17" width="9" height="6" rx="3" fill="none" class="edo-logo-glasses" stroke-width="1.2"/>
+                                    <line x1="18" y1="20" x2="22" y2="20" class="edo-logo-glasses" stroke-width="1.3"/>
+                                    <line x1="7"  y1="20" x2="9"  y2="20" class="edo-logo-glasses" stroke-width="1.1"/>
+                                    <line x1="31" y1="20" x2="33" y2="20" class="edo-logo-glasses" stroke-width="1.1"/>
+                                </svg>
+                            </div>
+                            <div class="edo-message-bubble">
+                                <div class="edo-message-sender">EDo</div>
+                                <div class="edo-typing-indicator">
+                                    <span></span><span></span><span></span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
+
+        @* Input Section *@
+        @if (currentSessionId != 0)
+        {
+            <footer class="edo-chat-footer">
+                <div class="edo-input-area-container">
+                    
+                    @* رسالة الأخطاء تظهر فوق بار الكتابة *@
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="edo-error-message">
+                            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/></svg>
+                            <span>@errorMessage</span>
+                        </div>
+                    }
+
+                    <div class="edo-input-box-row">
+                        <textarea class="edo-textarea" 
+                                  placeholder="اسألني عن أي شيء برمجيا..." 
+                                  @bind="userInput"
+                                  @bind:event="oninput"
+                                  @onkeydown="HandleKeyDown"
+                                  disabled="@isGenerating"
+                                  rows="1"></textarea>
+
+                        <button class="edo-send-btn" @onclick="SendMessage" disabled="@(isGenerating || string.IsNullOrWhiteSpace(userInput))">
+                            <svg viewBox="0 0 24 24" width="18" height="18"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="currentColor"/></svg>
+                        </button>
+                    </div>
+                    <div class="edo-input-footer">
+                        <div class="edo-attach-btns"></div>
+                        <div class="edo-hint"> نظام المحادثة المخصص للأكاديمية التعليمية</div>
+                    </div>
+                </div>
+            </footer>
+        }
+    </main>
+
 </div>
 
+<style>
+    /* CSS Variables & Themes */
+    :root {
+        --sidebar-width: 260px;
+        --sidebar-collapsed-width: 68px;
+        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Light Theme */
+    .edo-page.light-theme {
+        --bg-page: #e8e8e8;
+        --bg-sidebar: #f2f2f2;
+        --bg-card: #ffffff;
+        --bg-input: #d4d4d4;
+        --bg-input-focus: #ffffff;
+        --border-color: #cccccc;
+        --text-color: #111111;
+        --text-muted: #666666;
+        --hover-bg: rgba(0,0,0,0.06);
+        --active-bg: #d0e8ec;
+        --accent-color: #4b7983;
+        --user-msg-bg: #4b7983;
+        --user-msg-text: #ffffff;
+        --bot-msg-bg: #ffffff;
+        --bot-msg-text: #111111;
+        --bot-msg-border: #cccccc;
+        --welcome-gradient-start: #111111;
+        --welcome-gradient-end: #4b7983;
+        --start-btn-shadow: rgba(75,121,131,0.3);
+    }
+
+    /* Dark Theme */
+    .edo-page.dark-theme {
+        --bg-page: #0f1923;
+        --bg-sidebar: #0d1720;
+        --bg-card: #172130;
+        --bg-input: #1e2d3d;
+        --bg-input-focus: #243547;
+        --border-color: #1e3a4a;
+        --text-color: #b0c8d0;
+        --text-muted: #6a8a94;
+        --hover-bg: rgba(141,201,212,0.07);
+        --active-bg: #1e3a4a;
+        --accent-color: #8dc9d4;
+        --user-msg-bg: #1e3040;
+        --user-msg-text: #ffffff;
+        --bot-msg-bg: transparent;
+        --bot-msg-text: #b0c8d0;
+        --bot-msg-border: transparent;
+        --welcome-gradient-start: #ffffff;
+        --welcome-gradient-end: #8dc9d4;
+        --start-btn-shadow: rgba(141,201,212,0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .edo-page {
+        display: flex;
+        width: 100%;
+        height: 100vh;
+        background-color: var(--bg-page);
+        color: var(--text-color);
+        font-family: var(--font-family);
+        direction: rtl; /* اتجاه عربي متناسق */
+        overflow: hidden;
+    }
+
+    /* Sidebar Styles*/
+    .edo-sidebar {
+        width: var(--sidebar-width);
+        background-color: var(--bg-sidebar);
+        border-left: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10;
+        flex-shrink: 0;
+    }
+
+    .edo-sidebar.collapsed {
+        width: var(--sidebar-collapsed-width);
+    }
+
+    .edo-sidebar-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        height: 64px;
+        gap: 6px;
+    }
+
+    .edo-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .edo-logo-mark {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .edo-logo-text {
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: opacity 0.2s;
+    }
+
+    .edo-sidebar.collapsed .edo-logo-text {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .edo-sidebar-toggle {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 6px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s, color 0.2s;
+    }
+
+    .edo-sidebar-toggle:hover {
+        background-color: var(--hover-bg);
+        color: var(--text-color);
+    }
+
+    .edo-new-chat-btn {
+        margin: 8px 12px 16px 12px;
+        padding: 12px 16px;
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        color: var(--text-color);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: background-color 0.2s, border-color 0.2s;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .edo-new-chat-btn:hover:not(:disabled) {
+        background-color: var(--hover-bg);
+        border-color: #5f6368;
+    }
+
+    .edo-sidebar.collapsed .edo-new-chat-btn {
+        padding: 12px;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .edo-sidebar.collapsed .edo-new-chat-btn span {
+        display: none;
+    }
+
+    .edo-history-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 8px;
+    }
+
+    .edo-history-list::-webkit-scrollbar { width: 4px; }
+    .edo-history-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+    .edo-history-group {
+        margin-bottom: 20px;
+    }
+
+    .edo-history-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        padding: 8px 12px;
+        letter-spacing: 0.8px;
+    }
+
+    .edo-sidebar.collapsed .edo-history-label {
+        display: none;
+    }
+
+    .edo-history-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13.5px;
+        color: #c4c7c5;
+        transition: background-color 0.15s;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .edo-history-item:hover {
+        background-color: var(--hover-bg);
+    }
+
+    .edo-history-item.active {
+        background-color: var(--active-bg);
+        color: var(--accent-color);
+        font-weight: 500;
+    }
+
+    .edo-history-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .edo-sidebar.collapsed .edo-history-title {
+        display: none;
+    }
+
+    .edo-history-item.empty, .edo-history-item.loading {
+        color: var(--text-muted);
+        font-size: 12px;
+        font-style: italic;
+        cursor: default;
+    }
+    .edo-sidebar.collapsed .edo-history-item.empty { display: none; }
+
+    .edo-sidebar-footer {
+        padding: 12px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .edo-user-profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 4px;
+    }
+
+    .edo-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #4a90e2;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+
+    .edo-user-info {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .edo-sidebar.collapsed .edo-user-info {
+        display: none;
+    }
+
+    .edo-user-name {
+        font-size: 13.5px;
+        font-weight: 500;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    .edo-user-status {
+        font-size: 11px;
+        color: #81c995;
+    }
+
+    /* Main Content & Messaging Area */
+    .edo-main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        position: relative;
+    }
+
+    .edo-chat-header {
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .edo-header-title h2 {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    .edo-messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px 15% 40px 15%;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+    }
+
+    .edo-messages-container::-webkit-scrollbar { width: 6px; }
+    .edo-messages-container::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+
+    .edo-message-wrapper {
+        display: flex;
+        gap: 18px;
+        max-width: 100%;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .edo-message-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        flex-shrink: 0;
+        margin-top: 4px;
+    }
+
+    .user-style {
+        flex-direction: row-reverse;
+    }
+    .user-style .edo-message-avatar {
+        background-color: #5c93db;
+        color: white;
+    }
+    .user-style .edo-message-bubble {
+        background-color: var(--user-msg-bg);
+        color: var(--user-msg-text);
+        border-radius: 18px 4px 18px 18px;
+    }
+    .user-style .edo-message-sender { text-align: left; }
+
+    .bot-style .edo-message-avatar {
+        background: linear-gradient(135deg, #4a90e2, #9b51e0);
+    }
+    .bot-style .edo-message-bubble {
+        background-color: var(--bot-msg-bg);
+        color: var(--bot-msg-text);
+        border: 1px solid var(--bot-msg-border);
+        border-radius: 4px 18px 18px 18px;
+    }
+
+    .edo-message-bubble {
+        padding: 12px 18px;
+        max-width: 75%;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .edo-message-sender {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+    }
+
+    .edo-message-text {
+        font-size: 15px;
+        line-height: 1.6;
+        word-break: break-word;
+        white-space: pre-line;
+    }
+
+    .edo-message-time {
+        font-size: 10px;
+        color: var(--text-muted);
+        align-self: flex-end;
+        margin-top: 2px;
+    }
+
+    /* التنسيق الجديد لرسالة الخطأ */
+    .edo-error-message {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background-color: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #f87171;
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        font-size: 13px;
+        animation: fadeIn 0.2s ease-in-out;
+    }
+
+    /* Welcome Screen Style — see updated block below */
+
+    .edo-start-chat-btn {
+        background: linear-gradient(135deg, #4b7983, #3a6370);
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        font-size: 15px;
+        font-weight: 500;
+        border-radius: 24px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px var(--start-btn-shadow);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    /* لوجو EDo */
+    .edo-logo-diamond {
+        fill: #ffffff;
+    }
+    /* النظارة تكون داكنة دائماً لتظهر على المعين الأبيض */
+    .edo-logo-glasses {
+        stroke: #2a2a2a;
+    }
+
+    /* في الوضع المظلم: المعين على لون مختلف ليظهر على الخلفية */
+    .dark-theme .edo-logo-diamond {
+        fill: #ffffff;
+        filter: drop-shadow(0 0 3px rgba(255,255,255,0.3));
+    }
+    .dark-theme .edo-logo-glasses {
+        stroke: #1a1a1a;
+    }
+
+    /* شاشة الترحيب */
+    .edo-welcome-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        text-align: center;
+        max-width: 680px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .edo-welcome-icon {
+        margin-bottom: 20px;
+        animation: pulse 2s infinite ease-in-out;
+    }
+
+    .edo-welcome-container h1 {
+        font-size: 30px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: var(--text-color);
+    }
+
+    .edo-welcome-name {
+        background: linear-gradient(45deg, var(--welcome-gradient-start), var(--welcome-gradient-end));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .edo-welcome-sub {
+        font-size: 15px;
+        color: var(--text-muted);
+        margin-bottom: 28px;
+    }
+
+    .edo-welcome-input-wrap {
+        width: 100%;
+        max-width: 620px;
+    }
+
+    .edo-start-chat-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px var(--start-btn-shadow);
+    }
+
+    /* Input Box Footer */
+    .edo-chat-footer {
+        padding: 0 15% 24px 15%;
+        background-color: transparent;
+    }
+
+    .edo-input-area-container {
+        display: flex;
+        flex-direction: column;
+        background-color: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: 24px;
+        padding: 8px 16px;
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .edo-input-area-container:focus-within {
+        background-color: var(--bg-input-focus);
+        border-color: #5f6368;
+    }
+
+    .edo-input-box-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+    }
+
+    .edo-textarea {
+        flex: 1;
+        background: none;
+        border: none;
+        outline: none;
+        color: var(--text-color);
+        font-family: var(--font-family);
+        font-size: 15px;
+        line-height: 1.5;
+        padding: 8px 0;
+        resize: none;
+        max-height: 180px;
+    }
+
+    .edo-textarea::placeholder { color: var(--text-muted); }
+
+    .edo-send-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: none;
+        border: none;
+        color: var(--accent-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.15s, color 0.15s;
+        margin-bottom: 2px;
+    }
+
+    .edo-send-btn:hover:not(:disabled) {
+        background-color: var(--hover-bg);
+        color: white;
+    }
+
+    .edo-send-btn:disabled {
+        color: #5f6368;
+        cursor: not-allowed;
+    }
+
+    .edo-input-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 4px;
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    /* Typing Indicator */
+    .edo-typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 6px 0;
+        align-items: center;
+    }
+
+    .edo-typing-indicator span {
+        width: 6px;
+        height: 6px;
+        background-color: var(--text-color);
+        border-radius: 50%;
+        opacity: 0.4;
+        animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .edo-typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+    .edo-typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+    /*Animations */
+   @@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+   @@keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+   @@keyframes pulse { 0% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.03); opacity: 1; } 100% { transform: scale(1); opacity: 0.9; } }
+
+    /* Responsive Design */
+   @@media (max-width: 768px) {
+        .edo-messages-container, .edo-chat-footer { padding-left: 20px; padding-right: 20px; }
+        .edo-sidebar { position: absolute; height: 100%; }
+        .edo-sidebar.collapsed { width: 0; border: none; }
+    }
+</style>
+
 @code {
-    private string userInput = "";
-    private bool isDarkMode = false;
-    private bool isTyping = false;
-    private List<Message> chatMessages = new();
+    private string userId = string.Empty;
+    private string userName = string.Empty;
+    private string userInitial = string.Empty; 
+    private ElementReference messagesContainer; 
 
-    // إعدادات الـ API 
-    private const string ApiUrl = "https://api./chat";
-    private const string ApiKey = "KEY";
+    private List<ChatSession> sessions = new();
+    private List<ChatMessage> messages = new();
+    private int currentSessionId = 0;
+    
+    private string userInput = string.Empty; 
+    
+    private bool isGenerating = false;
+    private bool sidebarOpen = true;
+    private string errorMessage = string.Empty;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    [CascadingParameter(Name = "IsDarkMode")] public bool IsDarkMode { get; set; }
+
+    // خاصية محلية للقراءة
+    private bool isDarkMode => IsDarkMode;
+
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
+        _ = Configuration["AISettings:PageUrl"] ?? "/AI";
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is { IsAuthenticated: true })
         {
-            var theme = await JS.InvokeAsync<string>("localStorage.getItem", "theme");
-            isDarkMode = theme == "dark";
-            await ApplyTheme();
+            userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            userName = user.FindFirst("FullName")?.Value ?? user.Identity.Name ?? "مستخدم الأكاديمية";
+            
+            // استخراج الحرف الأول من الاسم وعرضه كحرف كبير داخل الأفاتار
+            if (!string.IsNullOrWhiteSpace(userName))
+            {
+                userInitial = userName.Trim().Substring(0, 1).ToUpper();
+            }
+            
+            await LoadSessionsFromDatabase();
+        }
+        else
+        {
+            Navigation.NavigateTo("/login");
         }
     }
 
-    private async Task ToggleTheme()
+    private void ToggleSidebar()
     {
-        isDarkMode = !isDarkMode;
-        await JS.InvokeVoidAsync("localStorage.setItem", "theme", isDarkMode ? "dark" : "light");
-        await ApplyTheme();
+        sidebarOpen = !sidebarOpen;
     }
 
-    private async Task ApplyTheme()
+    private async Task LoadSessionsFromDatabase()
     {
-        await JS.InvokeVoidAsync("document.documentElement.setAttribute", "data-theme", isDarkMode ? "dark" : "light");
-    }
-
-    private async Task HandleKeyUp(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter") 
+        try
         {
-            await SendMessage();
+            errorMessage = string.Empty;
+            sessions = await DbContext.ChatSessions
+                .Where(s => s.UserID == userId)
+                .OrderByDescending(s => s.CreatedAt)
+                .ToListAsync();
+        }
+        catch (Exception)
+        {
+            errorMessage = "حدث خطأ أثناء تحميل المحادثات السابقة.";
+        }
+    }
+
+    // إرسال رسالة من شاشة الترحيب — تنشئ محادثة جديدة أولاً ثم ترسل
+    private async Task SendMessageFromWelcome()
+    {
+        if (string.IsNullOrWhiteSpace(userInput) || isGenerating) return;
+        await CreateNewSession();
+        await SendMessage();
+    }
+
+    private async Task CreateNewSession()
+    {
+        try
+        {
+            errorMessage = string.Empty;
+            string defaultTitle = $"محادثة جديدة {DateTime.Now:yyyy-MM-dd HH:mm}";
+            
+            var session = await ChatbotService.CreateSessionAsync(userId, defaultTitle);
+            sessions.Insert(0, session);
+            
+            await SelectSession(session.SessionID);
+        }
+        catch (Exception)
+        {
+            errorMessage = "فشل إنشاء محادثة جديدة.";
+        }
+    }
+
+    private async Task SelectSession(int sessionId)
+    {
+        try
+        {
+            errorMessage = string.Empty;
+            currentSessionId = sessionId;
+            
+            var history = await ChatbotService.GetHistoryAsync(userId, sessionId);
+            if (history != null)
+            {
+                messages = history.ToList();
+            }
+            else
+            {
+                messages = new List<ChatMessage>();
+            }
+            
+            await ScrollToBottom();
+        }
+        catch (Exception)
+        {
+            errorMessage = "فشل تحميل رسائل المحادثة.";
         }
     }
 
     private async Task SendMessage()
     {
-        if (string.IsNullOrWhiteSpace(userInput) || isTyping) return;
+        if (string.IsNullOrWhiteSpace(userInput) || isGenerating) return;
 
-        var userRequest = userInput;
-        chatMessages.Add(new Message { Content = userRequest, IsUser = true });
-        userInput = "";
-        isTyping = true;
+        if (currentSessionId == 0)
+        {
+            await CreateNewSession();
+        }
+
+        var userMsgText = userInput;
+        userInput = string.Empty; // تفريغ صندوق الإدخال فوراً
+        isGenerating = true;
+
+        var userMsg = new ChatMessage 
+        { 
+            SessionID = currentSessionId,
+            Role = AiRoles.User, 
+            Content = userMsgText, 
+            CreatedAt = DateTime.UtcNow 
+        };
+        messages.Add(userMsg);
+        await ScrollToBottom();
 
         try
         {
-            // الربط الفعلي مع الـ API
-            var response = await CallAiApi(userRequest);
-            chatMessages.Add(new Message { Content = response, IsUser = false });
+            var request = new ChatRequest { SessionId = currentSessionId, Message = userMsgText };
+            var response = await ChatbotService.SendMessageAsync(userId, request);
+
+            if (response != null && string.IsNullOrEmpty(response.Error))
+            {
+                messages.Add(new ChatMessage 
+                { 
+                    SessionID = currentSessionId,
+                    Role = AiRoles.Assistant, 
+                    Content = response.Reply, 
+                    CreatedAt = response.CreatedAt 
+                });
+            }
+            else
+            {
+                errorMessage = response?.Error ?? "لم نتمكن من تلقي إجابة من الذكاء الاصطناعي.";
+            }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            chatMessages.Add(new Message { Content = "عذراً، حدث خطأ في الاتصال بـ Saif_bot: " + ex.Message, IsUser = false });
+            errorMessage = "حدثت مشكلة في الخادم أثناء معالجة الرد.";
         }
         finally
         {
-            isTyping = false;
+            isGenerating = false;
+            await ScrollToBottom();
         }
     }
 
-    private async Task<string> CallAiApi(string prompt)
+    private async Task HandleKeyDown(KeyboardEventArgs e)
     {
-        // محاكاة للرد API الفعلية بعد
-        await Task.Delay(1500); 
-        return "هذا رد من Saif_bot عبر الـ API. لقد استلمت رسالتك: " + prompt;
+        if (e.Key == "Enter" && !e.ShiftKey)
+        {
+            await SendMessage();
+        }
     }
 
-    private void NewChat()
+    private async Task ScrollToBottom()
     {
-        chatMessages.Clear();
-        userInput = "";
-    }
-
-    public class Message 
-    { 
-        public string Content { get; set; } = ""; 
-        public bool IsUser { get; set; } 
+        try
+        {
+            await JS.InvokeVoidAsync("eval", "setTimeout(() => { const el = document.querySelector('.edo-messages-container'); if(el) el.scrollTop = el.scrollHeight; }, 50);");
+        }
+        catch { }
     }
 }
-
-<style>
-:root {
-    --bg: #ffffff;
-    --text: #1f1f1f;
-    --sidebar: #f8f9fa;
-    --border: #e0e0e0;
-    --accent: #000000;
-    --input-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-[data-theme="dark"] {
-    --bg: #0e0e0e;
-    --text: #eeeeee;
-    --sidebar: #171717;
-    --border: #2d2d2d;
-    --accent: #ffffff;
-    --input-shadow: 0 1px 10px rgba(0,0,0,0.5);
-}
-
-body {
-    background-color: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    margin: 0;
-    transition: all 0.2s ease;
-}
-
-.layout {
-    display: flex;
-    height: 100vh;
-    direction: rtl;
-}
-
-.sidebar {
-    width: 240px;
-    background: var(--sidebar);
-    border-left: 1px solid var(--border);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-}
-
-.main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    align-items: center;
-}
-
-.header {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 40px;
-}
-
-.logo {
-    font-weight: 800;
-    font-size: 1.5rem;
-    letter-spacing: 2px;
-}
-
-.btn-text {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: 0.2s;
-}
-
-.btn-text:hover {
-    background: var(--text);
-    color: var(--bg);
-}
-
-.welcome-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    max-width: 800px;
-}
-
-.bot-name {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-.chat-box {
-    width: 100%;
-    max-width: 800px;
-    margin-bottom: 20px;
-    overflow-y: auto;
-}
-
-.message {
-    margin-bottom: 20px;
-    line-height: 1.6;
-}
-
-.user-tag { font-weight: bold; color: #555; }
-.bot-tag { font-weight: bold; color: var(--accent); }
-
-.input-wrapper {
-    width: 100%;
-    max-width: 800px;
-    border: 1px solid var(--border);
-    padding: 15px;
-    display: flex;
-    gap: 10px;
-    box-shadow: var(--input-shadow);
-}
-
-.text-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    outline: none;
-    font-size: 1rem;
-}
-
-.suggestion-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.sug-item {
-    border: 1px solid var(--border);
-    padding: 15px;
-    cursor: pointer;
-    font-size: 0.85rem;
-}
-
-.sug-item:hover { border-color: var(--text); }
-</style>
