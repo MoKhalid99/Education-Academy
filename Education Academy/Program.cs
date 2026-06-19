@@ -45,7 +45,7 @@ builder.Services.AddChatbotModule(options =>
 	options.OpenAiApiKey = builder.Configuration["Chatbot:OpenAiApiKey"];
 	options.GeminiApiKey = builder.Configuration["Chatbot:GeminiApiKey"];
 
-	options.SystemPrompt = "You are EDo, an advanced text-only AI assistant built for Education Academy. You must always refer to yourself as Saif_bot. Answer accurately, concisely, and directly in Arabic unless the user speaks in another language. Do not use any icons, markdown symbols for icons, or emojis in your responses; provide text-only formatting.";
+	options.SystemPrompt = "You are EDo, an advanced text-only AI assistant built for Education Academy. You must always refer to yourself as EDo. Answer accurately, concisely, and directly in Arabic unless the user speaks in another language. Do not use any icons, markdown symbols for icons, or emojis in your responses; provide text-only formatting.";
 
 	options.MaxHistoryCount = 10; // عدد الرسائل السابقة التي يتذكرها في سياق المحادثة
 	options.MaxTokens = 1000;

@@ -1,8 +1,18 @@
 ﻿@inherits LayoutComponentBase
+@using ChatbotModule.Models
+@using ChatbotModule.Services
+@using ChatbotModule.AI
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using EducationAcademy.Data
 @inject NavigationManager Navigation
 @implements IDisposable
-@inject HttpClient Http
+@inject IChatbotService ChatbotService
+@inject AcademyDbContext DbContext
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IConfiguration Configuration
+@inject IJSRuntime JS
 
 <LoadingOverlay IsVisible="isPageLoading" />
 <CascadingValue Value="isDarkMode" Name="IsDarkMode">
@@ -16,7 +26,7 @@
     </div>
 </CascadingValue>
 
-@*الشات بوت EDo*@
+@*الشات بوت EDo المنبثق*@
 <div class="AI-panel @(isChatOpen ? "open" : "") @(isDarkMode ? "dark-theme" : "")">
     <div class="AI-header">
         <div class="header-title">
@@ -35,23 +45,35 @@
         <button class="close-btn" @onclick="ToggleChatbot">✕</button>
     </div>
 
-    <div class="AI-body">
+    <div class="AI-body" @ref="panelMessagesContainer">
         <div class="chat-message bot">
             <div class="message-bubble">مرحباً بك! أنا EDo، كيف يمكنني مساعدتك اليوم؟</div>
         </div>
 
-        @foreach (var msg in chatMessages)
+        @if (messages != null)
         {
-            <div class="chat-message @(msg.IsUser ? "user" : "bot")">
-                <div class="message-bubble">@msg.Text</div>
-            </div>
+            @foreach (var msg in messages)
+            {
+                <div class="chat-message @(msg.Role == "user" ? "user" : "bot")">
+                    <div class="message-bubble">@msg.Content</div>
+                </div>
+            }
         }
 
-        @if (isTyping)
+        @if (isGenerating)
         {
             <div class="chat-message bot">
                 <div class="message-bubble typing-indicator">
                     <span></span><span></span><span></span>
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(panelErrorMessage))
+        {
+            <div class="chat-message bot">
+                <div class="message-bubble" style="color: #f87171; background-color: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3);">
+                    @panelErrorMessage
                 </div>
             </div>
         }
@@ -60,10 +82,12 @@
     <div class="AI-footer">
         <div class="input-container">
             <textarea @bind="userInput"
-                      @onkeyup="HandleKeyUp"
+                      @bind:event="oninput"
+                      @onkeydown="HandleKeyDown"
                       placeholder="اسألني أي شيء يفيد تقدمك..."
+                      disabled="@isGenerating"
                       rows="1"></textarea>
-            <button class="send-btn" @onclick="SendMessage" disabled="@string.IsNullOrWhiteSpace(userInput)">
+            <button class="send-btn" @onclick="SendMessage" disabled="@(isGenerating || string.IsNullOrWhiteSpace(userInput))">
                 <svg viewBox="0 0 24 24" width="24" height="24">
                     <path fill="currentColor" d="M2 .057l22.5 11.943-22.5 11.943v-9.324l15-2.619-15-2.619z" />
                 </svg>
@@ -97,75 +121,157 @@
 @code
 {
     private bool isChatOpen = false;
-    private bool isTyping = false;
+    private bool isGenerating = false;
     private string userInput = string.Empty;
-    private List<ChatMessage> chatMessages = new();
     private string aiPageUrl = "/AI";
+    private string userId = string.Empty;
+    private string panelErrorMessage = string.Empty;
+    private int currentSessionId = 0;
+    private List<ChatMessage> messages = new();
+    private ElementReference panelMessagesContainer;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         Navigation.LocationChanged += HandleLocationChanged;
         aiPageUrl = Configuration["AISettings:PageUrl"] ?? "/AI";
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity is { IsAuthenticated: true })
+        {
+            userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            await LoadLatestSession();
+        }
+    }
+
+    private async Task LoadLatestSession()
+    {
+        try
+        {
+            var latestSession = await DbContext.ChatSessions
+                .Where(s => s.UserID == userId)
+                .OrderByDescending(s => s.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            if (latestSession != null)
+            {
+                currentSessionId = latestSession.SessionID;
+                var history = await ChatbotService.GetHistoryAsync(userId, currentSessionId);
+                if (history != null)
+                {
+                    messages = history.ToList();
+                }
+            }
+        }
+        catch
+        {
+            // صامت أو إسناد رسالة خطأ خفيفة
+        }
     }
 
     private void ToggleChatbot()
     {
         isChatOpen = !isChatOpen;
+        if (isChatOpen)
+        {
+            _ = ScrollToBottom();
+        }
     }
 
-    private async Task HandleKeyUp(KeyboardEventArgs e)
+    private async Task HandleKeyDown(KeyboardEventArgs e)
     {
-        if (e.Key == "Enter" && !e.ShiftKey && !string.IsNullOrWhiteSpace(userInput))
+        if (e.Key == "Enter" && !e.ShiftKey)
         {
             await SendMessage();
         }
     }
 
+    private async Task CreateNewSession()
+    {
+        try
+        {
+            panelErrorMessage = string.Empty;
+            string defaultTitle = $"محادثة سريعة {DateTime.Now:yyyy-MM-dd HH:mm}";
+            var session = await ChatbotService.CreateSessionAsync(userId, defaultTitle);
+            currentSessionId = session.SessionID;
+        }
+        catch (Exception)
+        {
+            panelErrorMessage = "فشل إنشاء محادثة جديدة.";
+        }
+    }
+
     private async Task SendMessage()
     {
-        if (string.IsNullOrWhiteSpace(userInput)) return;
-        var userMessage = userInput.Trim();
-        userInput = string.Empty;
+        if (string.IsNullOrWhiteSpace(userInput) || isGenerating) return;
 
-        chatMessages.Add(new ChatMessage { Text = userMessage, IsUser = true });
-        isTyping = true;
+        if (string.IsNullOrEmpty(userId))
+        {
+            panelErrorMessage = "يرجى تسجيل الدخول أولاً للاستخدام.";
+            return;
+        }
+
+        if (currentSessionId == 0)
+        {
+            await CreateNewSession();
+        }
+
+        var userMsgText = userInput.Trim();
+        userInput = string.Empty;
+        isGenerating = true;
+        panelErrorMessage = string.Empty;
+
+        var userMsg = new ChatMessage
+        {
+            SessionID = currentSessionId,
+            Role = AiRoles.User,
+            Content = userMsgText,
+            CreatedAt = DateTime.UtcNow
+        };
+        messages.Add(userMsg);
         StateHasChanged();
+        await ScrollToBottom();
 
         try
         {
-            var apiUrl = Configuration["AISettings:ApiUrl"] ?? "api/chatbot/respond";
-            var response = await Http.PostAsJsonAsync(apiUrl, new { Message = userMessage });
-            if (response.IsSuccessStatusCode)
+            var request = new ChatRequest { SessionId = currentSessionId, Message = userMsgText };
+            var response = await ChatbotService.SendMessageAsync(userId, request);
+
+            if (response != null && string.IsNullOrEmpty(response.Error))
             {
-                var result = await response.Content.ReadFromJsonAsync<BotResponse>();
-                chatMessages.Add(new ChatMessage { Text = result?.Response ?? "عذراً، لم أفهم ذلك.", IsUser = false });
+                messages.Add(new ChatMessage
+                {
+                    SessionID = currentSessionId,
+                    Role = AiRoles.Assistant,
+                    Content = response.Reply,
+                    CreatedAt = response.CreatedAt
+                });
             }
             else
             {
-                chatMessages.Add(new ChatMessage { Text = "عذراً، حدث خطأ في الاتصال بالخادم.", IsUser = false });
+                panelErrorMessage = response?.Error ?? "لم نتمكن من تلقي إجابة من الذكاء الاصطناعي.";
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            chatMessages.Add(new ChatMessage { Text = "فشل الاتصال بالـ API.", IsUser = false });
-            Console.WriteLine(ex.Message);
+            panelErrorMessage = "حدثت مشكلة أثناء معالجة الرد.";
         }
         finally
         {
-            isTyping = false;
+            isGenerating = false;
             StateHasChanged();
+            await ScrollToBottom();
         }
     }
 
-    public class ChatMessage
+    private async Task ScrollToBottom()
     {
-        public string Text { get; set; } = string.Empty;
-        public bool IsUser { get; set; }
-    }
-
-    public class BotResponse
-    {
-        public string Response { get; set; } = string.Empty;
+        try
+        {
+            await JS.InvokeVoidAsync("eval", "setTimeout(() => { const el = document.querySelector('.AI-body'); if(el) el.scrollTop = el.scrollHeight; }, 50);");
+        }
+        catch { }
     }
 
     private bool isPageLoading = false;
