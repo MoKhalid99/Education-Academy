@@ -9,9 +9,17 @@
 @inject EducationAcademy.Services.IProgressionService ProgressionService
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime 
 @*اتعدلت جامد بس محدش يلعب في اي حاجة *@
 
 <div class="test-wrapper">
+    @if (!isFinished && currentQuiz != null) 
+    {
+        <div class="anti-cheat-alert" style="background: #0000; color: #fff; padding: 12px 20px; text-align: center; font-weight: bold; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(255, 76, 76, 0.3); font-size: 1.1rem;">
+             تنبيه أمني : يمنع فتح أي تبويب آخر، تغيير النافذة، أو فقدان التركيز عن الصفحة. الخروج سيؤدي لإغلاق الاختبار واحتسابه فوراً!
+        </div>
+    }
+
     @if (currentQuiz == null)
     {
         <div class="loading-status">
@@ -19,6 +27,7 @@
             <p>جاري تحميل المستوى...</p>
             @if (!string.IsNullOrEmpty(errorMessage))
             {
+
                 <p class="error-text" style="color: #ff4c4c; margin-top: 10px;">@errorMessage</p>
             }
         </div>
@@ -42,6 +51,7 @@
                 <p>حاول مرة أخرى لتخطي هذا المستوى.</p>
             }
 
+         
             <button class="btn-action" @onclick="GoToCourses">العودة للمراحل</button>
         </div>
     }
@@ -51,12 +61,14 @@
             <div class="test-header">
                 <div class="quiz-info">
                     <h2>@currentQuiz.Title</h2>
+
                     <span class="badge">المستوى @Level - اختبار @QuizNum</span>
                 </div>
 
                 <div class="timer-display @(timeLeft < 60 ? "timer-danger" : "")">
                     <i class="bi bi-alarm"></i>
                     <span>@FormatTime(timeLeft)</span>
+
                 </div>
             </div>
 
@@ -66,6 +78,7 @@
 
             <div class="question-body">
                 <div class="question-meta">
+
                     سؤال @(currentQuestionIndex + 1) من @currentQuiz.Questions.Count
                 </div>
 
@@ -73,6 +86,7 @@
 
                 <div class="options-list">
                     @foreach (var option in currentQuiz.Questions[currentQuestionIndex].Options)
+
                     {
                         var isCorrect = option == currentQuiz.Questions[currentQuestionIndex].CorrectAnswer;
                         var isSelected = selectedOption == option;
@@ -93,12 +107,15 @@
                             <span class="option-indicator"></span>
                             @option
                             @if (isAnswerRevealed && isCorrect)
+
                             {
                                 <span class="answer-icon">✓</span>
                             }
+
                             else if (isAnswerRevealed && isSelected && !isCorrect)
                             {
                                 <span class="answer-icon">✗</span>
+
                             }
                         </button>
                     }
@@ -106,10 +123,12 @@
 
                 @if (isAnswerRevealed && !string.IsNullOrEmpty(currentQuiz.Questions[currentQuestionIndex].Explanation))
                 {
+
                     <div class="explanation-box">
                         <span class="explanation-icon">💡</span>
                         @currentQuiz.Questions[currentQuestionIndex].Explanation
                     </div>
+
                 }
 
                 <div class="action-container">
@@ -119,6 +138,7 @@
                                 disabled="@string.IsNullOrEmpty(selectedOption)"
                                 @onclick="RevealAnswer">
                             تحقق
+
                         </button>
                     }
                     else
@@ -135,294 +155,302 @@
 </div>
 
 <style>
-    /* تصميم داكن اللي معموم في المشروع اللي قبله */
-    .test-wrapper {
-        padding: 40px 20px;
-        direction: rtl;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        background-color: #121212;
-        color: #e0e0e0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       /* تصميم داكن اللي معموم في المشروع اللي قبله */
+
+       .test-wrapper {
+           padding: 40px 20px;
+           direction: rtl;
+           min-height: 100vh;
+    display: flex;
+           flex-direction: column;
+           align-items: center;   
+           background-color: #121212;
+           color: #e0e0e0;
+           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+           /*  منع تحديد النصوص عبر الـ CSS  */
+           -webkit-user-select: none;
+           -moz-user-select: none;
+           -ms-user-select: none;
+           user-select: none;
     }
 
-    .test-card {
-        background: #1e1e24;
-        width: 100%;
-        max-width: 850px;
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-        border: 1px solid #333;
-        overflow: hidden;
-        height: fit-content;
+       .test-card {
+           background: #1e1e24;
+           width: 100%;
+           max-width: 850px;
+    border-radius: 16px;
+           box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+           border: 1px solid #333;
+           overflow: hidden;
+           height: fit-content;
     }
 
-    .result-card {
-        text-align: center;
-        padding: 50px 30px;
+       .result-card {
+           text-align: center;
+           padding: 50px 30px;
     }
 
-    .score-display {
-        font-size: 4rem;
-        font-weight: bold;
-        margin: 20px 0;
-        font-family: 'Courier New', Courier, monospace;
+       .score-display {
+           font-size: 4rem;
+           font-weight: bold;
+           margin: 20px 0;
+    font-family: 'Courier New', Courier, monospace;
+       }
+
+           .score-display.success {
+               color: #00ffcc;
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+           }
+
+           .score-display.fail {
+               color: #ff4c4c;
+    text-shadow: 0 0 10px rgba(255, 76, 76, 0.5);
+           }
+
+       .success-text {
+           color: #00ffcc;
     }
 
-        .score-display.success {
-            color: #00ffcc;
-            text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
-        }
-
-        .score-display.fail {
-            color: #ff4c4c;
-            text-shadow: 0 0 10px rgba(255, 76, 76, 0.5);
-        }
-
-    .success-text {
-        color: #00ffcc;
+       .fail-text {
+           color: #ff4c4c;
     }
 
-    .fail-text {
-        color: #ff4c4c;
+       .test-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+    padding: 25px 30px;
+           background: #18181d;
+           border-bottom: 1px solid #333;
+       }
+
+       .quiz-info h2 {
+           margin: 0;
+    font-size: 1.5rem;
+           color: #fff;
+       }
+
+       .badge {
+           background: #00ffcc;
+    color: #000;
+           padding: 4px 12px;
+           border-radius: 20px;
+           font-size: 0.8rem;
+           font-weight: bold;
     }
 
-    .test-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 25px 30px;
-        background: #18181d;
-        border-bottom: 1px solid #333;
+       .timer-display {
+           background: #000;
+           color: #00ffcc;
+           padding: 10px 20px;
+    border-radius: 8px;
+           font-family: 'Courier New', monospace;
+           font-size: 1.4rem;
+           font-weight: bold;
+           display: flex;
+           align-items: center;
+           gap: 10px;
+           border: 1px solid #333;
     }
 
-    .quiz-info h2 {
-        margin: 0;
-        font-size: 1.5rem;
-        color: #fff;
+       .timer-danger {
+           color: #ff4c4c;
+           border-color: #ff4c4c;
+    animation: pulse 1s infinite;
+       }
+
+       .progress-container {
+           height: 8px;
+    background: #222;
+           width: 100%;
+       }
+
+       .progress-bar {
+           height: 100%;
+    background: #00ffcc;
+           transition: width 0.4s ease;
+           box-shadow: 0 0 8px #00ffcc;
     }
 
-    .badge {
-        background: #00ffcc;
-        color: #000;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: bold;
+       .question-body {
+           padding: 40px;
     }
 
-    .timer-display {
-        background: #000;
-        color: #00ffcc;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-family: 'Courier New', monospace;
-        font-size: 1.4rem;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        border: 1px solid #333;
+       .question-meta {
+           color: #888;
+           font-size: 1rem;
+           margin-bottom: 15px;
     }
 
-    .timer-danger {
-        color: #ff4c4c;
-        border-color: #ff4c4c;
-        animation: pulse 1s infinite;
+       .question-text {
+           font-size: 1.4rem;
+           line-height: 1.6;
+           color: #fff;
+    margin-bottom: 30px;
+       }
+
+       .options-list {
+           display: flex;
+           flex-direction: column;
+    gap: 15px;
+       }
+
+       .option-item {
+           background: #2a2a35;
+    border: 2px solid #3a3a48;
+           padding: 18px;
+           border-radius: 12px;
+           text-align: right;
+           font-size: 1.1rem;
+           color: #ddd;
+           cursor: pointer;
+           transition: all 0.2s;
+    display: flex;
+           align-items: center;
+           gap: 15px;
+       }
+
+           .option-item:hover:not(.selected) {
+               border-color: #666;
+    background: #333342;
+           }
+
+           .option-item.selected {
+               border-color: #00ffcc;
+    background: rgba(0, 255, 204, 0.1);
+               color: #fff;
+           }
+
+           .option-item.correct {
+               border-color: #00e676;
+    background: rgba(0, 230, 118, 0.15);
+               color: #fff;
+           }
+
+           .option-item.wrong {
+               border-color: #ff4c4c;
+    background: rgba(255, 76, 76, 0.15);
+               color: #fff;
+           }
+
+           .option-item:disabled {
+               cursor: default;
     }
 
-    .progress-container {
-        height: 8px;
-        background: #222;
-        width: 100%;
+       .answer-icon {
+           margin-right: auto;
+           margin-left: 8px;
+           font-size: 1.2rem;
+    font-weight: bold;
+       }
+
+       .option-item.correct .answer-icon {
+           color: #00e676;
     }
 
-    .progress-bar {
-        height: 100%;
-        background: #00ffcc;
-        transition: width 0.4s ease;
-        box-shadow: 0 0 8px #00ffcc;
+       .option-item.wrong .answer-icon {
+           color: #ff4c4c;
     }
 
-    .question-body {
-        padding: 40px;
+       .option-item.correct .option-indicator {
+           border-color: #00e676;
+           background: #00e676;
+    box-shadow: 0 0 8px #00e676;
+       }
+
+       .option-item.wrong .option-indicator {
+           border-color: #ff4c4c;
+    background: #ff4c4c;
+           box-shadow: 0 0 8px #ff4c4c;
+       }
+
+       .explanation-box {
+           margin-top: 20px;
+    background: rgba(0, 255, 204, 0.07);
+           border: 1px solid #00ffcc44;
+           border-radius: 10px;
+           padding: 14px 18px;
+           color: #b0f0e0;
+           font-size: 1rem;
+           display: flex;
+    gap: 10px;
+           align-items: flex-start;
+       }
+
+       .explanation-icon {
+           font-size: 1.2rem;
+    flex-shrink: 0;
+       }
+
+       .option-indicator {
+           width: 16px;
+           height: 16px;
+    border: 2px solid #666;
+           border-radius: 50%;
+           transition: 0.2s;
+       }
+
+       .option-item.selected .option-indicator {
+           border-color: #00ffcc;
+    background: #00ffcc;
+           box-shadow: 0 0 8px #00ffcc;
+       }
+
+       .action-container {
+           margin-top: 30px;
+    display: flex;
+           justify-content: flex-end;
+       }
+
+       .btn-action {
+           background: #00ffcc;
+    color: #000;
+           border: none;
+           padding: 12px 30px;
+           font-size: 1.2rem;
+           font-weight: bold;
+           border-radius: 8px;
+           cursor: pointer;
+           transition: 0.3s;
     }
 
-    .question-meta {
-        color: #888;
-        font-size: 1rem;
-        margin-bottom: 15px;
+           .btn-action:hover:not(:disabled) {
+               background: #00cca3;
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+           }
+
+           .btn-action:disabled {
+               background: #444;
+    color: #777;
+               cursor: not-allowed;
+           }
+
+       @@keyframes pulse {
+           0% {
+               transform: scale(1);
     }
 
-    .question-text {
-        font-size: 1.4rem;
-        line-height: 1.6;
-        color: #fff;
-        margin-bottom: 30px;
+           50% {
+               transform: scale(1.05);
     }
 
-    .options-list {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
+           100% {
+               transform: scale(1);
     }
+       }
 
-    .option-item {
-        background: #2a2a35;
-        border: 2px solid #3a3a48;
-        padding: 18px;
-        border-radius: 12px;
-        text-align: right;
-        font-size: 1.1rem;
-        color: #ddd;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 15px;
+       @@media (max-width: 600px) {
+           .test-header {
+               flex-direction: column;
+    gap: 15px;
+               text-align: center;
+           }
+
+           .action-container {
+               justify-content: center;
     }
-
-        .option-item:hover:not(.selected) {
-            border-color: #666;
-            background: #333342;
-        }
-
-        .option-item.selected {
-            border-color: #00ffcc;
-            background: rgba(0, 255, 204, 0.1);
-            color: #fff;
-        }
-
-        .option-item.correct {
-            border-color: #00e676;
-            background: rgba(0, 230, 118, 0.15);
-            color: #fff;
-        }
-
-        .option-item.wrong {
-            border-color: #ff4c4c;
-            background: rgba(255, 76, 76, 0.15);
-            color: #fff;
-        }
-
-        .option-item:disabled {
-            cursor: default;
-        }
-
-    .answer-icon {
-        margin-right: auto;
-        margin-left: 8px;
-        font-size: 1.2rem;
-        font-weight: bold;
-    }
-
-    .option-item.correct .answer-icon {
-        color: #00e676;
-    }
-
-    .option-item.wrong .answer-icon {
-        color: #ff4c4c;
-    }
-
-    .option-item.correct .option-indicator {
-        border-color: #00e676;
-        background: #00e676;
-        box-shadow: 0 0 8px #00e676;
-    }
-
-    .option-item.wrong .option-indicator {
-        border-color: #ff4c4c;
-        background: #ff4c4c;
-        box-shadow: 0 0 8px #ff4c4c;
-    }
-
-    .explanation-box {
-        margin-top: 20px;
-        background: rgba(0, 255, 204, 0.07);
-        border: 1px solid #00ffcc44;
-        border-radius: 10px;
-        padding: 14px 18px;
-        color: #b0f0e0;
-        font-size: 1rem;
-        display: flex;
-        gap: 10px;
-        align-items: flex-start;
-    }
-
-    .explanation-icon {
-        font-size: 1.2rem;
-        flex-shrink: 0;
-    }
-
-    .option-indicator {
-        width: 16px;
-        height: 16px;
-        border: 2px solid #666;
-        border-radius: 50%;
-        transition: 0.2s;
-    }
-
-    .option-item.selected .option-indicator {
-        border-color: #00ffcc;
-        background: #00ffcc;
-        box-shadow: 0 0 8px #00ffcc;
-    }
-
-    .action-container {
-        margin-top: 30px;
-        display: flex;
-        justify-content: flex-end;
-    }
-
-    .btn-action {
-        background: #00ffcc;
-        color: #000;
-        border: none;
-        padding: 12px 30px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: 0.3s;
-    }
-
-        .btn-action:hover:not(:disabled) {
-            background: #00cca3;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
-        }
-
-        .btn-action:disabled {
-            background: #444;
-            color: #777;
-            cursor: not-allowed;
-        }
-
-    @@keyframes pulse {
-        0% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.05);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-    }
-
-    @@media (max-width: 600px) {
-        .test-header {
-            flex-direction: column;
-            gap: 15px;
-            text-align: center;
-        }
-
-        .action-container {
-            justify-content: center;
-        }
-    }
+       }
 </style>
 
 @code {
@@ -441,7 +469,6 @@
     private bool isAnswerRevealed = false;
 
     private bool IsLastQuestion => currentQuiz != null && currentQuestionIndex == currentQuiz.Questions.Count - 1;
-
     protected override async Task OnInitializedAsync()
     {
         try
@@ -455,7 +482,6 @@
                 PropertyNameCaseInsensitive = true,
                 AllowTrailingCommas = true
             };
-
             currentQuiz = await Http.GetFromJsonAsync<QuizData>(fileUrl, jsonOptions);
 
             if (currentQuiz != null)
@@ -486,18 +512,18 @@
     {
         timer = new Timer(1000);
         timer.Elapsed += async (s, e) =>
-        {
-            if (timeLeft > 0)
-            {
-                timeLeft--;
-                await InvokeAsync(StateHasChanged);
-            }
-            else
-            {
-                timer.Stop();
-                await InvokeAsync(FinishQuiz);
-            }
-        };
+               {
+                   if (timeLeft > 0)
+                   {
+                       timeLeft--;
+                       await InvokeAsync(StateHasChanged);
+                   }
+                   else
+                   {
+                       timer.Stop();
+                       await InvokeAsync(FinishQuiz);
+                   }
+               };
         timer.Start();
     }
 
@@ -547,7 +573,6 @@
         timer?.Stop();
         isFinished = true;
         score = (int)Math.Round(((double)correctAnswersCount / currentQuiz!.Questions.Count) * 100);
-
         if (score >= 60)
         {
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -565,6 +590,7 @@
                     var progress = new UserProgress
                     {
                         UserId = userId,
+
                         LevelId = Level,
                         IsCompleted = true,
                         CompletionDate = DateTime.Now
@@ -573,7 +599,6 @@
 
                     // محاولة فتح المستوى التالي
                     await ProgressionService.UnlockNextLevelAsync(userId, Level);
-
                     Console.WriteLine($"[Success] XP updated and progress saved for user {userId}");
                 }
                 catch (Exception ex)
@@ -589,5 +614,72 @@
         Nav.NavigateTo("/courses");
     }
 
-    public void Dispose() => timer?.Dispose();
+   
+    private DotNetObjectReference<LevelTest>? objRef; 
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) 
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+
+            // حقن سكربت لمراقبة الـ Blur والـ visibilitychange بالإضافة إلى منع أحداث النسخ والقص والتحديد والسحب تماماً
+            await JSRuntime.InvokeVoidAsync("eval", @"
+                window.initAntiCheat = (dotNetObj) => {
+                    window._antiCheatCallback = () => {
+                        dotNetObj.invokeMethodAsync('OnCheatDetected');
+                    };
+                    window.addEventListener('blur', window._antiCheatCallback);
+                    document.addEventListener('visibilitychange', window._antiCheatCallback);
+
+                    // ◄ [إضافة جديدة] منع القائمة اليمين، والنسخ، والقص، وسحب النصوص لحماية الأسئلة
+                    window._blockCopyCallback = (e) => e.preventDefault();
+                    document.addEventListener('contextmenu', window._blockCopyCallback);
+                    document.addEventListener('copy', window._blockCopyCallback);
+                    document.addEventListener('cut', window._blockCopyCallback);
+                    document.addEventListener('selectstart', window._blockCopyCallback);
+                    document.addEventListener('dragstart', window._blockCopyCallback);
+                };
+                window.removeAntiCheat = () => {
+                    if (window._antiCheatCallback) {
+                        window.removeEventListener('blur', window._antiCheatCallback);
+                        document.removeEventListener('visibilitychange', window._antiCheatCallback);
+                    }
+                    // ◄ [إضافة جديدة] إزالة مستمعي أحداث منع النسخ عند الخروج الآمن من الصفحة لتعود طبيعية
+                    if (window._blockCopyCallback) {
+                        document.removeEventListener('contextmenu', window._blockCopyCallback);
+                        document.removeEventListener('copy', window._blockCopyCallback);
+                        document.removeEventListener('cut', window._blockCopyCallback);
+                        document.removeEventListener('selectstart', window._blockCopyCallback);
+                        document.removeEventListener('dragstart', window._blockCopyCallback);
+                    }
+                };
+            ");
+
+            await JSRuntime.InvokeVoidAsync("initAntiCheat", objRef);
+        }
+    }
+
+    [JSInvokable] 
+    public async Task OnCheatDetected()
+    {
+        if (!isFinished && currentQuiz != null)
+        {
+            await FinishQuiz(); 
+            await InvokeAsync(StateHasChanged); // تحديث الواجهة لإظهار النتيجة فوراً
+        }
+    }
+
+    public void Dispose() 
+    {
+        timer?.Dispose(); 
+
+        try
+        {
+            _ = JSRuntime.InvokeVoidAsync("removeAntiCheat"); // منع أي تعليق في المتصفح بعد الخروج
+        }
+        catch { }
+
+        objRef?.Dispose(); // إطلاق مرجع الصفحة من الذاكرة بآمان
+    }
 }

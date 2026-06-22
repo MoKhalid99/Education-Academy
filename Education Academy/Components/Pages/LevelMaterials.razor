@@ -13,7 +13,16 @@
         {
             <div class="material-card" @onclick="() => OpenFile(material)">
                 <div class="card-preview">
-                    @if (material.EncryptedFilePath.EndsWith(".mp4"))
+                    @if (material.EncryptedFilePath.Contains("youtube.com/playlist") || material.EncryptedFilePath.Contains("list="))
+                    {
+                        <svg class="preview-icon youtube-playlist-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="6" x2="15" y2="6"></line>
+                            <line x1="3" y1="12" x2="15" y2="12"></line>
+                            <line x1="3" y1="18" x2="11" y2="18"></line>
+                            <polygon points="17 14 17 20 22 17 17 14"></polygon>
+                        </svg>
+                    }
+                    else if (material.EncryptedFilePath.EndsWith(".mp4"))
                     {
                         <svg class="preview-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                     }
@@ -25,7 +34,16 @@
 
                 <div class="card-info">
                     <span class="material-title">@material.Title</span>
-                    <span class="material-type">@(material.EncryptedFilePath.EndsWith(".mp4") ? "فيديو" : "ملف PDF")</span>
+                    <span class="material-type">
+                        @if (material.EncryptedFilePath.Contains("youtube.com/playlist") || material.EncryptedFilePath.Contains("list="))
+                        {
+                            @("قائمة تشغيل YouTube")
+                        }
+                        else
+                        {
+                            @(material.EncryptedFilePath.EndsWith(".mp4") ? "فيديو" : "ملف PDF")
+                        }
+                    </span>
                 </div>
             </div>
         }
@@ -35,7 +53,7 @@
 <style>
     .materials-page-container {
         padding: 40px;
-        background-color: #dfdfdf; 
+        background-color: #dfdfdf;
         min-height: 100vh;
         direction: rtl;
         font-family: Arial, sans-serif;
@@ -89,12 +107,17 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #cccccc;
+        color: #4b7983;
     }
 
     .preview-icon {
         width: 60px;
         height: 60px;
+    }
+
+    /* لون مخصص لأيقونة يوتيوب لتمييزها */
+    .youtube-playlist-icon {
+        color: #4b7983;
     }
 
     /* الجزء الأبيض السفلي */
@@ -132,15 +155,32 @@
         {
             Materials = new List<Material>
             {
-                new Material { Id = 1, Title = "الدرس الأول - فيديو الشرح", EncryptedFilePath = "materials/level0/Vd01.mp4", LevelId = 0 },
-                new Material { Id = 2, Title = "ملف الشرح 1", EncryptedFilePath = "materials/level0/PDF01.pdf", LevelId = 0 },
-                new Material { Id = 3, Title = "ملف الشرح 2", EncryptedFilePath = "materials/level0/PDF02.pdf", LevelId = 0 },
-                new Material { Id = 4, Title = "ملف الشرح 3", EncryptedFilePath = "materials/level0/PDF03.pdf", LevelId = 0 }
+                new Material { Id = 1, Title = "HTML- انطلق مع مدرسة الزيرو لتتعلم كل ما تحتاجه لاجل بداية التعلم", EncryptedFilePath = "https://youtube.com/playlist?list=PLDoPjvoNmBAw_t_XWUFbBX-c9MafPk9ji&si=bT49NxJ8KMrTLnqX", LevelId = 0 },
+                new Material { Id = 2, Title = "CSS- انطلق مع مدرسة الزيرو لتتعلم كل ما تحتاجه لاجل بداية التعلم", EncryptedFilePath = "https://youtube.com/playlist?list=PLDoPjvoNmBAzjsz06gkzlSrlev53MGIKe&si=cOQcQvD3hmL4AFbV", LevelId = 0 },
+                new Material { Id = 3, Title = "Canves- انطلق مع مدرسة الزيرو لتقوية نفسك في عالم الويب", EncryptedFilePath = "https://youtube.com/playlist?list=PLDoPjvoNmBAxdetco1wwicE7Fbm73UYy0&si=0FkdXwdwAoUA4_1L", LevelId = 0 },
+                new Material { Id = 4, Title = "JS- انطلق مع مدرسة الزيرو لتقوية نفسك في عالم الويب", EncryptedFilePath = "https://youtube.com/playlist?list=PLDoPjvoNmBAx3kiplQR_oeDqLDBUDYwVv&si=ZwePiof2I-BzWpEa", LevelId = 0 },
+                new Material { Id = 5, Title = "تعلم اساسيات التفاضل و التكامل", EncryptedFilePath = "https://youtube.com/playlist?list=PLxIvc-MGOs6gkSl_PPAVJpebKDLo-ijEC&si=YVssIaBq6cUmBcfc", LevelId = 0 }
+            };
+        }
+        else if (LevelId == 1)
+        {
+            Materials = new List<Material>
+            {
+                new Material { Id = 6, Title = " مقدمة في البرمجة بلغة ال++C", EncryptedFilePath = "https://youtube.com/playlist?list=PL1DUmTEdeA6IUD9Gt5rZlQfbZyAWXd-oD&si=3h0gUBQsKTV5b_hA", LevelId = 1 },
+                new Material { Id = 7, Title = "C++ (OOP)التوسع بلغة", EncryptedFilePath = "https://youtube.com/playlist?list=PL1DUmTEdeA6KLEvIO0NyrkT91BVle8BOU&si=mU-JBbHsedOcn9X6", LevelId = 1 },
+                new Material { Id = 8, Title = "الجبر الخطي", EncryptedFilePath = "https://youtube.com/playlist?list=PLxIvc-MGOs6iQXFnjF_STbhGdrZBphrv_&si=lMmKGR5VaH5_gtBd", LevelId = 1 }
+            };
+        }
+        else if (LevelId == 2)
+        {
+            Materials = new List<Material>
+            {
+                new Material { Id = 9, Title = "هياكل البيانات", EncryptedFilePath = "https://youtube.com/playlist?list=PL1DUmTEdeA6JlommmGP5wicYLxX5PVCQt&si=3ZxL4Y7Pr6Hq2N4k", LevelId = 2 },
+                new Material { Id = 10, Title = "الرياضيات الغير متصلة", EncryptedFilePath = "https://youtube.com/playlist?list=PLxIvc-MGOs6gZlMVYOOEtUHJmfUquCjwz&si=Tw02DhrDvR0kw52A", LevelId = 2 }
             };
         }
         else
         {
-            // يمكنك هنا وضع كود لجلب بيانات المستويات الأخرى
             Materials = new List<Material>();
         }
     }
@@ -152,7 +192,14 @@
 
     private void OpenFile(Material material)
     {
-        
-        Nav.NavigateTo($"/{material.EncryptedFilePath}", true);
+        // إذا كان الرابط خارجياً ، نقوم بالتوجيه إليه مباشرة دون إضافة شرطة مائلة في البداية
+        if (material.EncryptedFilePath.StartsWith("http://") || material.EncryptedFilePath.StartsWith("https://"))
+        {
+            Nav.NavigateTo(material.EncryptedFilePath, true);
+        }
+        else
+        {
+            Nav.NavigateTo($"/{material.EncryptedFilePath}", true);
+        }
     }
 }
