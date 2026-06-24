@@ -1,0 +1,322 @@
+﻿@page "/game/Snake"
+@using System.Text.Json
+@rendermode InteractiveServer
+@inject HttpClient Http
+@inject IJSRuntime JS
+@inject NavigationManager NavManager
+@implements IDisposable
+
+<div class="game-wrapper">
+    <div class="hud">
+        SCORE: @Score | LEVEL: @Level | CORRECT: @TotalCorrect
+    </div>
+
+    <div class="canvas-container" @ref="gameArea" tabindex="0" @onkeydown="HandleKeyDown">
+        @if (CurrentState == GameState.Start)
+        {
+            <div class="overlay">
+                <h1 style="color: #00ff00; font-size: 50px;">SNAKE C++ QUIZ</h1>
+                <button class="choice-btn" style="text-align:center; width:200px;" @onclick="StartGame">START GAME</button>
+            </div>
+        }
+
+        @if (CurrentState == GameState.Quiz || CurrentState == GameState.RescueQuiz)
+        {
+            <div class="overlay">
+                <div class="quiz-card">
+                    <h2 style="color:yellow">@(CurrentState == GameState.RescueQuiz ? "RESCUE MISSION" : $"LEVEL {Level} QUESTION")</h2>
+                    <p style="font-size: 22px; margin-bottom:20px;">@CurrentQuestion?.QuestionText</p>
+
+                    @foreach (var choice in ShuffledChoices)
+                    {
+                        var btnClass = GetButtonClass(choice);
+                        <button class="choice-btn @btnClass" @onclick="async () => await CheckAnswer(choice)" disabled="@IsProcessingAnswer">
+                            @choice
+                        </button>
+                    }
+
+                    @if (ShowWrongAnswerFeedback)
+                    {
+                        <p style="color: #ff4444; margin-top: 15px; font-weight: bold;">Wrong! The correct answer is highlighted in green.</p>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (CurrentState == GameState.GameOver)
+        {
+            <div class="overlay">
+                <h1 style="color: red; font-size: 60px;">GAME OVER</h1>
+                <button class="choice-btn" style="text-align:center; width:200px;" @onclick="ResetGame">PLAY AGAIN</button>
+            </div>
+        }
+
+        <canvas id="snakeCanvas" width="1200" height="600"></canvas>
+    </div>
+</div>
+
+<style>
+    .game-wrapper {
+        text-align: center;
+        background: #1a1a1a;
+        min-height: 100vh;
+        padding: 20px;
+        color: white;
+        overflow: hidden;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .canvas-container {
+        position: relative;
+        display: inline-block;
+        border: 5px solid #4facfe;
+        border-radius: 4px;
+        outline: none;
+        box-shadow: 0 0 20px rgba(79, 172, 254, 0.4);
+    }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.85);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        backdrop-filter: blur(3px);
+    }
+
+    .quiz-card {
+        background: #222;
+        padding: 30px;
+        border-radius: 15px;
+        border: 2px solid #00ff00;
+        max-width: 800px;
+        width: 90%;
+        box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+    }
+
+    .choice-btn {
+        width: 100%;
+        padding: 15px;
+        margin: 8px 0;
+        background: #333;
+        color: white;
+        border: 1px solid #555;
+        cursor: pointer;
+        text-align: left; /* أو right حسب اللغة */
+        font-size: 18px;
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+
+        .choice-btn:hover:not(:disabled) {
+            background: #444;
+            border-color: #888;
+        }
+
+    .correct-feedback {
+        background: #008000 !important;
+        color: white !important;
+        border-color: #00ff00 !important;
+        box-shadow: 0 0 15px #00ff00;
+    }
+
+    .wrong-feedback {
+        background: #800000 !important;
+        color: white !important;
+        border-color: #ff0000 !important;
+    }
+
+    .hud {
+        font-family: 'Consolas', monospace;
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #00ff00;
+        text-shadow: 0 0 5px #00ff00;
+        background: rgba(0,0,0,0.5);
+        padding: 10px;
+        border-radius: 10px;
+        display: inline-block;
+    }
+
+</style>
+
+@code {
+    public enum GameState { Start, Playing, Quiz, GameOver, RescueQuiz }
+    public class Point { public int x { get; set; } public int y { get; set; } }
+    public class Question { public string QuestionText { get; set; } = ""; public List<string> Choices { get; set; } = new(); public string Correct { get; set; } = ""; }
+    public class QuizRoot { public Dictionary<string, Dictionary<string, List<string>>> NORMAL_QUESTIONS { get; set; } = new(); }
+
+    private GameState CurrentState = GameState.Start;
+    private ElementReference gameArea;
+    private List<Point> S = new();
+    private Point Food = new Point { x = 400, y = 300 };
+    private Point Direction = new Point { x = 0, y = 0 }; // يبدأ بـ 0 لكي لا يتحرك
+
+    private int Score = 0;
+    private int Level = 1;
+    private int TotalCorrect = 0;
+    private bool IsProcessingAnswer = false;
+    private bool ShowWrongAnswerFeedback = false;
+    private string SelectedChoice = "";
+
+    private Question? CurrentQuestion;
+    private List<string> ShuffledChoices = new();
+    private List<string> UsedQuestions = new();
+    private QuizRoot? QuizData;
+    private System.Threading.Timer? _gameTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var jsonString = await Http.GetStringAsync(NavManager.BaseUri + "questionsSnake.json");
+            QuizData = JsonSerializer.Deserialize<QuizRoot>(jsonString);
+        }
+        catch { }
+    }
+
+    private async Task StartGame()
+    {
+        S = new List<Point> { new Point { x = 600, y = 300 }, new Point { x = 580, y = 300 } };
+        Direction = new Point { x = 0, y = 0 }; // متوقف في البداية
+        Score = 0;
+        Level = 1;
+        TotalCorrect = 0;
+        UsedQuestions.Clear();
+        CurrentState = GameState.Playing;
+
+        _gameTimer?.Dispose();
+        _gameTimer = new System.Threading.Timer(async _ => await OnTick(), null, 0, 100);
+        await Task.Delay(200);
+        await gameArea.FocusAsync();
+    }
+
+    private async Task OnTick()
+    {
+        if (CurrentState != GameState.Playing || (Direction.x == 0 && Direction.y == 0)) return;
+
+        var head = S[0];
+        var newHead = new Point { x = head.x + Direction.x, y = head.y + Direction.y };
+
+        if (newHead.x < 10 || newHead.x >= 1190 || newHead.y < 10 || newHead.y >= 590 || S.Any(p => p.x == newHead.x && p.y == newHead.y))
+        {
+            await InvokeAsync(() => ShowQuestion(true));
+            return;
+        }
+
+        S.Insert(0, newHead);
+
+        if (newHead.x == Food.x && newHead.y == Food.y)
+        {
+            Score++;
+            GenerateFood();
+            if (Score % 5 == 0 && Level < 4) Level++;
+            await InvokeAsync(() => ShowQuestion(false));
+        }
+        else
+        {
+            S.RemoveAt(S.Count - 1);
+        }
+
+        await InvokeAsync(async () =>
+        {
+            await JS.InvokeVoidAsync("drawSnakeGame", S, Food, 20);
+            StateHasChanged();
+        });
+    }
+
+    private void ShowQuestion(bool isRescue)
+    {
+        CurrentState = isRescue ? GameState.RescueQuiz : GameState.Quiz;
+        IsProcessingAnswer = false;
+        ShowWrongAnswerFeedback = false;
+        SelectedChoice = "";
+
+        if (QuizData != null && QuizData.NORMAL_QUESTIONS.ContainsKey(Level.ToString()))
+        {
+            var levelQs = QuizData.NORMAL_QUESTIONS[Level.ToString()];
+            var available = levelQs.Where(q => !UsedQuestions.Contains(q.Key)).ToList();
+            if (available.Count == 0) available = levelQs.ToList();
+
+            var selected = available[Random.Shared.Next(available.Count)];
+            CurrentQuestion = new Question
+            {
+                QuestionText = selected.Key,
+                Choices = selected.Value.ToList(),
+                Correct = selected.Value[0]
+            };
+            UsedQuestions.Add(selected.Key);
+            ShuffledChoices = CurrentQuestion.Choices.OrderBy(x => Guid.NewGuid()).ToList();
+        }
+        StateHasChanged();
+    }
+
+    private async Task CheckAnswer(string choice)
+    {
+        IsProcessingAnswer = true;
+        SelectedChoice = choice;
+
+        if (choice == CurrentQuestion?.Correct)
+        {
+            TotalCorrect++;
+            await Task.Delay(500); // تأخير بسيط للملاحظة
+
+            // العودة للمنتصف مع الحفاظ على الطول والمستوى
+            // نقوم بتغيير إحداثيات كل قطعة من الثعبان لتنتقل للمنتصف خلف الرأس
+            int centerX = 600;
+            int centerY = 300;
+            for (int i = 0; i < S.Count; i++)
+            {
+                S[i] = new Point { x = centerX - (i * 20), y = centerY };
+            }
+
+            Direction = new Point { x = 0, y = 0 }; // إيقاف الحركة
+            CurrentState = GameState.Playing;
+            await Task.Delay(100);
+            await gameArea.FocusAsync();
+        }
+        else
+        {
+            ShowWrongAnswerFeedback = true;
+            StateHasChanged();
+            await Task.Delay(2500); // إعطاء اللاعب وقت لرؤية الإجابة الصحيحة
+            CurrentState = GameState.GameOver;
+        }
+        StateHasChanged();
+    }
+
+    private string GetButtonClass(string choice)
+    {
+        if (!IsProcessingAnswer) return "";
+        if (choice == CurrentQuestion?.Correct) return "correct-feedback";
+        if (choice == SelectedChoice && choice != CurrentQuestion?.Correct) return "wrong-feedback";
+        return "";
+    }
+
+    private void HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (CurrentState != GameState.Playing) return;
+
+        switch (e.Key)
+        {
+            case "ArrowUp": if (Direction.y == 0) Direction = new Point { x = 0, y = -20 }; break;
+            case "ArrowDown": if (Direction.y == 0) Direction = new Point { x = 0, y = 20 }; break;
+            case "ArrowLeft": if (Direction.x == 0) Direction = new Point { x = -20, y = 0 }; break;
+            case "ArrowRight": if (Direction.x == 0) Direction = new Point { x = 20, y = 0 }; break;
+        }
+    }
+
+    private void GenerateFood()
+    {
+        Food = new Point { x = Random.Shared.Next(1, 58) * 20, y = Random.Shared.Next(1, 28) * 20 };
+    }
+
+    private async Task ResetGame() => await StartGame();
+    public void Dispose() => _gameTimer?.Dispose();
+}

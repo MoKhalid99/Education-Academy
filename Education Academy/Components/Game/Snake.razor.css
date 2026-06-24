@@ -1,0 +1,87 @@
+﻿.game-wrapper {
+    text-align: center;
+    background: #1a1a1a;
+    min-height: 100vh;
+    padding: 20px;
+    color: white;
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.canvas-container {
+    position: relative;
+    display: inline-block;
+    border: 5px solid #4facfe;
+    border-radius: 4px;
+    outline: none;
+    box-shadow: 0 0 20px rgba(79, 172, 254, 0.4);
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(3px);
+}
+
+.quiz-card {
+    background: #222;
+    padding: 30px;
+    border-radius: 15px;
+    border: 2px solid #00ff00;
+    max-width: 800px;
+    width: 90%;
+    box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+}
+
+.choice-btn {
+    width: 100%;
+    padding: 15px;
+    margin: 8px 0;
+    background: #333;
+    color: white;
+    border: 1px solid #555;
+    cursor: pointer;
+    text-align: left; /* أو right حسب اللغة */
+    font-size: 18px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+    .choice-btn:hover:not(:disabled) {
+        background: #444;
+        border-color: #888;
+    }
+
+.correct-feedback {
+    background: #008000 !important;
+    color: white !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 15px #00ff00;
+}
+
+.wrong-feedback {
+    background: #800000 !important;
+    color: white !important;
+    border-color: #ff0000 !important;
+}
+
+.hud {
+    font-family: 'Consolas', monospace;
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #00ff00;
+    text-shadow: 0 0 5px #00ff00;
+    background: rgba(0,0,0,0.5);
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
+}

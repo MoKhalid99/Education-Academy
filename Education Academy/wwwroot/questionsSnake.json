@@ -1,0 +1,214 @@
+{
+  "NORMAL_QUESTIONS": {
+    "1": {
+      "What is the standard file extension for a C++ source file?": [ "cpp", "c", "py", "java" ],
+      "What keyword is used to define a class in C++?": [ "class", "struct", "Type", "def" ],
+      "Which object is used to print output to the screen in C++?": [ "std::cout", "Console.Write", "print", "System.out" ],
+      "What is the main function where C++ program execution begins?": [ "main()", "start()", "run()", "execute()" ],
+      "What does std::endl do?": [ "Inserts a newline and flushes the buffer", "Inserts a newline only", "Flushes the buffer only", "Ends the program" ],
+      "What data type stores a True or False value?": [ "bool", "int", "char", "void" ],
+      "What symbol represents the end of a statement in C++?": [ ";", ":", ".", "," ],
+      "Which of the following is the Equality Operator?": [ "==", "=", "!=", ">" ],
+      "Which library must be included to use std::cout and std::cin?": [ "iostream", "stdlib", "stdio", "math" ],
+      "What is the typical size (in bytes) of the int data type?": [ "4", "2", "8", "1" ],
+      "Which of these is a correct variable declaration?": [ "int x = 10;", "x int = 10;", "declare x as int 10;", "x = 10 int;" ],
+      "What does the 'const' keyword mean when applied to a variable?": [ "The variable cannot be changed", "The variable must be global", "The variable is a pointer", "The variable is static" ],
+      "What is the purpose of the 'include' directive?": [ "To insert the content of another file", "To define a class", "To start a loop", "To declare a function" ],
+      "What is the arithmetic operator for remainder?": [ "%", "/", "*", "+" ],
+      "Which keyword is used to conditionally execute a block of code?": [ "if", "for", "while", "class" ],
+      "How do you declare a character variable?": [ "char c;", "string c;", "Character c;", "chr c;" ],
+      "What is the output of 'cout << 5/2;' (integer division)?": [ "2", "2.5", "3", "Error" ],
+      "What is the correct syntax for a 'for' loop that counts from 0 to 4?": [ "for (int i=0; i<5; i++)", "for (i=0; i<=5; i++)", "for (i=5; i>0; i--)", "for (int i=1; i<5; i++)" ],
+      "What is the base type of a C++ string?": [ "char array", "int array", "bool array", "float array" ],
+      "What is the size of a 'char' data type (usually)?": [ "1 byte", "2 bytes", "4 bytes", "8 bytes" ]
+    },
+    "2": {
+      "Which control statement selects one path from many based on a variable's value?": [ "switch", "if-else", "for", "while" ],
+      "What keyword is used to immediately stop a loop?": [ "break", "continue", "return", "exit" ],
+      "What keyword tells a function to return a value?": [ "return", "yield", "output", "get" ],
+      "How is an array of 5 integers defined?": [ "int arr[5];", "int arr = new int[5];", "Array<int, 5> arr;", "list arr(5);" ],
+      "What does a Pointer represent in C++?": [ "A memory address location", "A variable value", "A function name", "A data type" ],
+      "Which loop executes its body at least once?": [ "do-while", "while", "for", "if" ],
+      "What function is used to get user input from the keyboard?": [ "std::cin", "scanf", "input()", "read" ],
+      "What does the 'Scope' of a variable mean in C++?": [ "The region where the variable can be accessed and used", "The variable's data type", "The size of memory allocated for the variable", "The variable's value" ],
+      "What is the difference between a Local and Global variable?": [ "Local is inside a function and Global is outside", "Local is larger than Global", "Difference in speed", "No major difference" ],
+      "What does the '&' symbol represent when used as a prefix to a variable name?": [ "Address of the variable", "Value of the variable", "Pointer", "Reference" ],
+      "What is 'Recursion' in programming?": [ "A function calling itself", "A loop that never ends", "A variable defined globally", "A class definition" ],
+      "Which operator is used to access members of a struct or class using a pointer?": [ "->", ".", "::", "[]" ],
+      "What is the value of i after 'int i=0; while(i<3) {i++;}'?": [ "3", "2", "0", "4" ],
+      "What is the difference between '++i' and 'i++'?": [ "++i increments before use, i++ increments after use", "i++ is faster", "++i is slower", "They are identical" ],
+      "What is function 'Prototyping'?": [ "Declaring a function before its definition", "Defining the function body", "Calling the function", "Returning a value" ],
+      "What is the default value of a global integer variable?": [ "0", "Undefined", "1", "Null" ],
+      "What is an 'argument' in a function call?": [ "The value passed to the function's parameter", "The name of the function", "The return type", "The function body" ],
+      "How do you pass an array to a function in C++?": [ "By pointer (address)", "By value (copy)", "By name only", "It cannot be done" ],
+      "Which storage class specifier is used for variables that retain their value even after the function returns?": [ "static", "auto", "register", "extern" ],
+      "What is the use of 'typedef' in C++?": [ "To create an alias for a data type", "To define a class", "To declare a pointer", "To allocate memory" ]
+    },
+    "3": {
+      "What concept bundles data and the functions that operate on that data into a single unit (the Class)?": [ "Encapsulation", "Inheritance", "Polymorphism", "Abstraction" ],
+      "What method initializes class members when a new object is created?": [ "Constructor", "Destructor", "Method", "Function" ],
+      "What is the function of the Destructor in C++?": [ "Frees resources and memory when the object is deleted", "Creates a copy of the object", "Initializes variables", "Defines class functions" ],
+      "What is the common way to represent an 'Is-A' relationship in OOP?": [ "Inheritance", "Composition", "Aggregation", "Association" ],
+      "What concept allows a new Class to acquire the properties and behavior of an existing Class?": [ "Inheritance", "Encapsulation", "Polymorphism", "Abstraction" ],
+      "What type of member in a class is shared among all instances (Objects)?": [ "static member", "const member", "local member", "private member" ],
+      "What does function 'Overloading' mean?": [ "Defining functions with the same name but different signatures (parameters)", "Defining functions with different names", "Changing only the return type", "Defining a class inside a class" ],
+      "What keyword is used to ensure a variable's value cannot be changed?": [ "const", "volatile", "static", "mutable" ],
+      "What is an Object created from a Class called?": [ "Instance", "Pointer", "Reference", "Blueprint" ],
+      "What is the common way to represent an Is-A relationship in OOP?": [ "Inheritance", "Composition", "Aggregation", "Association" ],
+      "What is the process of creating an object called?": [ "Instantiation", "Declaration", "Construction", "Definition" ],
+      "What is 'Abstraction' in OOP?": [ "Showing only essential information and hiding implementation details", "Creating multiple objects", "Inheriting properties", "Defining functions" ],
+      "What is the primary use of the 'this' pointer?": [ "To refer to the current object in a member function", "To point to the base class", "To point to a static member", "To delete the object" ],
+      "What is a 'Friend Function' in C++?": [ "A non-member function that can access private and protected members of a class", "A function defined inside the class", "A function that returns a class object", "A static function" ],
+      "What is 'Polymorphism' literally translated as?": [ "Many forms", "Single shape", "Object oriented", "Data hiding" ],
+      "What does the 'protected' access specifier allow?": [ "Access by derived classes and the class itself", "Access by any code", "Access only by the class itself", "No access" ],
+      "What is 'Operator Overloading'?": [ "Giving operators new meanings for user-defined types", "Defining a new operator", "Using too many operators", "Calling a function with an operator" ],
+      "When should you use 'Composition' over 'Inheritance'?": [ "When you need a 'Has-A' relationship", "When you need an 'Is-A' relationship", "Always", "Never" ],
+      "What is the role of the 'public' keyword in a class?": [ "To make members accessible from outside the class", "To restrict access", "To define a constructor", "To define a destructor" ],
+      "What is a 'default constructor'?": [ "A constructor that takes no arguments", "The first constructor called", "The only constructor allowed", "A constructor that must be defined" ]
+    },
+    "4": {
+      "Which function must be defined as 'virtual' to enable Dynamic Polymorphism?": [ "Virtual Function", "Constructor", "Main function", "Inline function" ],
+      "What is a Pure Virtual Function?": [ "A function with no implementation (abstract)", "A function with only one line of code", "A function that takes no arguments", "A function specific to destructors" ],
+      "What is 'Multiple Inheritance'?": [ "A class inherits from more than one base class", "A class containing multiple functions with the same name", "A class containing multiple pointers", "A class inheriting from itself" ],
+      "What does the '::' (Scope Resolution Operator) mean?": [ "Accessing a class member or namespace", "Defining a pointer", "Division operation", "Comparison operation" ],
+      "What is a 'Template' in C++?": [ "A way to write generic functions or classes that can work with any data type", "A program setup file", "A standard library", "A type of virtual function" ],
+      "What concept allows a Base class pointer to refer to a Derived class object in Polymorphism?": [ "Upcasting", "Downcasting", "Overriding", "Overloading" ],
+      "What is the best way to prevent Memory Leak when using pointers?": [ "Smart Pointers", "Raw Pointers only", "Using malloc and free functions", "Disabling the Destructor" ],
+      "What happens when the 'delete' keyword is used on a pointer allocated with 'new' ?": [ "The memory pointed to is released", "Only the pointer is deleted", "The pointer's value is reset to zero", "Nothing happens" ],
+      "Which standard library provides containers like Vector and List?": [ "<vector>", "<iostream>", "<algorithm>", "<cmath>" ],
+      "What is the difference between Pass by Value and Pass by Reference when passing arguments to a function?": [ "Value copies, Reference passes the address of the original variable", "Reference is slower than Value", "No performance difference", "Value is only used for classes" ],
+      "What is 'RAII' (Resource Acquisition Is Initialization)?": [ "A C++ programming idiom where resource acquisition occurs during object creation (initialization)", "A memory allocation technique", "A type of template", "A design pattern for loops" ],
+      "What does 'std::unique_ptr' ensure?": [ "That only one pointer owns the resource, automatically deleting it when the pointer goes out of scope", "Multiple pointers can own the resource", "Manual memory management", "The resource is never deleted" ],
+      "What is an 'Exception' in C++?": [ "An unexpected event that occurs during program execution", "A special type of loop", "A class member", "A pointer error" ],
+      "Which keyword is used to handle exceptions?": [ "try-catch", "if-else", "for-while", "switch" ],
+      "What is an 'STL container'?": [ "A class that manages a collection of objects (like std::vector, std::map)", "A memory storage unit", "A compiler error", "A type of function" ],
+      "What does 'std::map' store?": [ "Key-value pairs (ordered by key)", "An ordered list of elements", "Only unique elements", "Only integer values" ],
+      "What is the purpose of the 'typename' keyword in templates?": [ "To indicate that a dependent name is a type", "To define a function name", "To declare a variable", "To create an alias" ],
+      "What does 'const_cast' primarily do?": [ "Removes or adds the const or volatile qualifier from a variable or reference", "Converts int to float", "Converts pointer to object", "Casts between unrelated types" ],
+      "What is 'Dynamic Allocation'?": [ "Allocating memory at runtime using 'new' or 'malloc'", "Allocating memory at compile time", "Allocating memory on the stack", "Allocating memory for static variables" ],
+      "What is a 'Lambda Expression' in C++?": [ "A way to create an anonymous function object inline", "A special type of loop", "A new data type", "A type of preprocessor directive" ]
+    }
+  },
+  "HARD_GAMEOVER_QUESTIONS": {
+    "What is the main difference between a struct and a class in C++?": [
+      "In struct, members are public by default, and in class, they are private by default",
+      "Structs cannot inherit, while classes can",
+      "Structs cannot contain functions, while classes can",
+      "Structs cannot contain variables"
+    ],
+    "What does the principle of Polymorphism mean?": [
+      "The ability to take multiple forms for the same function or object",
+      "Bundling data and functions together into a single unit",
+      "Hiding implementation details from the user",
+      "The ability to create objects from an existing class"
+    ],
+    "What is the keyword used to prevent a class from being inherited?": [
+      "final",
+      "abstract",
+      "private",
+      "sealed"
+    ],
+    "What happens when you try to delete a pointer using `delete` that was not allocated memory using `new`?": [
+      "Undefined Behavior",
+      "The command is ignored",
+      "Memory is successfully deallocated",
+      "The program safely terminates"
+    ],
+    "What is a standard tool used to build C++ libraries and executables?": [
+      "CMake",
+      "Maven",
+      "npm",
+      "Bundler"
+    ],
+    "What is the name of the header file required to use `std::cout`?": [
+      "iostream",
+      "stdio.h",
+      "conio.h",
+      "math.h"
+    ],
+    "What is the difference between `++i` and `i++`?": [
+      "`++i` increments the value before using it, and `i++` increments it after use",
+      "There is no difference between them",
+      "`++i` is only used in loops",
+      "`i++` is faster to execute"
+    ],
+    "What operator is used to obtain the address of a variable?": [
+      "&",
+      "*",
+      "->",
+      "."
+    ],
+    "Which Standard Template Library (STL) container ensures that elements are unique and sorted?": [
+      "std::set",
+      "std::vector",
+      "std::list",
+      "std::map"
+    ],
+    "What is the time complexity for the Binary Search operation?": [
+      "O(log n)",
+      "O(n)",
+      "O(n^2)",
+      "O(1)"
+    ],
+    "What is the purpose of the `virtual` keyword in member functions?": [
+      "Allows the function to be overridden in derived classes",
+      "Makes the function execute faster",
+      "Prevents access to the function from outside the class",
+      "Makes the function static"
+    ],
+    "Which of the following represents a Reference, not a Pointer?": [
+      "int& ref = var;",
+      "int* ptr = &var;",
+      "int var(5);",
+      "int* const ptr = &var;"
+    ],
+    "How many bytes does a `char` variable usually occupy?": [
+      "1 byte",
+      "2 bytes",
+      "4 bytes",
+      "8 bytes"
+    ],
+    "What is the keyword used to terminate the current loop iteration and move to the next iteration?": [
+      "continue",
+      "break",
+      "return",
+      "exit"
+    ],
+    "What is the role of the Constructor in a class?": [
+      "To initialize a new object and set its initial values",
+      "To deallocate memory when the object is destroyed",
+      "To return a value from the function",
+      "To define constant variables"
+    ],
+    "What is the name of the graphics library that the current snake game depends on?": [
+      "Pygame",
+      "OpenGL",
+      "SDL",
+      "Allegro"
+    ],
+    "Which type of memory stores local variables inside functions?": [
+      "Stack",
+      "Heap",
+      "Static Memory",
+      "Global Memory"
+    ],
+    "What is the keyword used to access members of the Parent class?": [
+      "Base class members are directly accessible or qualified with scope resolution (::)", 
+      "this->",
+      "super::",
+      "parent::"
+    ],
+    "What does it mean for a function to be `inline`?": [
+      "A request to the compiler to place the body of the function directly at the point of its call",
+      "That the function operates in parallel",
+      "That the function is exclusive to the class",
+      "That the function accepts no inputs"
+    ],
+    "What is the data type of the object that handles input and output streams?": [
+      "std::fstream",
+      "std::file",
+      "std::stream",
+      "std::io"
+    ]
+  }
+}

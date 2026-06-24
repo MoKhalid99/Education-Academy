@@ -32,12 +32,14 @@
                 الاختيار الامثل للوصول لهدفك
             </p>
         </div>
-        <div class="lower_text_container">
+
+        <a href="/game/snake" class="lower_text_container card_link">
             <p class="lower_text">
                 سهولة الاستخدام <br>
                 سهلة الاستخدام و تناسب جميع الاعمار
             </p>
-        </div>
+        </a>
+
         <div class="lower_text_container">
             <p class="lower_text">
                 متعددة الوسائل <br>
@@ -54,13 +56,11 @@
         flex-direction: column;
     }
 
-
     .image_text_container {
         display: flex;
         align-items: center;
         flex-direction: row;
     }
-
 
     .education_academy {
         font-family: 'roboto';
@@ -69,8 +69,6 @@
         text-shadow: 5px 5px 5px rgba(0, 0,0, 0.25);
         text-align: center;
     }
-
-
 
     .education_academy_explain {
         font-family: 'roboto';
@@ -133,6 +131,14 @@
         .lower_text_container:hover {
             transform: scale(1.15);
         }
+
+    /* تغيير شكل الماوس عند الوقوف عليه */
+    .card_link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        cursor: pointer;
+    }
 
     .lower_text {
         font-family: 'roboto';
